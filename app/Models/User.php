@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+    protected $with = ['roles.permissions'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -45,5 +46,17 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class);
+    }
+    public function hasPermission(string $permission): bool
+    {
+        $permissonArray = [];
+
+        foreach ($this->roles as $role) {
+            foreach ($role->permissions as $singlePermission) {
+                $permissonArray[] = $singlePermission->title;
+            }
+        }
+
+        return collect($permissonArray)->unique()->contains($permission);
     }
 }
