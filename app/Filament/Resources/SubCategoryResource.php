@@ -18,6 +18,8 @@ class SubCategoryResource extends Resource
     protected static ?string $model = SubCategory::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Manage Products';
+
 
     public static function form(Form $form): Form
     {
@@ -67,14 +69,14 @@ class SubCategoryResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -82,5 +84,5 @@ class SubCategoryResource extends Resource
             'create' => Pages\CreateSubCategory::route('/create'),
             'edit' => Pages\EditSubCategory::route('/{record}/edit'),
         ];
-    }    
+    }
 }

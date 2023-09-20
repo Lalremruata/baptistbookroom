@@ -18,6 +18,8 @@ class BranchStockResource extends Resource
     protected static ?string $model = BranchStock::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Manage Stocks';
+
 
     public static function form(Form $form): Form
     {
@@ -86,14 +88,14 @@ class BranchStockResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -101,5 +103,5 @@ class BranchStockResource extends Resource
             'create' => Pages\CreateBranchStock::route('/create'),
             'edit' => Pages\EditBranchStock::route('/{record}/edit'),
         ];
-    }    
+    }
 }

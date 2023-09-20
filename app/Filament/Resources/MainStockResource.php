@@ -18,6 +18,9 @@ class MainStockResource extends Resource
     protected static ?string $model = MainStock::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Manage Stocks';
+
+
 
     public static function form(Form $form): Form
     {
@@ -80,14 +83,14 @@ class MainStockResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -95,5 +98,5 @@ class MainStockResource extends Resource
             'create' => Pages\CreateMainStock::route('/create'),
             'edit' => Pages\EditMainStock::route('/{record}/edit'),
         ];
-    }    
+    }
 }
