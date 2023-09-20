@@ -7,13 +7,17 @@ use App\Filament\Resources\UserResource\RelationManagers;
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
@@ -25,12 +29,26 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                 ->required()
-                ->autofocus()
-                ->placeholder('Enter a name'),
-                Forms\Components\TextInput::make('email')
-                ->required(),
+                ->maxLength(255),
+                TextInput::make('email')
+                ->required()
+                ->type('email')
+                ->maxLength(255),
+                TextInput::make('password')
+                ->required(fn(Page $livewire): bool => $livewire instanceof CreateRecord)
+                ->minLength(8)
+                ->type('password')
+                ->same('passwordConfirmation')
+                ->dehydrated(fn($state) => filled($state))
+                ->dehydrateStateUsing(fn($state) => Hash::make($state)),
+                TextInput::make('passwordConfirmation')
+                ->password()
+                ->Label('Password Confirmation')
+                ->required(fn(Page $livewire): bool => $livewire instanceof CreateRecord)
+                ->minLength(8)
+                ->dehydrated(false),
             ]);
     }
 
