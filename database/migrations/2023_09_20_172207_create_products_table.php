@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('product_name');
             $table->string('description');
             $table->unsignedInteger('price');
-            $table->foreignId('category_id')->constrained('categories');
-            $table->foreignId('subcategory_id')->constrained('sub_categories');
+            $table->foreignId('category_id')->constrained();
+            $table->foreignId('sub_category_id')->constrained();
             $table->timestamps();
         });
     }

@@ -4,7 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
+use App\Models\Category;
 use App\Models\Product;
+use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -25,12 +27,21 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('category_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('subcategory_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Select::make('category_id')
+                    ->relationship('category','category_name')
+                    ->reactive()
+                    ->afterStateUpdated(fn(callable $set)=>$set('sub_category_id', null))
+                    ->required(),
+                Forms\Components\Select::make('sub_category_id')
+                    ->options(function(callable $get){
+                        $category= Category::find($get('category_id'));
+                        if(!$category){
+                            return null;
+                        }
+                        return $category->subcategories->pluck('subcategory_name','id');
+                    })
+                    ->reactive()
+                    ->required(),
                 Forms\Components\TextInput::make('product_name')
                     ->required()
                     ->maxLength(255),
@@ -40,7 +51,7 @@ class ProductResource extends Resource
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('₹'),
             ]);
     }
 

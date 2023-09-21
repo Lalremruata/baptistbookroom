@@ -25,9 +25,9 @@ class SubCategoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('category_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Select::make('category_id')
+                    ->relationship('category', 'category_name')
+                    ->required(),
                 Forms\Components\TextInput::make('subcategory_name')
                     ->required()
                     ->maxLength(255),
