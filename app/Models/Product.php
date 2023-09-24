@@ -15,14 +15,22 @@ class Product extends Model
         'description',
         'price',
         'category_id',
-        'subcategory_id',
+        'sub_category_id',
     ];
-    public function mainstock(): HasMany
+    public function mainStock(): HasMany
     {
         return $this->hasMany(MainStock::class);
+    }
+    public function branchStock(): HasMany
+    {
+        return $this->hasMany(BranchStock::class);
     }
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+    public function subCategory(): BelongsTo
+    {
+        return $this->belongsTo(SubCategory::class);
     }
 }

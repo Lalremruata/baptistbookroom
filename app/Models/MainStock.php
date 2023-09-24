@@ -15,6 +15,7 @@ class MainStock extends Model
         'cost_price',
         'item_id',
         'last_update_date',
+        'product_id',
     ];
     public function product(): BelongsTo
     {

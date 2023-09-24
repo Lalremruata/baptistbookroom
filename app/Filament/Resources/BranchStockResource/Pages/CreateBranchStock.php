@@ -9,4 +9,8 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateBranchStock extends CreateRecord
 {
     protected static string $resource = BranchStockResource::class;
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

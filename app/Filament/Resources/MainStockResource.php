@@ -27,7 +27,7 @@ class MainStockResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('product_id')
-                    ->relationship('product', 'id')
+                    ->relationship('product', 'product_name')
                     ->required(),
                 Forms\Components\TextInput::make('quantity')
                     ->required()
@@ -39,6 +39,7 @@ class MainStockResource extends Resource
                     ->required()
                     ->numeric(),
                 Forms\Components\DateTimePicker::make('last_update_date')
+                    ->default(now())
                     ->required(),
             ]);
     }
@@ -47,7 +48,7 @@ class MainStockResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('product.id')
+                Tables\Columns\TextColumn::make('product.product_name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')

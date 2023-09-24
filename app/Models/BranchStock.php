@@ -17,11 +17,11 @@ class BranchStock extends Model
         'branch_id',
         'product_id',
     ];
-    public function branches(): BelongsTo
+    public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
     }
-    public function products(): BelongsTo
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }

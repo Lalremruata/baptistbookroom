@@ -19,18 +19,20 @@ class BranchStockResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Manage Stocks';
+    protected static ?int $navigationSort = 2;
 
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('branch_id')
+                Forms\Components\Select::make('branch_id')
+                    ->relationship('branches','branch_name')
+                    ->required(),
+                Forms\Components\Select::make('product_id')
+                    ->searchable()
                     ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('product_id')
-                    ->required()
-                    ->numeric(),
+                    ->relationship('products','product_name'),
                 Forms\Components\TextInput::make('quantity')
                     ->required()
                     ->numeric(),
@@ -41,7 +43,11 @@ class BranchStockResource extends Resource
                     ->required()
                     ->numeric(),
                 Forms\Components\DateTimePicker::make('last_update_date')
-                    ->required(),
+                ->native(false)
+                ->seconds(false)
+                ->closeOnDateSelection()
+                ->default(now())
+                ->required(),
             ]);
     }
 
@@ -49,10 +55,9 @@ class BranchStockResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('branch_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('branch.branch_name')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('product_id')
+                Tables\Columns\TextColumn::make('product.product_name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')

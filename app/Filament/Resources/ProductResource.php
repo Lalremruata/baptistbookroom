@@ -21,6 +21,8 @@ class ProductResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Manage Products';
+    protected static ?int $navigationSort = 3;
+
 
 
     public static function form(Form $form): Form
@@ -59,10 +61,10 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('category_id')
+                Tables\Columns\TextColumn::make('category.category_name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('subcategory_id')
+                Tables\Columns\TextColumn::make('subCategory.subcategory_name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('product_name')
@@ -70,7 +72,7 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->money()
+                    ->money('INR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
