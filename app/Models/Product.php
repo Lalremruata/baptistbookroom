@@ -25,6 +25,10 @@ class Product extends Model
     {
         return $this->hasMany(BranchStock::class);
     }
+    public function productRequests(): HasMany
+    {
+        return $this->hasMany(ProductRequest::class);
+    }
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
