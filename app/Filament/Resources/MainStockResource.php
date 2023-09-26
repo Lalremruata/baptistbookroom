@@ -17,7 +17,7 @@ class MainStockResource extends Resource
 {
     protected static ?string $model = MainStock::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
     protected static ?string $navigationGroup = 'Manage Stocks';
 
 
