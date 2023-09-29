@@ -10,35 +10,62 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Wizard;
+use Filament\Forms\Components\Builder;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
 
 class StockTransferResource extends Resource
 {
     protected static ?string $model = StockTransfer::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
 
     public static function form(Form $form): Form
     {
+
         return $form
             ->schema([
-                Forms\Components\Select::make('item_id')
-                    ->relationship('item', 'item_name')
-                    ->required(),
-                Forms\Components\Select::make('branch_id')
-                ->relationship('branch', 'branch_name')
-                    ->required(),
-                Forms\Components\TextInput::make('quantity')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\DatePicker::make('transfer_date')
-                    ->required(),
-                Forms\Components\TextInput::make('notes')
-                    ->required()
-                    ->maxLength(255),
+                Wizard::make([
+                    Wizard\Step::make('Select Items')
+                        ->schema([
+                            Builder::make('content')
+                            ->blocks([
+                                Builder\Block::make('Add items')
+                                    ->schema([
+                                        Forms\Components\Select::make('item_id')
+                                        ->relationship('item', 'item_name')
+                                        ->required(),
+                                        Forms\Components\TextInput::make('quantity')
+                                        ->required()
+                                        ->numeric(),
+                                    Forms\Components\DatePicker::make('transfer_date')
+                                        ->required(),
+                                    Forms\Components\TextInput::make('notes')
+                                        ->required()
+                                        ->maxLength(255),
+                                    ])
+                        ])
+
+                        ]),
+                    Wizard\Step::make('Select Branch')
+                        ->schema([
+                            Forms\Components\Select::make('branch_id')
+                            ->relationship('branch', 'branch_name')
+                                ->required(),
+                        ]),
+                    ])->submitAction(new HtmlString(Blade::render(<<<'BLADE'
+                    <x-filament::button
+                        wire:click="submit"
+                    >
+                        Submit
+                    </x-filament::button>
+                BLADE))),
+
             ]);
     }
+
 
     public static function table(Table $table): Table
     {
