@@ -21,8 +21,8 @@ class BranchStock extends Model
     {
         return $this->belongsTo(Branch::class);
     }
-    public function product(): BelongsTo
+    public function item(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Item::class);
     }
 }

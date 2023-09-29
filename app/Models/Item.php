@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Product extends Model
+class Item extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'product_name',
+        'item_name',
         'description',
         'price',
         'category_id',
@@ -28,6 +28,10 @@ class Product extends Model
     public function productRequests(): HasMany
     {
         return $this->hasMany(ProductRequest::class);
+    }
+    public function stockTransfer(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class);
     }
     public function category(): BelongsTo
     {

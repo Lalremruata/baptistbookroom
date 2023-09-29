@@ -4,21 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MainStock extends Model
+class StockTransfer extends Model
 {
     use HasFactory;
-    protected $fillable =[
+    protected $fillable = [
         'quantity',
-        'discount',
-        'cost_price',
+        'transfer_date',
+        'notes',
         'item_id',
-        'last_update_date',
-        'product_id',
+        'branch_id',
     ];
-    public function item(): BelongsTo
+    public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 }

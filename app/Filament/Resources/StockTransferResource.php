@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\MainStockResource\Pages;
-use App\Filament\Resources\MainStockResource\RelationManagers;
-use App\Models\MainStock;
+use App\Filament\Resources\StockTransferResource\Pages;
+use App\Filament\Resources\StockTransferResource\RelationManagers;
+use App\Models\StockTransfer;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,14 +13,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class MainStockResource extends Resource
+class StockTransferResource extends Resource
 {
-    protected static ?string $model = MainStock::class;
+    protected static ?string $model = StockTransfer::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
-    protected static ?string $navigationGroup = 'Manage Stocks';
-
-
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
@@ -29,18 +26,17 @@ class MainStockResource extends Resource
                 Forms\Components\Select::make('item_id')
                     ->relationship('item', 'item_name')
                     ->required(),
+                Forms\Components\Select::make('branch_id')
+                ->relationship('branch', 'branch_name')
+                    ->required(),
                 Forms\Components\TextInput::make('quantity')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('cost_price')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('discount')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\DateTimePicker::make('last_update_date')
-                    ->default(now())
+                Forms\Components\DatePicker::make('transfer_date')
                     ->required(),
+                Forms\Components\TextInput::make('notes')
+                    ->required()
+                    ->maxLength(255),
             ]);
     }
 
@@ -48,21 +44,20 @@ class MainStockResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('item.item_name')
+                Tables\Columns\TextColumn::make('item_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('branch_id')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('cost_price')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('transfer_date')
+                    ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('discount')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('last_update_date')
-                    ->dateTime()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('notes')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -95,9 +90,9 @@ class MainStockResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListMainStocks::route('/'),
-            'create' => Pages\CreateMainStock::route('/create'),
-            'edit' => Pages\EditMainStock::route('/{record}/edit'),
+            'index' => Pages\ListStockTransfers::route('/'),
+            'create' => Pages\CreateStockTransfer::route('/create'),
+            'edit' => Pages\EditStockTransfer::route('/{record}/edit'),
         ];
     }
 }

@@ -20,5 +20,9 @@ class Branch extends Model
     {
         return $this->hasMany(ProductRequest::class);
     }
+    public function stockTransfer(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class);
+    }
 
 }

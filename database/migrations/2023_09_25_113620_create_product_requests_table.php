@@ -16,7 +16,7 @@ return new class extends Migration
             $table->integer('quantity_requested');
             $table->date('request_date');
             $table->enum('status',['pending','approved','rejected']);
-            $table->foreignId('product_id')->constrained();
+            $table->foreignId('item_id')->constrained();
             $table->foreignId('branch_id')->constrained();
             $table->timestamps();
         });

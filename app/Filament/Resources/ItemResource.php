@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ProductResource\Pages;
+use App\Filament\Resources\ItemResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Category;
-use App\Models\Product;
+use App\Models\Item;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,9 +15,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ProductResource extends Resource
+class ItemResource extends Resource
 {
-    protected static ?string $model = Product::class;
+    protected static ?string $model = Item::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
     protected static ?string $navigationGroup = 'Manage Products';
@@ -44,7 +44,7 @@ class ProductResource extends Resource
                     })
                     ->reactive()
                     ->required(),
-                Forms\Components\TextInput::make('product_name')
+                Forms\Components\TextInput::make('item_name')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('description')
@@ -67,7 +67,7 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('subCategory.subcategory_name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('product_name')
+                Tables\Columns\TextColumn::make('item_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
@@ -106,9 +106,9 @@ class ProductResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProducts::route('/'),
-            'create' => Pages\CreateProduct::route('/create'),
-            'edit' => Pages\EditProduct::route('/{record}/edit'),
+            'index' => Pages\ListItems::route('/'),
+            'create' => Pages\CreateItem::route('/create'),
+            'edit' => Pages\EditItem::route('/{record}/edit'),
         ];
     }
 }

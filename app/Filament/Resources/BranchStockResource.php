@@ -27,12 +27,12 @@ class BranchStockResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('branch_id')
-                    ->relationship('branches','branch_name')
+                    ->relationship('branch','branch_name')
                     ->required(),
-                Forms\Components\Select::make('product_id')
+                Forms\Components\Select::make('item_id')
                     ->searchable()
                     ->required()
-                    ->relationship('products','product_name'),
+                    ->relationship('items','item_name'),
                 Forms\Components\TextInput::make('quantity')
                     ->required()
                     ->numeric(),
@@ -57,7 +57,7 @@ class BranchStockResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('branch.branch_name')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('product.product_name')
+                Tables\Columns\TextColumn::make('item.item_name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')

@@ -15,9 +15,9 @@ class ProductRequest extends Model
         'product_id',
         'branch_id'
     ];
-    public function product()
+    public function item()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Item::class);
     }
     public function branch()
     {
