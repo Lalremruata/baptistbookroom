@@ -16,23 +16,23 @@ class CreateStockTransfer extends CreateRecord
     {
         $formData = $this->form->getState();
 
-        foreach ($formData as $data) {
-            $item_id = $data['item_id'];
-            $quantity = $data['quantity'];
-            $transfer_date = $data['transfer_date'];
-            $notes = $data['notes'];
-            $branch_id = $data['branch_id'];
+        // foreach ($formData as $data) {
+        //     $item_id = $data['item_id'];
+        //     $quantity = $data['quantity'];
+        //     $transfer_date = $data['transfer_date'];
+        //     $notes = $data['notes'];
+        //     $branch_id = $data['branch_id'];
 
-        StockTransfer::create([
-            'item_id' => $item_id,
-            'quantity' => $quantity,
-            'transfer_date' => $transfer_date,
-            'notes' => $notes,
-            'branch_id' => $branch_id,
-        ]);
-        }
+        // StockTransfer::create([
+        //     'item_id' => $item_id,
+        //     'quantity' => $quantity,
+        //     'transfer_date' => $transfer_date,
+        //     'notes' => $notes,
+        //     'branch_id' => $branch_id,
+        // ]);
+        // }
 
-        // dd($this->form->getState());
+        dd($this->form->getState());
         // create your logic to save to DB
     }
 }

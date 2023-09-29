@@ -1,0 +1,59 @@
+[33mcommit 8761820bdee2ab0df46e2a9fd083ed41058aaac6[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: vagrant <vagrant@homestead>
+Date:   Tue Sep 26 02:56:56 2023 +0000
+
+    Navigation icons updated
+
+[33mcommit d27d233546d1dfe47072f0f97e628cd8c754e70d[m
+Author: vagrant <vagrant@homestead>
+Date:   Mon Sep 25 17:32:52 2023 +0000
+
+    product request resource added
+
+[33mcommit 7539b23e812159d72cfddd67705232b5ead3cb9d[m
+Author: vagrant <vagrant@homestead>
+Date:   Mon Sep 25 12:23:13 2023 +0000
+
+    product_request migration added
+
+[33mcommit 333e5eb7426f29170ff4e5ee404a916d8c109df2[m
+Author: vagrant <vagrant@homestead>
+Date:   Sun Sep 24 18:19:54 2023 +0000
+
+    navigation panel sorting and form and table updated
+
+[33mcommit d9285c728db1d37c83ca5d80a67c182ee3df4c68[m
+Author: vagrant <vagrant@homestead>
+Date:   Thu Sep 21 10:29:31 2023 +0000
+
+    resource changes made
+
+[33mcommit c1cce75dfd693b32e1675aaa9917f5e3c3352b94[m
+Author: vagrant <vagrant@homestead>
+Date:   Wed Sep 20 18:17:39 2023 +0000
+
+    sidebar collapsible on desktop
+
+[33mcommit 61caf14c6f008057fbac11b4a4c2e26e10625a0e[m
+Author: vagrant <vagrant@homestead>
+Date:   Wed Sep 20 18:08:21 2023 +0000
+
+    migration for Branch, Stock, Category and resource created
+
+[33mcommit 2e16bc1e4a210ba3189d97344e4baedff757b0c6[m
+Author: vagrant <vagrant@homestead>
+Date:   Tue Sep 19 17:24:44 2023 +0000
+
+    permission policy and database seeder added
+
+[33mcommit c9b86a458e940ae53126dd1f8ea0156b75b8ab54[m
+Author: vagrant <vagrant@homestead>
+Date:   Tue Sep 19 12:02:35 2023 +0000
+
+    roles and permission added
+
+[33mcommit a68a7bb29f98c22c1856f9490e34994ac742a2ed[m
+Author: vagrant <vagrant@homestead>
+Date:   Mon Sep 18 12:21:13 2023 +0000
+
+    first commit
