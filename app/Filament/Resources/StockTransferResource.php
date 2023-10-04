@@ -6,7 +6,6 @@ use App\Filament\Resources\StockTransferResource\Pages;
 use App\Filament\Resources\StockTransferResource\RelationManagers;
 use App\Models\StockTransfer;
 use Filament\Forms;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -31,7 +30,9 @@ class StockTransferResource extends Resource
                 Wizard::make([
                     Wizard\Step::make('Select Items')
                         ->schema([
-                            Repeater::make('content')
+                            Builder::make('content')
+                            ->blocks([
+                                Builder\Block::make('Add items')
                                     ->schema([
                                         Forms\Components\Select::make('item_id')
                                         ->relationship('item', 'item_name')
@@ -44,7 +45,8 @@ class StockTransferResource extends Resource
                                     Forms\Components\TextInput::make('notes')
                                         ->required()
                                         ->maxLength(255),
-                                    ])->columns(2)
+                                    ])
+                        ])
 
                         ]),
                     Wizard\Step::make('Select Branch')
