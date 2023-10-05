@@ -12,6 +12,11 @@ class CreateStockTransfer extends CreateRecord
     protected static string $resource = StockTransferResource::class;
     public StockTransfer $stockTransfer;
 
+    // protected function mutateFormDataBeforeCreate(array $data): array
+    // {
+    //     $data['user_id'] = auth()->id();
+    //     return $data;
+    // }
     public function submit(): void
     {
         $formData = $this->form->getState();

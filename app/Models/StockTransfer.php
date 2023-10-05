@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StockTransfer extends Model
@@ -18,11 +19,11 @@ class StockTransfer extends Model
     ];
     public function item()
     {
-        return $this->belongsTo(Item::class);
+        return $this->hasMany(Item::class);
     }
-    public function mainStock(): HasMany
+    public function stockTransferMainStock(): HasMany
     {
-        return $this->hasMany(MainStock::class);
+        return $this->hasMany(StockTransferMainStock::class);
     }
     public function branch()
     {

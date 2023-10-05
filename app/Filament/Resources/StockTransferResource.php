@@ -40,19 +40,24 @@ class StockTransferResource extends Resource
 
                 Card::make()
                 ->schema([
-                    Repeater::make('item')
+                    Repeater::make('stockTransferMainStock')
+                    ->relationship()
                     ->schema([
-                        Forms\Components\Select::make('item_id')
-                        ->relationship('item', 'item_name')
-                        ->required(),
                         Forms\Components\TextInput::make('quantity')
                         ->required()
                         ->numeric(),
+                        Forms\Components\Select::make('mainStock')
+                        ->relationship('mainStock', 'item_id')
+                        ->required(),
+                        Forms\Components\Select::make('item_id')
+                        ->relationship('mainStock', 'item_id')
+                        ->required(),
 
                     ])->columns(2)
+                    ->reorderable(false)
+                    ->collapsible()
+                    ->defaultItems(1)
                 ])
-
-
             ]);
     }
 
