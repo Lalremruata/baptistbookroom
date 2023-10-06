@@ -17,6 +17,10 @@ class Item extends Model
         'category_id',
         'sub_category_id',
     ];
+    public function itemStockTransfer(): HasMany
+    {
+        return $this->hasMany(ItemStockTransfer::class);
+    }
     public function mainStock(): HasMany
     {
         return $this->hasMany(MainStock::class);

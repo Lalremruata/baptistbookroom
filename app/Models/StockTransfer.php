@@ -21,10 +21,14 @@ class StockTransfer extends Model
     {
         return $this->hasMany(Item::class);
     }
-    public function stockTransferMainStock(): HasMany
+    public function itemStockTransfer(): HasMany
     {
-        return $this->hasMany(StockTransferMainStock::class);
+        return $this->hasMany(ItemStockTransfer::class);
     }
+    // public function stockTransferMainStock(): HasMany
+    // {
+    //     return $this->hasMany(StockTransferMainStock::class);
+    // }
     public function branch()
     {
         return $this->belongsTo(Branch::class);

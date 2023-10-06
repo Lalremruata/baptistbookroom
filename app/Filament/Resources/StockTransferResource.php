@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\StockTransferResource\Pages;
 use App\Filament\Resources\StockTransferResource\RelationManagers;
+use App\Models\Item;
+use App\Models\MainStock;
 use App\Models\StockTransfer;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
@@ -40,23 +42,18 @@ class StockTransferResource extends Resource
 
                 Card::make()
                 ->schema([
-                    Repeater::make('stockTransferMainStock')
+                    Repeater::make('itemStockTransfer')
                     ->relationship()
                     ->schema([
+                        Forms\Components\Select::make('item_id')
+                        ->options(Item::query()->pluck('item_name', 'id'))
+                        ->required(),
                         Forms\Components\TextInput::make('quantity')
                         ->required()
                         ->numeric(),
-                        Forms\Components\Select::make('mainStock')
-                        ->relationship('mainStock', 'item_id')
-                        ->required(),
-                        Forms\Components\Select::make('item_id')
-                        ->relationship('mainStock', 'item_id')
-                        ->required(),
+
 
                     ])->columns(2)
-                    ->reorderable(false)
-                    ->collapsible()
-                    ->defaultItems(1)
                 ])
             ]);
     }
