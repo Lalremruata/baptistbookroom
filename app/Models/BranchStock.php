@@ -13,9 +13,8 @@ class BranchStock extends Model
         'quantity',
         'cost_price',
         'discount',
-        'last_update_date',
         'branch_id',
-        'product_id',
+        'item_id',
     ];
     public function branch(): BelongsTo
     {

@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('main_stocks', function (Blueprint $table) {
             $table->id();
-            $table->integer('quantity');
-            $table->unsignedInteger('cost_price');
-            $table->unsignedInteger('discount');
-            $table->dateTime('last_update_date');
             $table->foreignId('item_id')->constrained();
+            $table->unsignedInteger('cost_price');
+            $table->unsignedInteger('mrp');
+            $table->string('batch');
+            $table->integer('quantity');
             $table->timestamps();
         });
     }

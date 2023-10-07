@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Item;
 use Closure;
 use Filament\Forms;
+use Filament\Forms\Components\Card;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -20,7 +21,7 @@ class ItemResource extends Resource
     protected static ?string $model = Item::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
-    protected static ?string $navigationGroup = 'Manage Products';
+    protected static ?string $navigationGroup = 'Manage Items';
     protected static ?int $navigationSort = 3;
 
 
@@ -29,7 +30,9 @@ class ItemResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('category_id')
+                Card::make()
+                ->schema([
+                    Forms\Components\Select::make('category_id')
                     ->relationship('category','category_name')
                     ->reactive()
                     ->afterStateUpdated(fn(callable $set)=>$set('sub_category_id', null))
@@ -47,13 +50,13 @@ class ItemResource extends Resource
                 Forms\Components\TextInput::make('item_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('description')
+                Forms\Components\TextInput::make('barcode')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('₹'),
+                Forms\Components\TextInput::make('description')
+                    ->maxLength(255),
+                ])->columnSpanFull()
+
             ]);
     }
 
@@ -69,11 +72,10 @@ class ItemResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('item_name')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('barcode')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('price')
-                    ->money('INR')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

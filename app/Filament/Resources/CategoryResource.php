@@ -6,6 +6,7 @@ use App\Filament\Resources\CategoryResource\Pages;
 use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
 use Filament\Forms;
+use Filament\Forms\Components\Card;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -18,19 +19,22 @@ class CategoryResource extends Resource
     protected static ?string $model = Category::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-cube';
-    protected static ?string $navigationGroup = 'Manage Products';
+    protected static ?string $navigationGroup = 'Manage Items';
 
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('category_name')
+                Card::make()
+                ->schema([
+                    Forms\Components\TextInput::make('category_name')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('description')
-                    ->required()
                     ->maxLength(255),
+                ])->columnSpan('full')
+
             ]);
     }
 

@@ -11,15 +11,15 @@ class Item extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'item_name',
-        'description',
-        'price',
         'category_id',
         'sub_category_id',
+        'item_name',
+        'barcode',
+        'description',
     ];
-    public function itemStockTransfer(): HasMany
+    public function stockDistributeItem(): HasMany
     {
-        return $this->hasMany(ItemStockTransfer::class);
+        return $this->hasMany(StockDistributeItem::class);
     }
     public function mainStock(): HasMany
     {
@@ -33,9 +33,9 @@ class Item extends Model
     {
         return $this->hasMany(ProductRequest::class);
     }
-    public function stockTransfer(): HasMany
+    public function stockDistribute(): HasMany
     {
-        return $this->hasMany(StockTransfer::class);
+        return $this->hasMany(StockDistribute::class);
     }
     public function category(): BelongsTo
     {

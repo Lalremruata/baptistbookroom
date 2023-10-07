@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\StockTransferResource\Pages;
+use App\Filament\Resources\StockDistributeResource\Pages;
 use App\Filament\Resources\StockTransferResource\RelationManagers;
 use App\Models\Item;
 use App\Models\MainStock;
-use App\Models\StockTransfer;
+use App\Models\StockDistribute;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Repeater;
@@ -16,11 +16,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class StockTransferResource extends Resource
+class StockDistributeResource extends Resource
 {
-    protected static ?string $model = StockTransfer::class;
+    protected static ?string $model = StockDistribute::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static ?string $navigationGroup = 'Main Stocks';
+
 
     public static function form(Form $form): Form
     {
@@ -32,23 +34,23 @@ class StockTransferResource extends Resource
                     Forms\Components\Select::make('branch_id')
                     ->relationship('branch', 'branch_name')
                     ->required(),
-                    Forms\Components\DatePicker::make('transfer_date')
-                    ->required(),
-                Forms\Components\TextInput::make('notes')
-                    ->required()
-                    ->maxLength(255),
                 ])->columns(3),
 
 
                 Card::make()
                 ->schema([
-                    Repeater::make('itemStockTransfer')
+                    Repeater::make('stockDistributeItem')
                     ->relationship()
                     ->schema([
                         Forms\Components\Select::make('item_id')
                         ->options(Item::query()->pluck('item_name', 'id'))
+                        ->reactive()
+                        // ->afterStateUpdated(fn(callable $set) => $set('quantity', null))
                         ->required(),
                         Forms\Components\TextInput::make('quantity')
+                        ->reactive()
+                        ->hint(fn(callable $get)=>MainStock::query()->pluck('quantity')->whereIn('item_id',$get('item_id')))
+                        ->hintColor('primary')
                         ->required()
                         ->numeric(),
 
@@ -63,13 +65,14 @@ class StockTransferResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('item_id')
+                Tables\Columns\TextColumn::make('stockDistributeItem.item.item_name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('branch_id')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('quantity')
+                Tables\Columns\TextColumn::make('stockDistributeItem.quantity')
+                ->label('quantities')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('transfer_date')
@@ -109,9 +112,9 @@ class StockTransferResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListStockTransfers::route('/'),
-            'create' => Pages\CreateStockTransfer::route('/create'),
-            'edit' => Pages\EditStockTransfer::route('/{record}/edit'),
+            'index' => Pages\ListStockDistribute::route('/'),
+            'create' => Pages\CreateStockDistribute::route('/create'),
+            'edit' => Pages\EditStockDistribute::route('/{record}/edit'),
         ];
     }
 }

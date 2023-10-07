@@ -16,7 +16,6 @@ return new class extends Migration
             $table->integer('quantity');
             $table->unsignedInteger('cost_price');
             $table->unsignedInteger('discount');
-            $table->dateTime('last_update_date');
             $table->foreignId('branch_id')->constrained();
             $table->foreignId('item_id')->constrained();
             $table->timestamps();

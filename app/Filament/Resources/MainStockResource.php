@@ -18,7 +18,7 @@ class MainStockResource extends Resource
     protected static ?string $model = MainStock::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
-    protected static ?string $navigationGroup = 'Manage Stocks';
+    protected static ?string $navigationGroup = 'Main Stocks';
 
 
 
@@ -35,12 +35,12 @@ class MainStockResource extends Resource
                 Forms\Components\TextInput::make('cost_price')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('discount')
+                Forms\Components\TextInput::make('mrp')
                     ->required()
                     ->numeric(),
-                Forms\Components\DateTimePicker::make('last_update_date')
-                    ->default(now())
-                    ->required(),
+                Forms\Components\TextInput::make('batch')
+                    ->required()
+                    ->numeric(),
             ]);
     }
 
@@ -57,11 +57,11 @@ class MainStockResource extends Resource
                 Tables\Columns\TextColumn::make('cost_price')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('discount')
+                Tables\Columns\TextColumn::make('mrp')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('last_update_date')
-                    ->dateTime()
+                Tables\Columns\TextColumn::make('batch')
+                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

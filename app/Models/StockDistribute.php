@@ -4,26 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class StockTransfer extends Model
+class StockDistribute extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'quantity',
-        'transfer_date',
-        'notes',
-        'item_id',
         'branch_id',
     ];
     public function item()
     {
         return $this->hasMany(Item::class);
     }
-    public function itemStockTransfer(): HasMany
+    public function stockDistributeItem(): HasMany
     {
-        return $this->hasMany(ItemStockTransfer::class);
+        return $this->hasMany(StockDistributeItem::class);
     }
     // public function stockTransferMainStock(): HasMany
     // {

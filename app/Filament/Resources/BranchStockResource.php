@@ -18,7 +18,7 @@ class BranchStockResource extends Resource
     protected static ?string $model = BranchStock::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Manage Stocks';
+    protected static ?string $navigationGroup = 'Branch Stocks';
     protected static ?int $navigationSort = 2;
 
 
@@ -42,12 +42,6 @@ class BranchStockResource extends Resource
                 Forms\Components\TextInput::make('discount')
                     ->required()
                     ->numeric(),
-                Forms\Components\DateTimePicker::make('last_update_date')
-                ->native(false)
-                ->seconds(false)
-                ->closeOnDateSelection()
-                ->default(now())
-                ->required(),
             ]);
     }
 

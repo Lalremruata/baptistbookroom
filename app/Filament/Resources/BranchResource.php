@@ -18,6 +18,8 @@ class BranchResource extends Resource
     protected static ?string $model = Branch::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+    protected static ?string $navigationGroup = 'Settings';
+
 
     public static function form(Form $form): Form
     {
@@ -56,14 +58,14 @@ class BranchResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -71,5 +73,5 @@ class BranchResource extends Resource
             'create' => Pages\CreateBranch::route('/create'),
             'edit' => Pages\EditBranch::route('/{record}/edit'),
         ];
-    }    
+    }
 }

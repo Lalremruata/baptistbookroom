@@ -6,6 +6,7 @@ use App\Filament\Resources\SubCategoryResource\Pages;
 use App\Filament\Resources\SubCategoryResource\RelationManagers;
 use App\Models\SubCategory;
 use Filament\Forms;
+use Filament\Forms\Components\Card;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -18,7 +19,7 @@ class SubCategoryResource extends Resource
     protected static ?string $model = SubCategory::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-inbox-stack';
-    protected static ?string $navigationGroup = 'Manage Products';
+    protected static ?string $navigationGroup = 'Manage Items';
 
 
 
@@ -26,15 +27,18 @@ class SubCategoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('category_id')
+                Card::make()
+                ->schema([
+                    Forms\Components\Select::make('category_id')
                     ->relationship('category', 'category_name')
                     ->required(),
                 Forms\Components\TextInput::make('subcategory_name')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('description')
-                    ->required()
                     ->maxLength(255),
+                ])->columnSpanFull()
+
             ]);
     }
 

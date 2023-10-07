@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ItemStockTransfer extends Pivot
+class StockDistributeItem extends Pivot
 {
     public function item(): BelongsTo
     {

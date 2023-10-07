@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -54,7 +55,22 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->sidebarCollapsibleOnDesktop();
+            ->sidebarCollapsibleOnDesktop()
             // ->topNavigation();
+            ->navigationGroups([
+                NavigationGroup::make()
+                     ->label('Main Stocks'),
+                NavigationGroup::make()
+                    ->label('Branch Stocks'),
+                NavigationGroup::make()
+                    ->label('Manage Items')
+                    ->collapsed(),
+                NavigationGroup::make()
+                    ->label('Manage Users')
+                    ->collapsed(),
+                NavigationGroup::make()
+                    ->label('Settings')
+                    ->collapsed(),
+            ]);
     }
 }
