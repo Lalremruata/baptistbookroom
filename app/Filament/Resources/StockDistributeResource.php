@@ -11,6 +11,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -43,16 +44,25 @@ class StockDistributeResource extends Resource
                     ->relationship()
                     ->schema([
                         Forms\Components\Select::make('item_id')
+                        ->live()
+                        ->searchable()
                         ->options(Item::query()->pluck('item_name', 'id'))
-                        ->reactive()
                         // ->afterStateUpdated(fn(callable $set) => $set('quantity', null))
                         ->required(),
                         Forms\Components\TextInput::make('quantity')
-                        ->reactive()
-                        ->hint(fn(callable $get)=>MainStock::query()->pluck('quantity')->whereIn('item_id',$get('item_id')))
+                        ->live()
+                        ->hint(function(Get $get){
+                            $itemId = $get('item_id');
+                            if ($itemId) {
+                                $result=MainStock::where('item_id',$itemId)->select('quantity')->first();
+                                $quantity = $result->quantity;
+                                return 'quantity available: '.$quantity;
+                            }
+                            return null;
+                        })
                         ->hintColor('primary')
                         ->required()
-                        ->numeric(),
+                        ->integer(),
 
 
                     ])->columns(2)
