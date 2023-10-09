@@ -39,7 +39,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('Poppins')
             ->brandName('Baptist BookRoom')
-            ->viteTheme('resources/css/filament/admin/theme.css')
             // ->brandLogo(asset('/images/bcm-logo.svg'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
