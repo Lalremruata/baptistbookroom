@@ -6,6 +6,7 @@ use App\Models\CartItem;
 use App\Models\Item;
 use Filament\Actions\Action;
 // use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Card;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -20,6 +21,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Collection;
 
 class CartItems extends Page implements HasForms, HasTable
 {
@@ -41,14 +44,19 @@ class CartItems extends Page implements HasForms, HasTable
     {
         return $form
             ->schema([
-                Select::make('item_id')
-                ->options(Item::query()->pluck('item_name', 'id'))
-                    ->required(),
-                TextInput::make('quantity')
-                ->required()
-                ->numeric(),
-                Hidden::make('user_id')
-                ->default(auth()->user()->id)
+                Card::make()
+                ->schema([
+                    Select::make('item_id')
+                    ->options(Item::query()->pluck('item_name', 'id'))
+                        ->searchable()
+                        ->required(),
+                    TextInput::make('quantity')
+                    ->required()
+                    ->numeric(),
+                    Hidden::make('user_id')
+                    ->default(auth()->user()->id)
+                ])->columns(2)
+
             ])
             ->statePath('data');
     }
@@ -57,31 +65,27 @@ class CartItems extends Page implements HasForms, HasTable
         return $table
             ->query(CartItem::query())
             ->columns([
-                TextColumn::make('item_id')
-                    ->searchable(),
-                TextColumn::make('quantity')
-                    ->sortable(),
-                TextColumn::make('user_id')
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->filters([
-                // ...
+                TextColumn::make('item_id'),
+                TextColumn::make('quantity'),
+                TextColumn::make('user_id'),
             ])
             ->actions([
                 DeleteAction::make()
             ])
             ->bulkActions([
                 // ...
+            ])
+            ->headerActions([
+                BulkAction::make('check out cartcd')
+                ->requiresConfirmation()
+                ->action(fn (Collection $records) => $records->each->delete())
             ]);
     }
     protected function getFormActions(): array
     {
         return [
             Action::make('save')
-                ->label(__('filament-panels::resources/pages/edit-record.form.actions.save.label'))
+                ->label(__('Add to cart'))
                 ->submit('save'),
         ];
     }
