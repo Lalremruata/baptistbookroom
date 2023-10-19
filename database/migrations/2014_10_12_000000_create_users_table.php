@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->tinyInteger('user_type')->default(1);
+            $table->foreignId('branch_id')->nullable();
+            $table->string('address')->nullable();
+            $table->string('contact')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

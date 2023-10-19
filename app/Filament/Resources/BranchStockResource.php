@@ -6,6 +6,7 @@ use App\Filament\Resources\BranchStockResource\Pages;
 use App\Filament\Resources\BranchStockResource\RelationManagers;
 use App\Models\BranchStock;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -26,7 +27,9 @@ class BranchStockResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('branch_id')
+                Section::make()
+                ->schema([
+                    Forms\Components\Select::make('branch_id')
                     ->relationship('branch','branch_name')
                     ->required(),
                 Forms\Components\Select::make('item_id')
@@ -42,6 +45,9 @@ class BranchStockResource extends Resource
                 Forms\Components\TextInput::make('discount')
                     ->required()
                     ->numeric(),
+                    ])->compact()
+                    ->columns(2)
+
             ]);
     }
 

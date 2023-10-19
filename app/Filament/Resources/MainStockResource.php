@@ -7,6 +7,7 @@ use App\Filament\Resources\MainStockResource\RelationManagers;
 use App\Models\Item;
 use App\Models\MainStock;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -27,23 +28,28 @@ class MainStockResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('item_id')
-                ->label('Item')
-                    ->options(Item::query()->pluck('item_name', 'id'))
-                    ->searchable()
-                    ->required(),
-                Forms\Components\TextInput::make('quantity')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('cost_price')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('mrp')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('batch')
-                    ->required()
-                    ->numeric(),
+                Section::make()
+                ->schema([
+                    Forms\Components\Select::make('item_id')
+                    ->label('Item')
+                        ->options(Item::query()->pluck('item_name', 'id'))
+                        ->searchable()
+                        ->required(),
+                    Forms\Components\TextInput::make('quantity')
+                        ->required()
+                        ->numeric(),
+                    Forms\Components\TextInput::make('cost_price')
+                        ->required()
+                        ->numeric(),
+                    Forms\Components\TextInput::make('mrp')
+                        ->required()
+                        ->numeric(),
+                    Forms\Components\TextInput::make('batch')
+                        ->required()
+                        ->numeric(),
+                ])->compact()
+                ->columns(2)
+
             ]);
     }
 

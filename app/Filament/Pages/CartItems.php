@@ -83,7 +83,7 @@ class CartItems extends Page implements HasForms, HasTable, HasActions
                 DeleteAction::make()
             ])
             ->bulkActions([
-                // ...
+            // ...
             ])
             ->headerActions([
                 \Filament\Tables\Actions\Action::make('checkout cart')

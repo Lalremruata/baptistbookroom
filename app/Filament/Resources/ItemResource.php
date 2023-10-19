@@ -9,6 +9,7 @@ use App\Models\Item;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -30,7 +31,7 @@ class ItemResource extends Resource
     {
         return $form
             ->schema([
-                Card::make()
+                Section::make()
                 ->schema([
                     Forms\Components\Select::make('category_id')
                     ->label('Category')

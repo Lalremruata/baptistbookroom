@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\SubCategory;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -28,7 +29,7 @@ class SubCategoryResource extends Resource
     {
         return $form
             ->schema([
-                Card::make()
+                Section::make()
                 ->schema([
                     Forms\Components\Select::make('category_id')
                     ->options(Category::query()->pluck('category_name', 'id'))
@@ -39,7 +40,7 @@ class SubCategoryResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('description')
                     ->maxLength(255),
-                ])->columnSpanFull()
+                ])->columnSpanFull()->compact()
 
             ]);
     }

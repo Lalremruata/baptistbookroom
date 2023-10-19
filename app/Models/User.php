@@ -23,6 +23,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'branch_id',
+        'address',
+        'contact',
     ];
     protected $with = ['roles.permissions'];
 
@@ -48,6 +51,10 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class);
+    }
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
     public function cartitem(): HasMany
     {

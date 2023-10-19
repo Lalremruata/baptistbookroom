@@ -7,6 +7,7 @@ use App\Filament\Resources\UserResource\RelationManagers;
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
@@ -52,6 +53,13 @@ class UserResource extends Resource
                 ->required(fn(Page $livewire): bool => $livewire instanceof CreateRecord)
                 ->minLength(8)
                 ->dehydrated(false),
+                Select::make('branch_id')
+                ->label('branch')
+                ->relationship('branch','branch_name')
+                ->required(),
+                TextInput::make('address'),
+                TextInput::make('contact')
+                ->numeric()
             ]);
     }
 

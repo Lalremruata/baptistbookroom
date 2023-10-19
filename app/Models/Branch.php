@@ -24,5 +24,9 @@ class Branch extends Model
     {
         return $this->hasMany(StockDistribute::class);
     }
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 
 }
