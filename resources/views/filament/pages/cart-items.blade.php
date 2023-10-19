@@ -7,5 +7,10 @@
             :actions="$this->getFormActions()"
         />
     </x-filament-panels::form>
+    {{-- <div>
+        {{ $this->deleteAction }}
+
+        <x-filament-actions::modals />
+    </div> --}}
     {{ $this->table }}
 </x-filament-panels::page>

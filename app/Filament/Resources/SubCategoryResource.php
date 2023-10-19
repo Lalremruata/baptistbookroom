@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SubCategoryResource\Pages;
 use App\Filament\Resources\SubCategoryResource\RelationManagers;
+use App\Models\Category;
 use App\Models\SubCategory;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
@@ -30,7 +31,8 @@ class SubCategoryResource extends Resource
                 Card::make()
                 ->schema([
                     Forms\Components\Select::make('category_id')
-                    ->relationship('category', 'category_name')
+                    ->options(Category::query()->pluck('category_name', 'id'))
+                    ->searchable()
                     ->required(),
                 Forms\Components\TextInput::make('subcategory_name')
                     ->required()

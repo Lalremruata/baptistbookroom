@@ -17,10 +17,7 @@ class Item extends Model
         'barcode',
         'description',
     ];
-    public function stockDistributeItem(): HasMany
-    {
-        return $this->hasMany(StockDistributeItem::class);
-    }
+
     public function mainStock(): HasMany
     {
         return $this->hasMany(MainStock::class);

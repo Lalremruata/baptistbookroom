@@ -33,11 +33,15 @@ class ItemResource extends Resource
                 Card::make()
                 ->schema([
                     Forms\Components\Select::make('category_id')
-                    ->relationship('category','category_name')
+                    ->label('Category')
+                    ->searchable()
+                    ->options(Category::query()->pluck('category_name', 'id'))
                     ->reactive()
                     ->afterStateUpdated(fn(callable $set)=>$set('sub_category_id', null))
                     ->required(),
                 Forms\Components\Select::make('sub_category_id')
+                    ->label('Sub Categoty')
+                    ->searchable()
                     ->options(function(callable $get){
                         $category= Category::find($get('category_id'));
                         if(!$category){

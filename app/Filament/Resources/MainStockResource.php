@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MainStockResource\Pages;
 use App\Filament\Resources\MainStockResource\RelationManagers;
+use App\Models\Item;
 use App\Models\MainStock;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -27,7 +28,9 @@ class MainStockResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('item_id')
-                    ->relationship('item', 'item_name')
+                ->label('Item')
+                    ->options(Item::query()->pluck('item_name', 'id'))
+                    ->searchable()
                     ->required(),
                 Forms\Components\TextInput::make('quantity')
                     ->required()

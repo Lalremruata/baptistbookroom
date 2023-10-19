@@ -63,28 +63,20 @@ class BranchStockResource extends Resource
                 Tables\Columns\TextColumn::make('discount')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('last_update_date')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 
@@ -100,7 +92,7 @@ class BranchStockResource extends Resource
         return [
             'index' => Pages\ListBranchStocks::route('/'),
             'create' => Pages\CreateBranchStock::route('/create'),
-            'edit' => Pages\EditBranchStock::route('/{record}/edit'),
+            // 'edit' => Pages\EditBranchStock::route('/{record}/edit'),
         ];
     }
 }
