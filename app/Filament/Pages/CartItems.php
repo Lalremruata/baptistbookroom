@@ -8,6 +8,7 @@ use App\Models\CartItem;
 use App\Models\Item;
 use App\Models\MainStock;
 use App\Models\StockDistribute;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -54,13 +55,12 @@ class CartItems extends Page implements HasForms, HasTable, HasActions
                 Card::make()
                 ->schema([
                     Select::make('item_id')
-                    ->live()
+
                     ->label('Item')
                     ->options(Item::query()->pluck('item_name', 'id'))
                         ->searchable()
                         ->required(),
                     TextInput::make('quantity')
-                    ->live()
                     ->required()
                     ->numeric(),
                     Hidden::make('user_id')
@@ -151,6 +151,7 @@ class CartItems extends Page implements HasForms, HasTable, HasActions
             $data = $this->form->getState();
             // dd(auth()->user()->id);
             CartItem::create($data);
+            $this->form->fill();
             // auth()->cartitem->save($data);
         } catch (Halt $exception) {
             return;

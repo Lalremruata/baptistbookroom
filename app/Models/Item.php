@@ -42,4 +42,8 @@ class Item extends Model
     {
         return $this->belongsTo(SubCategory::class);
     }
+    public function cartItems(): BelongsTo
+    {
+        return $this->belongsTo(CartItem::class);
+    }
 }
