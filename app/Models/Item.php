@@ -26,10 +26,6 @@ class Item extends Model
     {
         return $this->hasMany(BranchStock::class);
     }
-    public function productRequests(): HasMany
-    {
-        return $this->hasMany(ProductRequest::class);
-    }
     public function stockDistribute(): HasMany
     {
         return $this->hasMany(StockDistribute::class);
@@ -42,8 +38,8 @@ class Item extends Model
     {
         return $this->belongsTo(SubCategory::class);
     }
-    public function cartItems(): BelongsTo
+    public function stockDistributeCart(): BelongsTo
     {
-        return $this->belongsTo(CartItem::class);
+        return $this->belongsTo(StockDistributeCart::class);
     }
 }

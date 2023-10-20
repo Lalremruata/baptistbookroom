@@ -56,9 +56,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Branch::class);
     }
-    public function cartitem(): HasMany
+    public function stockDistributeCarts(): HasMany
     {
-        return $this->hasMany(CartItem::class);
+        return $this->hasMany(StockDistributeCart::class);
     }
 
     public function hasPermission(string $permission): bool

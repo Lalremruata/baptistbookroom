@@ -26,6 +26,7 @@ class CategoryResource extends Resource
                 Section::make()
                 ->schema([
                     Forms\Components\TextInput::make('category_name')
+                    ->autofocus()
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('description')

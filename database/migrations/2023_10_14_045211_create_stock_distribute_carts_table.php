@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cart_items', function (Blueprint $table) {
+        Schema::create('stock_distribute_carts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('item_id')->constrained;
             $table->foreignId('user_id')->constrained;
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cart_items');
+        Schema::dropIfExists('stock_distribute_carts');
     }
 };

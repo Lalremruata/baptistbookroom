@@ -8,6 +8,7 @@ use App\Models\CartItem;
 use App\Models\Item;
 use App\Models\MainStock;
 use App\Models\StockDistribute;
+use App\Models\StockDistributeCart;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -21,6 +22,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Support\Exceptions\Halt;
@@ -31,17 +33,17 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
 
-class CartItems extends Page implements HasForms, HasTable, HasActions
+class StockDistributeCarts extends Page implements HasForms, HasTable, HasActions
 {
-    protected static ?string $model = CartItem::class;
-    public CartItem $cartItem;
+    protected static ?string $model = StockDistributeCart::class;
+    public StockDistributeCart $stockDistributeCart;
     use InteractsWithTable;
     use InteractsWithForms;
     use InteractsWithActions;
     public ?array $data = [];
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
-
-    protected static string $view = 'filament.pages.cart-items';
+    protected static ?string $navigationLabel = 'Distribution cart';
+    protected static string $view = 'filament.pages.stock-distribute-cart';
     public function mount(): void
     {
         $this->form->fill();
@@ -52,7 +54,7 @@ class CartItems extends Page implements HasForms, HasTable, HasActions
     {
         return $form
             ->schema([
-                Card::make()
+                Section::make()
                 ->schema([
                     Select::make('item_id')
 
@@ -73,7 +75,7 @@ class CartItems extends Page implements HasForms, HasTable, HasActions
     public function table(Table $table): Table
     {
         return $table
-            ->query(CartItem::query())
+            ->query(StockDistributeCart::query())
             ->columns([
                 TextColumn::make('item_id'),
                 TextColumn::make('quantity'),
@@ -102,7 +104,7 @@ class CartItems extends Page implements HasForms, HasTable, HasActions
 
                 ->requiresConfirmation()
                 ->action(function (array $data) {
-                    $cartItems = CartItem::all();
+                    $cartItems = StockDistributeCart::all();
                     foreach ($cartItems as $item) {
                         $mainstock = MainStock::find($item->item_id);
                         $mainstock->quantity -= $item->quantity;
@@ -150,7 +152,7 @@ class CartItems extends Page implements HasForms, HasTable, HasActions
         try {
             $data = $this->form->getState();
             // dd(auth()->user()->id);
-            CartItem::create($data);
+            StockDistributeCart::create($data);
             $this->form->fill();
             // auth()->cartitem->save($data);
         } catch (Halt $exception) {

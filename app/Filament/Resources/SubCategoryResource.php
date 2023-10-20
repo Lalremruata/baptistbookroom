@@ -32,6 +32,7 @@ class SubCategoryResource extends Resource
                 Section::make()
                 ->schema([
                     Forms\Components\Select::make('category_id')
+                    ->label('Select Category')
                     ->options(Category::query()->pluck('category_name', 'id'))
                     ->searchable()
                     ->required(),

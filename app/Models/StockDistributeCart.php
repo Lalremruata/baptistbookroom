@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class CartItem extends Model
+class StockDistributeCart extends Model
 {
     use HasFactory;
     protected $fillable = [
