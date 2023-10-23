@@ -21,7 +21,20 @@ class BranchStockResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Branch Stocks';
     protected static ?int $navigationSort = 2;
+    public static function canCreate(): bool
+    {
+        return 0;
+    }
+    public static function getEloquentQuery(): Builder
+    {
+        if(auth()->user()->user_type == '1') {
+            return parent::getEloquentQuery()->withoutGlobalScopes();
+        }
+        else {
+            return parent::getEloquentQuery()->where('branch_id', auth()->user()->branch_id);
 
+        }
+    }
 
     public static function form(Form $form): Form
     {
@@ -56,6 +69,7 @@ class BranchStockResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('branch.branch_name')
+                    ->searchable(isIndividual: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('item.item_name')
                     ->numeric()
