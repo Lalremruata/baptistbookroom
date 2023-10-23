@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('sales_cart_items', function (Blueprint $table) {
             $table->id();
-            $table->foreign('branch_id')->references('branch_id')->on('branch_stocks')->onDelete('cascade');
-            $table->foreign('item_id')->references('item_id')->on('branch_stocks')->onDelete('cascade');
+            $table->foreignId('branch_id')->constrained();
+            $table->foreignId('item_id')->constrained();
             $table->integer('quantity')->unsigned();
+            $table->integer('cost_price')->unsigned();
             $table->integer('selling_price')->unsigned();
             $table->integer('discount')->unsigned()->nullable();
             $table->timestamps();

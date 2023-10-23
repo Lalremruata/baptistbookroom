@@ -58,6 +58,7 @@ class MainStockResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('item.item_name')
+                    ->searchable(isIndividual: true)
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')

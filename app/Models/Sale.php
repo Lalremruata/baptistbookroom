@@ -18,8 +18,6 @@ class Sale extends Model
         "cost_price",
         "selling_price",
         "discount",
-        "return",
-        "return_date",
     ];
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);

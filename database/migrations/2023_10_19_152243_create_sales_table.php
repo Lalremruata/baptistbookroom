@@ -21,8 +21,6 @@ return new class extends Migration
             $table->unsignedInteger('cost_price')->nullable();
             $table->unsignedInteger('selling_price')->nullable();
             $table->unsignedInteger('discount')->nullable();
-            $table->tinyInteger('return')->nullable();
-            $table->date('return_date')->nullable();
             $table->timestamps();
         });
     }

@@ -8,4 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class SalesCartItem extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        "branch_id",
+        "item_id",
+        "quantity",
+        "cost_price",
+        "selling_price",
+        "discount",
+    ];
 }

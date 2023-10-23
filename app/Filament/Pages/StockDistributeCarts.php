@@ -4,23 +4,19 @@ namespace App\Filament\Pages;
 
 use App\Models\Branch;
 use App\Models\BranchStock;
-use App\Models\CartItem;
 use App\Models\Item;
 use App\Models\MainStock;
 use App\Models\StockDistribute;
 use App\Models\StockDistributeCart;
-use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\Card;
-use Filament\Tables\Actions\CreateAction;
+use Filament\Forms\Get;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -30,8 +26,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\BulkAction;
-use Illuminate\Database\Eloquent\Collection;
 
 class StockDistributeCarts extends Page implements HasForms, HasTable, HasActions
 {
@@ -44,6 +38,10 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
     protected static ?string $navigationLabel = 'Distribution cart';
     protected static string $view = 'filament.pages.stock-distribute-cart';
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->user_type;
+    }
     public function mount(): void
     {
         $this->form->fill();
@@ -57,16 +55,40 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 Section::make()
                 ->schema([
                     Select::make('item_id')
-
+                    ->reactive()
                     ->label('Item')
                     ->options(Item::query()->pluck('item_name', 'id'))
                         ->searchable()
                         ->required(),
                     TextInput::make('quantity')
+                    ->reactive()
                     ->required()
+                    ->minValue(1)
+                    ->maxValue(function (Get $get) {
+                        $itemId = $get('item_id');
+                        if ($itemId) {
+                            $result=MainStock::where('item_id',$itemId)
+                            ->pluck('quantity','id')->first();
+                             return $result;
+                        }
+                    })
+                    ->required()
+                    ->integer()
+                    ->hint(function(Get $get){
+                        $itemId = $get('item_id');
+                        if ($itemId) {
+                            $result=MainStock::where('item_id',$itemId)
+
+                            ->pluck('quantity','id')->first();
+                            return 'qty available: '.$result;
+                        }
+                            return null;
+                    })
+                        ->hintColor('danger')
                     ->numeric(),
                     Hidden::make('user_id')
-                    ->default(auth()->user()->id)
+                    ->default(auth()->user()->id),
+
                 ])->columns(2)
 
             ])
@@ -99,7 +121,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 ->label('checkout cart')
                 ->color('warning')
                 ->extraAttributes([
-                    'class' => 'left',
+                    'class' => 'flex justify-start',
                 ])
 
                 ->requiresConfirmation()
