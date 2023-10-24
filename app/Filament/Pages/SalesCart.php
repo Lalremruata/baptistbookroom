@@ -100,9 +100,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
         return $table
             ->query(SalesCartItem::query())
             ->columns([
-                TextColumn::make('item_id'),
+                TextColumn::make('item.item_name'),
                 TextColumn::make('quantity'),
-                TextColumn::make('user_id'),
                 TextColumn::make('cost_price'),
                 TextColumn::make('selling_price'),
                 TextColumn::make('discount'),

@@ -99,7 +99,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
         return $table
             ->query(StockDistributeCart::query())
             ->columns([
-                TextColumn::make('item_id'),
+                TextColumn::make('item.item_name'),
                 TextColumn::make('quantity'),
                 TextColumn::make('user_id'),
             ])

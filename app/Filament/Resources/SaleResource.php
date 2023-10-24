@@ -83,7 +83,7 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('item.id')
+                Tables\Columns\TextColumn::make('item.item_name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sale_date')

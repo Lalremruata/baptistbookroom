@@ -15,9 +15,8 @@ class StockDistributeCart extends Model
         'user_id',
         'quantity'
     ];
-    public function items(): HasMany
-    {
-        return $this->hasMany(Item::class);
+    public function item(): BelongsTo{
+        return $this->belongsTo(Item::class);
     }
     public function users(): HasMany
     {
