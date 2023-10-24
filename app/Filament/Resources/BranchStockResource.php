@@ -10,6 +10,8 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -72,7 +74,7 @@ class BranchStockResource extends Resource
                     ->searchable(isIndividual: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('item.item_name')
-                    ->numeric()
+                    ->searchable(isIndividual: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
                     ->numeric()
@@ -84,20 +86,14 @@ class BranchStockResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->date()
                     ->sortable(),
             ])
             ->filters([
-                //
-            ])
-            ->actions([
-                // Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                // Tables\Actions\BulkActionGroup::make([
-                //     Tables\Actions\DeleteBulkAction::make(),
-                // ]),
-            ]);
+                SelectFilter::make('branch')
+                ->relationship('branch','branch_name')
+            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3);
+
     }
 
     public static function getRelations(): array

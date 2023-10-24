@@ -20,7 +20,10 @@ class BranchResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
     protected static ?string $navigationGroup = 'Settings';
 
-
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->user_type=='1';
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -55,8 +58,11 @@ class BranchResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ])
+            ])
+            ->emptyStateActions([
+                    Tables\Actions\CreateAction::make(),
+                ]);
     }
 
     public static function getRelations(): array

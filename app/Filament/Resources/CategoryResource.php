@@ -18,7 +18,10 @@ class CategoryResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-cube';
     protected static ?string $navigationGroup = 'Manage Items';
 
-
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->user_type=='1';
+    }
     public static function form(Form $form): Form
     {
         return $form

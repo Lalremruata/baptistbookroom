@@ -9,7 +9,6 @@ use Filament\Resources\Pages\ListRecords;
 class ListMainStocks extends ListRecords
 {
     protected static string $resource = MainStockResource::class;
-
     protected function getHeaderActions(): array
     {
         return [

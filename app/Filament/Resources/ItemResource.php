@@ -25,7 +25,10 @@ class ItemResource extends Resource
     protected static ?string $navigationGroup = 'Manage Items';
     protected static ?int $navigationSort = 3;
 
-
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->user_type=='1';
+    }
 
     public static function form(Form $form): Form
     {

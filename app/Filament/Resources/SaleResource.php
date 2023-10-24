@@ -6,10 +6,13 @@ use App\Filament\Resources\SaleResource\Pages;
 use App\Filament\Resources\SaleResource\RelationManagers;
 use App\Models\Sale;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -19,6 +22,20 @@ class SaleResource extends Resource
     protected static ?string $model = Sale::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+    public static function canCreate(): bool
+    {
+        return 0;
+    }
+    public static function getEloquentQuery(): Builder
+    {
+        if(auth()->user()->user_type == '1') {
+            return parent::getEloquentQuery()->withoutGlobalScopes();
+        }
+        else {
+            return parent::getEloquentQuery()->where('branch_id', auth()->user()->branch_id);
+
+        }
+    }
 
     public static function form(Form $form): Form
     {
@@ -51,15 +68,7 @@ class SaleResource extends Resource
                         Forms\Components\TextInput::make('discount')
                             ->numeric(),
                     ])->columns(2)
-                ])->columnSpan(['lg' => 2]),
-                Forms\Components\Group::make()
-                    ->schema([
-                        Section::make()
-                        ->schema([
-                            Forms\Components\Toggle::make('return'),
-                            Forms\Components\DatePicker::make('return_date'),
-                        ])
-                    ])->columnSpan(['lg' => 1]),
+                ])->columnSpan(['lg' => 3]),
 
             ])->columns(3);
     }
@@ -68,7 +77,7 @@ class SaleResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('branch.id')
+                Tables\Columns\TextColumn::make('branch.branch_name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('user.name')
@@ -92,23 +101,28 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('discount')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('return')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('return_date')
+                Tables\Columns\TextColumn::make('created_at')
+                ->label('date')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                Filter::make('created_at')
+                ->form([
+                    DatePicker::make('sales_date'),
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['sales_date'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '=', $date),
+                        );
+                })
+            ], layout: FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

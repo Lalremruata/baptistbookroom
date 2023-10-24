@@ -132,7 +132,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         $mainstock->quantity -= $item->quantity;
                         $mainstock->update();
 
-                        $branchstock = BranchStock::where('branch_id', $item->branch_id)
+                        $branchstock = BranchStock::where('branch_id', $data['branch_id'])
                         ->where('item_id', $item->item_id)
                         ->first();
                         if ($branchstock) {

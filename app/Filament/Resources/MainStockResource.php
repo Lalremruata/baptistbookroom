@@ -22,8 +22,6 @@ class MainStockResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
     protected static ?string $navigationGroup = 'Main Stocks';
 
-
-
     public static function form(Form $form): Form
     {
         return $form

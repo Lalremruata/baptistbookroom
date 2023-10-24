@@ -137,6 +137,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                             'sale_date' => $item->created_at,
                             'cost_price' => $item->cost_price,
                             'selling_price' => $item->selling_price,
+                            'quantity' =>$item->quantity,
                             'discount' => $item->discount,
                         ];
                         $item->delete();

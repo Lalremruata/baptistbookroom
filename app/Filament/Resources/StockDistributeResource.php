@@ -34,6 +34,10 @@ class StockDistributeResource extends Resource
         return 0;
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->user_type=='1';
+    }
 
     // public static function form(Form $form): Form
     // {
@@ -99,7 +103,7 @@ class StockDistributeResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                      ->label('Transfer date')
-                    ->dateTime()
+                    ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
@@ -114,12 +118,11 @@ class StockDistributeResource extends Resource
                     if (! $data['date']) {
                         return null;
                     }
-
-            return 'Created at ' . Carbon::parse($data['date'])->toFormattedDateString();
-    }),
+                return 'Created at ' . Carbon::parse($data['date'])->toFormattedDateString();
+                }),
                 SelectFilter::make('branch')
-                ->relationship('branch','branch_name')
-            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)->filtersFormWidth('4xl');;
+                    ->relationship('branch','branch_name')
+                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)->filtersFormWidth('4xl');
     }
 
     public static function getRelations(): array

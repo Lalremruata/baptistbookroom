@@ -57,7 +57,22 @@ class PermissionsTableSeeder extends Seeder
                 'title' => 'user_delete',
             ],
             [
-                'title' => 'user_access',
+                'title' => 'main_stock_access',
+            ],
+            [
+                'title' => 'main_stock_create',
+            ],
+            [
+                'title' => 'main_stock_edit',
+            ],
+            [
+                'title' => 'main_stock_show',
+            ],
+            [
+                'title' => 'main_stock_delete',
+            ],
+            [
+                'title' => 'main_stock_access',
             ],
         ];
         Permission::insert($permissions);
