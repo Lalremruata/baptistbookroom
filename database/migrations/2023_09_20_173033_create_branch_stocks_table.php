@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('quantity');
             $table->unsignedInteger('cost_price');
+            $table->unsignedInteger('mrp');
             $table->unsignedInteger('discount');
             $table->foreignId('branch_id')->constrained();
             $table->foreignId('item_id')->constrained();

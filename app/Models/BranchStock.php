@@ -12,6 +12,7 @@ class BranchStock extends Model
     protected $fillable = [
         'quantity',
         'cost_price',
+        'mrp',
         'discount',
         'branch_id',
         'item_id',

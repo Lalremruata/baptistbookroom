@@ -78,15 +78,15 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     })
                         ->hintColor('danger')
                         ->required(),
-                TextInput::make('cost_price')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('selling_price')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('discount')
-                    ->required()
-                    ->numeric(),
+                // TextInput::make('cost_price')
+                //     ->required()
+                //     ->numeric(),
+                // TextInput::make('selling_price')
+                //     ->required()
+                //     ->numeric(),
+                // TextInput::make('discount')
+                //     ->required()
+                //     ->numeric(),
                 Hidden::make('user_id')
                     ->default(auth()->user()->id)
                     ]),
@@ -133,9 +133,9 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                             'branch_id' => $item->branch_id,
                             'user_id' => auth()->user()->id,
                             'item_id' => $item->item_id,
-                            'sale_date' => $item->created_at,
-                            'cost_price' => $item->cost_price,
-                            'selling_price' => $item->selling_price,
+                            'sale_date' => now(),
+                            'cost_price' => $branchStock['cost_price'],
+                            'selling_price' => $branchStock['se'],
                             'quantity' =>$item->quantity,
                             'discount' => $item->discount,
                         ];
