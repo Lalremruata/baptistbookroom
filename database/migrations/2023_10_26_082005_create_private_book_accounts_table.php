@@ -11,14 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('branch_stocks', function (Blueprint $table) {
+        Schema::create('private_book_accounts', function (Blueprint $table) {
             $table->id();
-            $table->integer('quantity');
-            $table->unsignedInteger('cost_price');
-            $table->unsignedInteger('mrp');
-            $table->unsignedInteger('batch');
-            $table->foreignId('branch_id')->constrained();
-            $table->foreignId('item_id')->constrained();
             $table->timestamps();
         });
     }
@@ -28,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('branch_stocks');
+        Schema::dropIfExists('private_book_accounts');
     }
 };

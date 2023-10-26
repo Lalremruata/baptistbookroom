@@ -72,7 +72,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             // ->sidebarCollapsibleOnDesktop()
             ->topNavigation()
-            ->spa()
+            // ->spa()
             ->navigationGroups([
                 NavigationGroup::make()
                      ->label('Main Stocks'),
