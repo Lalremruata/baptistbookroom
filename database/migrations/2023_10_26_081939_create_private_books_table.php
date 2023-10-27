@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('private_books', function (Blueprint $table) {
             $table->id();
+            $table->string('receive_from');
+            $table->string('author');
+            $table->string('file_no');
+            $table->unsignedInteger('quantity');
+            $table->unsignedInteger('quantity_return');
             $table->timestamps();
         });
     }

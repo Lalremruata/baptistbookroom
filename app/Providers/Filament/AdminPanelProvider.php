@@ -32,7 +32,6 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(Login::class)
-            ->passwordReset()
             ->colors([
                 'danger' => Color::Red,
                 'gray' => Color::Slate,
