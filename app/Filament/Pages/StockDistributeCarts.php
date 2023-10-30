@@ -57,17 +57,17 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->schema([
                 Section::make()
                 ->schema([
-                    Select::make('item_id')
+                    Select::make('main_stock_id')
                         ->reactive()
                         ->label('Item')
-                        ->options(MainStock::query()->pluck('item.item_name', 'id'))
+                        ->options(MainStock::with('item')->get()->pluck('item.item_name', 'id')->toArray())
                         ->required(),
                     TextInput::make('quantity')
                     ->reactive()
                     ->required()
                     ->minValue(1)
                     ->maxValue(function (Get $get) {
-                        $itemId = $get('item_id');
+                        $itemId = $get('main_stock_id');
                         if ($itemId) {
                             $result=MainStock::where('item_id',$itemId)
                             ->pluck('quantity','id')->first();
@@ -77,7 +77,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                     ->required()
                     ->integer()
                     ->hint(function(Get $get){
-                        $itemId = $get('item_id');
+                        $itemId = $get('main_stock_id');
                         if ($itemId) {
                             $result=MainStock::where('item_id',$itemId)
 
@@ -162,7 +162,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                     Notification::make()
                     ->success()
                     ->title('Item distributed')
-                    ->color('success') 
+                    ->color('success')
                     ->send();
 
                 })
@@ -184,7 +184,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
         try {
             $data = $this->form->getState();
             // dd(auth()->user()->id);
-            $cartItem=StockDistributeCart::where('item_id',$data['item_id'])
+            $cartItem=StockDistributeCart::where('main_stock_id',$data['main_stock_id'])
            ->first();
             if($cartItem){
                 $cartItem->quantity += $data['quantity'];
@@ -197,7 +197,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->success()
             ->title('Item added')
             ->body('The item has been added to cart successfully.')
-            ->color('success') 
+            ->color('success')
             ->send();
             $this->form->fill();
             // auth()->cartitem->save($data);

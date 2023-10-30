@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('return_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sales_id')->constrained();
+            $table->foreignId('branch_stock_id')->constrained();
+            $table->foreignId('branch_id')->constrained();
             $table->foreignId('user_id')->constrained();
             $table->integer('quantity_returned')->nullable();
-            $table->string('return_note')->nullable();
             $table->date('return_date');
+            $table->boolean('is_approved')->default(false);
+            $table->string('return_note')->nullable();
             $table->timestamps();
         });
     }

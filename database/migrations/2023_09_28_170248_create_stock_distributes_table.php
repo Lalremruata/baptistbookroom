@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('stock_distributes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained();
+            $table->foreignId('main_stock_id')->constrained();
             $table->foreignId('branch_id')->constrained();
             $table->integer('quantity');
+            $table->unsignedInteger('cost_price');
+            $table->unsignedInteger('mrp');
+            $table->string('batch');
             $table->timestamps();
         });
     }
