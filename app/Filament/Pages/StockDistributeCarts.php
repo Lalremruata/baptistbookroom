@@ -12,6 +12,7 @@ use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -22,10 +23,12 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Support\Exceptions\Halt;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+
 
 class StockDistributeCarts extends Page implements HasForms, HasTable, HasActions
 {
@@ -55,10 +58,9 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 Section::make()
                 ->schema([
                     Select::make('item_id')
-                    ->reactive()
-                    ->label('Item')
-                    ->options(Item::query()->pluck('item_name', 'id'))
-                        ->searchable()
+                        ->reactive()
+                        ->label('Item')
+                        ->options(MainStock::query()->pluck('item.item_name', 'id'))
                         ->required(),
                     TextInput::make('quantity')
                     ->reactive()
@@ -101,13 +103,13 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->columns([
                 TextColumn::make('item.item_name'),
                 TextColumn::make('quantity'),
-                TextColumn::make('user_id'),
+                TextColumn::make('mainStock.mrp'),
             ])
             ->actions([
                 DeleteAction::make()
             ])
             ->bulkActions([
-            // ...
+                    DeleteBulkAction::make(),
             ])
             ->headerActions([
                 \Filament\Tables\Actions\Action::make('checkout cart')
@@ -157,6 +159,11 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
 
                         $item->delete();
                     }
+                    Notification::make()
+                    ->success()
+                    ->title('Item distributed')
+                    ->color('success') 
+                    ->send();
 
                 })
                 ->modalIcon('heroicon-o-check-circle')
@@ -177,7 +184,21 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
         try {
             $data = $this->form->getState();
             // dd(auth()->user()->id);
-            StockDistributeCart::create($data);
+            $cartItem=StockDistributeCart::where('item_id',$data['item_id'])
+           ->first();
+            if($cartItem){
+                $cartItem->quantity += $data['quantity'];
+                $cartItem->update();
+            }
+            else{
+                StockDistributeCart::create($data);
+            }
+            Notification::make()
+            ->success()
+            ->title('Item added')
+            ->body('The item has been added to cart successfully.')
+            ->color('success') 
+            ->send();
             $this->form->fill();
             // auth()->cartitem->save($data);
         } catch (Halt $exception) {

@@ -23,6 +23,6 @@ class MainStock extends Model
     }
     public function stockDistribute()
     {
-        return $this->belongsToMany(StockDistribute::class);
+        return $this->hasMany(StockDistribute::class);
     }
 }

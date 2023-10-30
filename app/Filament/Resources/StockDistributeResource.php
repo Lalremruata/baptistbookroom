@@ -3,25 +3,19 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\StockDistributeResource\Pages;
-use App\Filament\Resources\StockTransferResource\RelationManagers;
-use App\Models\Item;
-use App\Models\MainStock;
 use App\Models\StockDistribute;
-use Filament\Forms;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Enums\FiltersLayout;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Carbon;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Filament\Tables\Actions\HeaderActionsPosition;
 
 class StockDistributeResource extends Resource
 {
@@ -122,7 +116,13 @@ class StockDistributeResource extends Resource
                 }),
                 SelectFilter::make('branch')
                     ->relationship('branch','branch_name')
-                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)->filtersFormWidth('4xl');
+                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)->filtersFormWidth('4xl')
+                ->headerActions([
+                    ExportAction::make()->exports([
+                        ExcelExport::make()->fromTable(),
+                        // ExcelExport::make('form')->fromForm(),
+                    ])
+                ], position: HeaderActionsPosition::Bottom);
     }
 
     public static function getRelations(): array

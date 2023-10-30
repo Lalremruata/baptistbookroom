@@ -32,6 +32,13 @@ class Login extends BaseAuth implements HasForms
             ->autocomplete()
             ->autofocus();
     }
+    protected function getPasswordFormComponent(): Component
+    {
+        return TextInput::make('password')
+            ->label('password')
+            ->required()
+            ->password();
+    }
     protected function getCredentialsFromFormData(array $data): array
     {
         $login_type = filter_var($data['login'], FILTER_VALIDATE_EMAIL ) ? 'email' : 'name';

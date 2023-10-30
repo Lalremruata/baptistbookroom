@@ -11,9 +11,13 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class MainStockResource extends Resource
 {
@@ -59,14 +63,14 @@ class MainStockResource extends Resource
                     ->searchable(isIndividual: true)
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('quantity')
-                    ->numeric()
+                Tables\Columns\TextInputColumn::make('quantity')
+                    ->rules(['required', 'numeric'])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('cost_price')
-                    ->numeric()
+                Tables\Columns\TextInputColumn::make('cost_price')
+                    ->rules(['required', 'numeric'])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('mrp')
-                    ->numeric()
+                Tables\Columns\TextInputColumn::make('mrp')
+                    ->rules(['required', 'numeric'])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('batch')
                     ->numeric()
@@ -90,7 +94,20 @@ class MainStockResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+                // ExportBulkAction::make()
+            ])
+            ->headerActions([
+                ExportAction::make()->exports([
+                    ExcelExport::make()->fromTable(),
+                    // ExcelExport::make('form')->fromForm(),
+                ])
+            ], position: HeaderActionsPosition::Bottom)
+            ->defaultGroup('item_id')
+            ->groupRecordsTriggerAction(
+                fn (Action $action) => $action
+                    ->button()
+                    ->label('Group records'),
+            );
     }
 
     public static function getRelations(): array

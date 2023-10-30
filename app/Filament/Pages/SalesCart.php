@@ -35,6 +35,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
     public ?array $data = [];
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
     protected static ?string $navigationLabel = 'Sales cart';
+    protected static ?string $navigationGroup = 'Manage Sales';
+
     protected static string $view = 'filament.pages.sales-cart';
     public function mount(): void
     {
@@ -78,20 +80,29 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     })
                         ->hintColor('danger')
                         ->required(),
-                // TextInput::make('cost_price')
-                //     ->required()
-                //     ->numeric(),
-                // TextInput::make('selling_price')
-                //     ->required()
-                //     ->numeric(),
-                // TextInput::make('discount')
-                //     ->required()
-                //     ->numeric(),
+                TextInput::make('cost_price')
+                ->reactive()
+                    ->required()
+                    ->numeric(),
+                TextInput::make('selling_price')
+                    ->required()
+                    ->numeric(),
+                TextInput::make('discount')
+                    ->required()
+                    ->numeric(),
                 Hidden::make('user_id')
                     ->default(auth()->user()->id)
                     ]),
                 Hidden::make('branch_id')
-                    ->default(auth()->user()->branch_id)
+                    ->default(auth()->user()->branch_id),
+                // Hidden::make('cost_price')
+                //     ->default(function(Get $get) {
+                //         $itemId = $get('item_id');
+                //         $result=BranchStock::where('item_id',$itemId)
+                //         ->where('branch_id',auth()->user()->branch_id)
+                //         ->pluck('cost_price')->first();
+                //         return $result;
+                //     } )
 
         ])->statePath('data');
     }
@@ -167,4 +178,5 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             return;
         }
     }
+    
 }

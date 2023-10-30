@@ -18,6 +18,10 @@ class StockDistributeCart extends Model
     public function item(): BelongsTo{
         return $this->belongsTo(Item::class);
     }
+    public function mainStock(): BelongsTo
+    {
+        return $this->belongsTo(MainStock::class);
+    }
     public function users(): HasMany
     {
         return $this->hasMany(User::class);

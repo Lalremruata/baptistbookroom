@@ -14,7 +14,10 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Filament\Tables\Actions\HeaderActionsPosition;
+
 
 class BranchStockResource extends Resource
 {
@@ -92,7 +95,13 @@ class BranchStockResource extends Resource
             ->filters([
                 SelectFilter::make('branch')
                 ->relationship('branch','branch_name')
-            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3);
+            ])->filtersFormColumns(3)
+            ->headerActions([
+                ExportAction::make()->exports([
+                    ExcelExport::make()->fromTable(),
+                    // ExcelExport::make('form')->fromForm(),
+                ])
+            ], position: HeaderActionsPosition::Bottom);;
 
     }
 
