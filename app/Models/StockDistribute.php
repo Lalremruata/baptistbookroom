@@ -10,11 +10,15 @@ class StockDistribute extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'item_id','branch_id', 'quantity'
+        'main_stock_id','branch_id', 'quantity','cost_price','mrp','batch',
     ];
     public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+    public function mainStock()
+    {
+        return $this->belongsTo(MainStock::class);
     }
 
     // public function stockTransferMainStock(): HasMany

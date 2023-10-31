@@ -155,7 +155,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 })
                 ->modalIcon('heroicon-o-check-circle')
                 ->modalIconColor('danger')
-            ]);
+            ])
+            ->paginated([25, 50, 100, 'all']);
 
     }
     protected function getFormActions(): array
@@ -178,5 +179,5 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             return;
         }
     }
-    
+
 }

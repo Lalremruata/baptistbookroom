@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedInteger('mrp');
             $table->unsignedInteger('batch');
             $table->foreignId('branch_id')->constrained();
-            $table->foreignId('item_id')->constrained();
+            $table->foreignId('main_stock_id')->constrained();
             $table->timestamps();
         });
     }

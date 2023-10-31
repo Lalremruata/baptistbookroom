@@ -24,10 +24,13 @@ use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Support\Exceptions\Halt;
 use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Query\Builder;
 
 
 class StockDistributeCarts extends Page implements HasForms, HasTable, HasActions
@@ -58,10 +61,13 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 Section::make()
                 ->schema([
                     Select::make('main_stock_id')
-                        ->reactive()
+                        // ->reactive()
+                        ->searchable()
                         ->label('Item')
                         ->options(MainStock::with('item')->get()->pluck('item.item_name', 'id')->toArray())
-                        ->required(),
+                        ->required()
+                        ->autofocus()
+                        ->live(),
                     TextInput::make('quantity')
                     ->reactive()
                     ->required()
@@ -101,10 +107,16 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
         return $table
             ->query(StockDistributeCart::query())
             ->columns([
-                TextColumn::make('item.item_name'),
+                TextColumn::make('mainStock.item.item_name'),
                 TextColumn::make('quantity'),
-                TextColumn::make('mainStock.mrp'),
+                TextColumn::make('cost_price')
+                ->label('Cost Price'),
+                TextColumn::make('mrp')
+                ->summarize(Summarizer::make()
+                ->label('Total')
+                ->using(fn (Builder $query): string => $query->sum('mrp'))),
             ])
+
             ->actions([
                 DeleteAction::make()
             ])
@@ -130,12 +142,12 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 ->action(function (array $data) {
                     $cartItems = StockDistributeCart::all();
                     foreach ($cartItems as $item) {
-                        $mainstock = MainStock::where('item_id', $item->item_id)->first();
+                        $mainstock = MainStock::where('id', $item->main_stock_id)->first();
                         $mainstock->quantity -= $item->quantity;
                         $mainstock->update();
 
                         $branchstock = BranchStock::where('branch_id', $data['branch_id'])
-                        ->where('item_id', $item->item_id)
+                        ->where('main_stock_id', $item->branch_stock_id)
                         ->first();
                         if ($branchstock) {
                             $branchstock->quantity += $item->quantity;
@@ -143,7 +155,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         }
                         else{
                             $branchstock = new Branchstock();
-                            $branchstock->item_id = $item->item_id;
+                            $branchstock->main_stock_id = $item->main_stock_id;
                             $branchstock->quantity = $item->quantity;
                             $branchstock->cost_price = $mainstock->cost_price;
                             $branchstock->branch_id = $data['branch_id'];
@@ -152,8 +164,11 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                             $branchstock->save();
                         }
                         $stockdistribute = new StockDistribute();
-                        $stockdistribute->item_id = $item->item_id;
+                        $stockdistribute->main_stock_id = $item->main_stock_id;
                         $stockdistribute->quantity = $item->quantity;
+                        $stockdistribute->cost_price = $item->cost_price;
+                        $stockdistribute->mrp = $item->mrp;
+                        $stockdistribute->batch = $item->batch;
                         $stockdistribute->branch_id = $data['branch_id'];
                         $stockdistribute->save();
 
@@ -191,6 +206,13 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 $cartItem->update();
             }
             else{
+                $mainStock = MainStock::where('id', $data['main_stock_id'])->first();
+                $newData = [
+                    'cost_price'=> $mainStock->cost_price,
+                    'mrp'=> $mainStock->mrp,
+                    'batch'=> $mainStock->cost_price,
+                ];
+                $data += $newData;
                 StockDistributeCart::create($data);
             }
             Notification::make()

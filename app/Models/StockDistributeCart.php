@@ -11,9 +11,12 @@ class StockDistributeCart extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'item_id',
+        'main_stock_id',
         'user_id',
-        'quantity'
+        'quantity',
+        'cost_price',
+        'mrp',
+        'batch',
     ];
     public function item(): BelongsTo{
         return $this->belongsTo(Item::class);

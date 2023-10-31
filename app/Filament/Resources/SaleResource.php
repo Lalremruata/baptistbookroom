@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
@@ -117,16 +118,24 @@ class SaleResource extends Resource
             ->filters([
                 Filter::make('created_at')
                 ->form([
-                    DatePicker::make('sales_date'),
-                ])
+                    DatePicker::make('from'),
+                    DatePicker::make('to'),
+                ])->columns(2)
                 ->query(function (Builder $query, array $data): Builder {
                     return $query
                         ->when(
-                            $data['sales_date'],
-                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '=', $date),
+                            $data['from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                        )
+                        ->when(
+                            $data['to'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                         );
-                })
-            ], layout: FiltersLayout::AboveContent)
+                    }),
+                    SelectFilter::make('branch')
+                        ->relationship('branch','branch_name')
+                        ->hidden(! auth()->user()->user_type=='1')
+                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

@@ -6,11 +6,13 @@ use App\Filament\Resources\BranchStockResource\Pages;
 use App\Filament\Resources\BranchStockResource\RelationManagers;
 use App\Models\BranchStock;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -76,7 +78,7 @@ class BranchStockResource extends Resource
                 Tables\Columns\TextColumn::make('branch.branch_name')
                     ->searchable(isIndividual: true)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('item.item_name')
+                Tables\Columns\TextColumn::make('mainStock.item.item_name')
                     ->searchable(isIndividual: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
@@ -85,23 +87,38 @@ class BranchStockResource extends Resource
                 Tables\Columns\TextColumn::make('cost_price')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('discount')
+                Tables\Columns\TextColumn::make('mrp')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->date()
                     ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('branch')
-                ->relationship('branch','branch_name')
-            ])->filtersFormColumns(3)
+                Filter::make('created_at')
+                ->form([
+                    DatePicker::make('from'),
+                    DatePicker::make('to'),
+                ])->columns(2)
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                        )
+                        ->when(
+                            $data['to'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                        );
+                    }),
+                    SelectFilter::make('branch')
+                        ->relationship('branch','branch_name')
+                        ->hidden(! auth()->user()->user_type=='1')
+                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->headerActions([
                 ExportAction::make()->exports([
                     ExcelExport::make()->fromTable(),
                     // ExcelExport::make('form')->fromForm(),
-                ])
-            ], position: HeaderActionsPosition::Bottom);;
+                    ])
+                ], position: HeaderActionsPosition::Bottom)
+            ->paginated([25, 50, 100, 'all']);
 
     }
 

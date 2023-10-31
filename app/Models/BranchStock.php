@@ -15,14 +15,14 @@ class BranchStock extends Model
         'mrp',
         'discount',
         'branch_id',
-        'item_id',
+        'main_stock_id',
     ];
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
     }
-    public function item(): BelongsTo
+    public function mainStock(): BelongsTo
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsTo(MainStock::class);
     }
 }

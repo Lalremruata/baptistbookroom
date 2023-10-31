@@ -12,6 +12,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Enums\FiltersLayout;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
@@ -83,7 +84,7 @@ class StockDistributeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('item.item_name')
+                Tables\Columns\TextColumn::make('mainStock.item.item_name')
                     ->searchable()
                     ->numeric()
                     ->sortable(),
@@ -92,9 +93,16 @@ class StockDistributeResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
-                ->label('quantities')
+                    ->label('quantities')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('cost_price')
+                    ->numeric()
+                    ->money('inr'),
+                Tables\Columns\TextColumn::make('mrp')
+                    ->numeric()
+                    ->money('inr'),
+                Tables\Columns\TextColumn::make('batch'),
                 Tables\Columns\TextColumn::make('created_at')
                      ->label('Transfer date')
                     ->date()
@@ -106,23 +114,30 @@ class StockDistributeResource extends Resource
             ])
             ->filters([
                 Filter::make('created_at')
-                ->form([DatePicker::make('date')])
-                // ...
-                ->indicateUsing(function (array $data): ?string {
-                    if (! $data['date']) {
-                        return null;
-                    }
-                return 'Created at ' . Carbon::parse($data['date'])->toFormattedDateString();
+                ->form([
+                    DatePicker::make('from'),
+                    DatePicker::make('to'),
+                ])->columns(2)
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                        )
+                        ->when(
+                            $data['to'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                        );
                 }),
                 SelectFilter::make('branch')
                     ->relationship('branch','branch_name')
-                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)->filtersFormWidth('4xl')
+                    ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
                 ->headerActions([
                     ExportAction::make()->exports([
                         ExcelExport::make()->fromTable(),
-                        // ExcelExport::make('form')->fromForm(),
-                    ])
-                ], position: HeaderActionsPosition::Bottom);
+                        ])
+                    ], position: HeaderActionsPosition::Bottom)
+                ->paginated([25, 50, 100, 'all']);
     }
 
     public static function getRelations(): array
