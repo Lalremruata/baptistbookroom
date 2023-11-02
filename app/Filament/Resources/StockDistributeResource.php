@@ -103,6 +103,9 @@ class StockDistributeResource extends Resource
                     ->numeric()
                     ->money('inr'),
                 Tables\Columns\TextColumn::make('batch'),
+                Tables\Columns\TextColumn::make('mainStock.barcode')
+                    ->label('Bar Code')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                      ->label('Transfer date')
                     ->date()

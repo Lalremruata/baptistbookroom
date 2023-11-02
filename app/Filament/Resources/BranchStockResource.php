@@ -90,6 +90,11 @@ class BranchStockResource extends Resource
                 Tables\Columns\TextColumn::make('mrp')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('mainStock.barcode')
+                    ->label('Bar code')
+                    ->searchable()
+                    ->numeric()
+                    ->sortable(),
             ])
             ->filters([
                 Filter::make('created_at')

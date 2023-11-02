@@ -60,20 +60,22 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->schema([
                 Section::make()
                 ->schema([
-                    Select::make('main_stock_id')
-                        // ->reactive()
+                    Select::make('item_id')
+                        ->reactive()
                         ->searchable()
                         ->label('Item')
-                        ->options(MainStock::with('item')->get()->pluck('item.item_name', 'id')->toArray())
-                        ->required()
-                        ->autofocus()
-                        ->live(),
+                        ->options(MainStock::with('item')->get()->pluck('item.item_name', 'item_id')->toArray())
+                        ->afterStateUpdated(fn(callable $set,Get $get)=>$set('main_stock_id',MainStock::query()
+                            ->where('item_id', $get('item_id'))->pluck('id')->first()))
+                        ->required(false)
+                        ->dehydrated(),
                     TextInput::make('quantity')
                     ->reactive()
                     ->required()
                     ->minValue(1)
                     ->maxValue(function (Get $get) {
-                        $itemId = $get('main_stock_id');
+                        $itemId = $get('item_id');
+                        // dd($itemId);
                         if ($itemId) {
                             $result=MainStock::where('item_id',$itemId)
                             ->pluck('quantity','id')->first();
@@ -83,10 +85,9 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                     ->required()
                     ->integer()
                     ->hint(function(Get $get){
-                        $itemId = $get('main_stock_id');
+                        $itemId = $get('item_id');
                         if ($itemId) {
                             $result=MainStock::where('item_id',$itemId)
-
                             ->pluck('quantity','id')->first();
                             return 'qty available: '.$result;
                         }
@@ -96,6 +97,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                     ->numeric(),
                     Hidden::make('user_id')
                     ->default(auth()->user()->id),
+                    Hidden::make('main_stock_id'),
 
                 ])->columns(2)
 
@@ -147,7 +149,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         $mainstock->update();
 
                         $branchstock = BranchStock::where('branch_id', $data['branch_id'])
-                        ->where('main_stock_id', $item->branch_stock_id)
+                        ->where('main_stock_id', $item->main_stock_id)
                         ->first();
                         if ($branchstock) {
                             $branchstock->quantity += $item->quantity;
@@ -198,7 +200,6 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     {
         try {
             $data = $this->form->getState();
-            // dd(auth()->user()->id);
             $cartItem=StockDistributeCart::where('main_stock_id',$data['main_stock_id'])
            ->first();
             if($cartItem){
@@ -206,11 +207,11 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 $cartItem->update();
             }
             else{
-                $mainStock = MainStock::where('id', $data['main_stock_id'])->first();
+                $mainStock = MainStock::where('item_id', $data['item_id'])->first();
                 $newData = [
                     'cost_price'=> $mainStock->cost_price,
                     'mrp'=> $mainStock->mrp,
-                    'batch'=> $mainStock->cost_price,
+                    'batch'=> $mainStock->batch,
                 ];
                 $data += $newData;
                 StockDistributeCart::create($data);

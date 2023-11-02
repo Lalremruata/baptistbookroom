@@ -10,7 +10,7 @@ class Sale extends Model
 {
     use HasFactory;
     protected $fillable = [
-        "branch_id",
+        "branch_stock_id",
         "user_id",
         "item_id",
         "sale_date",
@@ -25,7 +25,7 @@ class Sale extends Model
     public function branch(): BelongsTo{
         return $this->belongsTo(Branch::class);
     }
-    public function item(): BelongsTo{
-        return $this->belongsTo(Item::class);
+    public function branchStock(): BelongsTo{
+        return $this->belongsTo(BranchStock::class);
     }
 }

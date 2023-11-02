@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained();
             $table->foreignId('sub_category_id')->references('id')->on('sub_categories');
             $table->string('item_name');
-            $table->string('barcode');
+            $table->string('barcode')->nullable();
             $table->string('description')->nullable();
             $table->timestamps();
         });

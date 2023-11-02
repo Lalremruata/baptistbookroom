@@ -9,6 +9,7 @@ use App\Models\MainStock;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
@@ -35,6 +36,9 @@ class MainStockResource extends Resource
                     Forms\Components\Select::make('item_id')
                     ->label('Item')
                         ->options(Item::query()->pluck('item_name', 'id'))
+                        ->afterStateUpdated(fn(callable $set,Get $get)=>$set('barcode',Item::query()
+                            ->where('id', $get('item_id'))->pluck('barcode')->first()))
+                        ->reactive()
                         ->searchable()
                         ->required(),
                     Forms\Components\TextInput::make('quantity')
@@ -49,6 +53,11 @@ class MainStockResource extends Resource
                     Forms\Components\TextInput::make('batch')
                         ->required()
                         ->numeric(),
+                    Forms\Components\TextInput::make('barcode')
+                        ->required()
+                        ->disabled()
+                        ->dehydrated()
+
                 ])->compact()
                 ->columns(2)
 
@@ -60,7 +69,7 @@ class MainStockResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('item.item_name')
-                    ->searchable(isIndividual: true)
+                    ->searchable()
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextInputColumn::make('quantity')
@@ -74,6 +83,9 @@ class MainStockResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('batch')
                     ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('barcode')
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedInteger('mrp');
             $table->string('batch');
             $table->integer('quantity');
+            $table->string('barcode')->nullable();
             $table->timestamps();
         });
     }

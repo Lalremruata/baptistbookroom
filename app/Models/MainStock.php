@@ -16,6 +16,7 @@ class MainStock extends Model
         'mrp',
         'batch',
         'quantity',
+        'barcode',
     ];
     public function item(): BelongsTo
     {

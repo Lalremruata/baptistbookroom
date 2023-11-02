@@ -11,13 +11,14 @@ class SalesCartItem extends Model
     use HasFactory;
     protected $fillable = [
         "branch_id",
+        "user_id",
         "item_id",
         "quantity",
         "cost_price",
         "selling_price",
         "discount",
     ];
-    public function item(): BelongsTo{
-        return $this->belongsTo(Item::class);
+    public function branchStock(): BelongsTo{
+        return $this->belongsTo(BranchStock::class);
     }
 }

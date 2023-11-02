@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\BranchStock;
 use App\Models\Item;
+use App\Models\MainStock;
 use App\Models\Sale;
 use Filament\Actions\Action;
 use App\Models\SalesCartItem;
@@ -24,6 +25,7 @@ use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class SalesCart extends Page implements HasForms, HasTable, HasActions
 {
@@ -42,80 +44,95 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
     {
         $this->form->fill();
     }
+    public static function getEloquentQuery(): Builder
+    {
+        if(auth()->user()->roles->contains('title', 'Admin')) {
+            return parent::getEloquentQuery()->withoutGlobalScopes();
+        }
+        else {
+            return parent::getEloquentQuery()->where('branch_id', auth()->user()->branch_id);
+
+        }
+    }
     public function form(Form $form): Form
     {
         return $form
         ->schema([
             Section::make()
             ->schema([
-                Select::make('item_id')
+                Select::make('item')
                 ->reactive()
                 ->label('Item')
-                ->options(Item::query()->pluck('item_name', 'id'))
+                ->options(function(){
+                    if(auth()->user()->roles->contains('title', 'Admin'))
+                    {
+                        return MainStock::with('item')->get()->pluck('item.item_name', 'id')->toArray();
+                    }
+                    else{
+                        return BranchStock::with('mainStock')->get()->pluck('mainStock.item.item_name', 'id')->toArray();
+                    }
+                })
                 ->searchable()
+                ->dehydrated()
                 ->required(),
                 TextInput::make('quantity')
                     ->reactive()
                     ->minValue(1)
                     ->maxValue(function (Get $get) {
-                        $itemId = $get('item_id');
-                        if ($itemId) {
-                            $result=BranchStock::where('item_id',$itemId)
-                            ->where('branch_id',auth()->user()->branch_id)
-                            ->pluck('quantity','id')->first();
-                             return $result;
+                        $item = $get('item');
+                        if ($item) {
+                            if(auth()->user()->roles->contains('title', 'Admin')){
+                                $result=MainStock::where('item_id',$item)
+                                ->pluck('quantity','id')->first();
+                                 return $result;
+                            }
+                            else{
+                                $result=BranchStock::where('main_stock_id',$item)
+                                ->where('branch_id',auth()->user()->branch_id)
+                                ->pluck('quantity','id')->first();
+                                 return $result;
+                            }
+
                         }
                     })
                     ->required()
                     ->integer()
                     ->hint(function(Get $get){
-                        $itemId = $get('item_id');
-                        if ($itemId) {
-                            $result=BranchStock::where('item_id',$itemId)
-                            ->where('branch_id',auth()->user()->branch_id)
-                            ->pluck('quantity','id')->first();
-                            return 'quantity available: '.$result;
+                        $item = $get('item');
+                        if ($item) {
+                            if(auth()->user()->roles->contains('title', 'Admin')){
+                                $result=MainStock::where('item_id',$item)
+                                ->pluck('quantity','id')->first();
+                                 return 'quantity available: '.$result;
+                            }
+                            else{
+                                $result=BranchStock::where('main_stock_id',$item)
+                                ->where('branch_id',auth()->user()->branch_id)
+                                ->pluck('quantity','id')->first();
+                                 return 'quantity available: '.$result;
+                            }
                         }
                             return null;
                     })
                         ->hintColor('danger')
                         ->required(),
-                TextInput::make('cost_price')
-                ->reactive()
-                    ->required()
-                    ->numeric(),
-                TextInput::make('selling_price')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('discount')
-                    ->required()
-                    ->numeric(),
-                Hidden::make('user_id')
-                    ->default(auth()->user()->id)
-                    ]),
                 Hidden::make('branch_id')
                     ->default(auth()->user()->branch_id),
-                // Hidden::make('cost_price')
-                //     ->default(function(Get $get) {
-                //         $itemId = $get('item_id');
-                //         $result=BranchStock::where('item_id',$itemId)
-                //         ->where('branch_id',auth()->user()->branch_id)
-                //         ->pluck('cost_price')->first();
-                //         return $result;
-                //     } )
+                Hidden::make('user_id')
+                    ->default(auth()->user()->id),
+                    ]),
 
         ])->statePath('data');
     }
     public function table(Table $table): Table
     {
         return $table
-            ->query(SalesCartItem::query())
+            ->query(SalesCartItem::query()->where('branch_id', auth()->user()->branch_id))
             ->columns([
-                TextColumn::make('item.item_name'),
+                TextColumn::make('mainStock.item.item_name'),
                 TextColumn::make('quantity'),
                 TextColumn::make('cost_price'),
                 TextColumn::make('selling_price'),
-                TextColumn::make('discount'),
             ])
             ->actions([
                 DeleteAction::make()
@@ -171,8 +188,20 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
     {
         try {
             $data = $this->form->getState();
-            // dd(auth()->user()->id);
-            SalesCartItem::create($data);
+            $mainStock = MainStock::where('item_id', $data['item'])->first();
+            // if(auth()->user()->roles->contains('title', 'Admin')){
+                $newData = [
+                    'cost_price'=> $mainStock->cost_price,
+                    'selling_price'=> $mainStock->mrp,
+                ];
+                $data += $newData;
+                SalesCartItem::create($data);
+            // }
+            // else{
+            //     $branchStock = BranchStock::with('mainStock')->where('mainStock.item_id', $data['item'])->first();
+            //     dd($branchStock);
+            //     SalesCartItem::create($data);
+            // }
             $this->form->fill();
             // auth()->cartitem->save($data);
         } catch (Halt $exception) {

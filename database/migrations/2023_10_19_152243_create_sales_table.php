@@ -15,12 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('branch_id')->constrained();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('item_id')->constrained();
             $table->date('sale_date')->nullable();
             $table->integer('quantity')->nullable();
             $table->unsignedInteger('cost_price')->nullable();
             $table->unsignedInteger('selling_price')->nullable();
-            $table->unsignedInteger('discount')->nullable();
             $table->timestamps();
         });
     }
