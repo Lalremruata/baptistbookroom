@@ -15,6 +15,7 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Contracts\HasActions;
@@ -25,7 +26,8 @@ use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
 
 class SalesCart extends Page implements HasForms, HasTable, HasActions
 {
@@ -120,7 +122,13 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 TextColumn::make('branchStock.mainStock.item.item_name'),
                 TextColumn::make('quantity'),
                 TextColumn::make('cost_price'),
-                TextColumn::make('selling_price'),
+                TextColumn::make('selling_price')
+                ->summarize(Summarizer::make()
+                ->label('Total')
+                ->using(function (Builder $query): string {
+                    return $query->sum(DB::raw('selling_price * quantity'));
+                })
+                ),
             ])
             ->actions([
                 DeleteAction::make()

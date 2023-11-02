@@ -24,7 +24,6 @@ use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Support\Exceptions\Halt;
 use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
