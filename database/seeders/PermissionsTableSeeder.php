@@ -57,6 +57,9 @@ class PermissionsTableSeeder extends Seeder
                 'title' => 'user_delete',
             ],
             [
+                'title' => 'user_access',
+            ],
+            [
                 'title' => 'main_stock_access',
             ],
             [

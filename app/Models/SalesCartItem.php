@@ -10,6 +10,7 @@ class SalesCartItem extends Model
 {
     use HasFactory;
     protected $fillable = [
+        "branch_stock_id",
         "branch_id",
         "user_id",
         "item_id",

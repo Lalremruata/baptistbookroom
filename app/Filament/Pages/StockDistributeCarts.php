@@ -31,6 +31,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
 
 
 class StockDistributeCarts extends Page implements HasForms, HasTable, HasActions
@@ -67,7 +68,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         ->options(MainStock::with('item')->get()->pluck('item.item_name', 'item_id')->toArray())
                         ->afterStateUpdated(fn(callable $set,Get $get)=>$set('main_stock_id',MainStock::query()
                             ->where('item_id', $get('item_id'))->pluck('id')->first()))
-                        ->required(false)
+                        ->required()
                         ->dehydrated(),
                     TextInput::make('quantity')
                     ->reactive()
@@ -116,7 +117,10 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 TextColumn::make('mrp')
                 ->summarize(Summarizer::make()
                 ->label('Total')
-                ->using(fn (Builder $query): string => $query->sum('mrp'))),
+                ->using(function (Builder $query): string {
+                    return $query->sum(DB::raw('mrp * quantity'));
+                })
+                )
             ])
 
             ->actions([

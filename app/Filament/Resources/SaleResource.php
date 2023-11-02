@@ -88,7 +88,7 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('item.item_name')
+                Tables\Columns\TextColumn::make('branchStock.mainStock.item.item_name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sale_date')
@@ -101,9 +101,6 @@ class SaleResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('selling_price')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('discount')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
