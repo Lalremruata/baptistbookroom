@@ -110,7 +110,8 @@ class ItemResource extends Resource
                 ExportAction::make()->exports([
                     ExcelExport::make()->fromTable(),
                 ])
-            ], position: HeaderActionsPosition::Bottom);;
+            ], position: HeaderActionsPosition::Bottom)
+            ->paginated([25, 50, 100, 'all']);
     }
 
     public static function getRelations(): array
