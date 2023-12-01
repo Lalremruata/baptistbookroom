@@ -42,7 +42,9 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     use InteractsWithActions;
     public ?array $data = [];
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
-    protected static ?string $navigationLabel = 'Distribution cart';
+    protected static ?string $navigationGroup = 'Stocks';
+    protected static ?string $navigationLabel = 'Main Stock Distribute';
+    protected static ?int $navigationSort = 2;
     protected static string $view = 'filament.pages.stock-distribute-cart';
     public static function shouldRegisterNavigation(): bool
     {

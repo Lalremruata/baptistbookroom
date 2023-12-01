@@ -39,7 +39,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
     public ?array $data = [];
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
     protected static ?string $navigationLabel = 'Sales cart';
-    protected static ?string $navigationGroup = 'Manage Sales';
+    protected static ?string $navigationGroup = 'Sales';
 
     protected static string $view = 'filament.pages.sales-cart';
     public function mount(): void

@@ -27,7 +27,9 @@ class ReturnItemResource extends Resource
     protected static ?string $model = ReturnItem::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationGroup = 'Stocks';
+    protected static ?string $navigationLabel = 'Branch Return Item';
+    protected static ?int $navigationSort = 5;
     public static function form(Form $form): Form
     {
         return $form
