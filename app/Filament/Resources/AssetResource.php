@@ -18,6 +18,16 @@ class AssetResource extends Resource
     protected static ?string $model = Asset::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Assets';
+
+    public static function canCreate(): bool
+    {
+        return 0;
+    }
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->user_type=='1';
+    }
 
     public static function form(Form $form): Form
     {
@@ -70,14 +80,14 @@ class AssetResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -85,5 +95,5 @@ class AssetResource extends Resource
             'create' => Pages\CreateAsset::route('/create'),
             'edit' => Pages\EditAsset::route('/{record}/edit'),
         ];
-    }    
+    }
 }

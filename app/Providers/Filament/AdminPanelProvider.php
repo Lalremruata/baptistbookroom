@@ -52,7 +52,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
+                // Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
@@ -74,15 +74,17 @@ class AdminPanelProvider extends PanelProvider
             // ->spa()
             ->navigationGroups([
                 NavigationGroup::make()
-                     ->label('Main Stocks'),
+                     ->label('Sales'),
                 NavigationGroup::make()
-                    ->label('Branch Stocks'),
+                     ->label('Stocks'),
+                NavigationGroup::make()
+                     ->label('Manage Private Books')
+                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Manage Items')
                     ->collapsed(),
                 NavigationGroup::make()
-                    ->label('Manage Users')
-                    ->collapsed(),
+                    ->label('Assets'),
                 NavigationGroup::make()
                     ->label('Settings')
                     ->collapsed(),

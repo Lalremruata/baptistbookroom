@@ -25,7 +25,8 @@ class MainStockResource extends Resource
     protected static ?string $model = MainStock::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
-    protected static ?string $navigationGroup = 'Main Stocks';
+    protected static ?string $navigationGroup = 'Stocks';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

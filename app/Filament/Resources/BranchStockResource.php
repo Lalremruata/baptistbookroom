@@ -26,8 +26,9 @@ class BranchStockResource extends Resource
     protected static ?string $model = BranchStock::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Branch Stocks';
-    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationLabel = 'Branch Stock Report';
+    protected static ?string $navigationGroup = 'Stocks';
+    protected static ?int $navigationSort = 4;
     public static function canCreate(): bool
     {
         return 0;
