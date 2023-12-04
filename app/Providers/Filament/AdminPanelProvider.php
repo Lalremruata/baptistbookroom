@@ -76,7 +76,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                      ->label('Sales'),
                 NavigationGroup::make()
-                     ->label('Stocks'),
+                     ->label('Stocks')
+                     ->collapsible(false),
                 NavigationGroup::make()
                      ->label('Manage Private Books')
                      ->collapsed(),
@@ -84,10 +85,11 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Manage Items')
                     ->collapsed(),
                 NavigationGroup::make()
-                    ->label('Assets'),
+                    ->label('Assets')
+                    ->collapsed(),
                 NavigationGroup::make()
                     ->label('Settings')
-                    ->collapsed(),
+                    ->collapsed()
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()->label('Edit profile'),

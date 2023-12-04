@@ -23,8 +23,8 @@ class StockDistributeResource extends Resource
     protected static ?string $model = StockDistribute::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
-    protected static ?string $navigationGroup = 'Stocks';
     protected static ?string $navigationLabel = 'Distribute Report';
+    protected static ?string $navigationGroup = 'Stocks';
     protected static ?int $navigationSort = 3;
 
     public static function canCreate(): bool
