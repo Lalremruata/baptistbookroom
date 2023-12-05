@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
 class BranchSalesChart extends ChartWidget
 {
     protected static ?int $sort = 2;
+    protected int | string | array $columnSpan = 'full';
     protected static ?string $heading = 'Branch Sales Chart';
 
     protected function getData(): array

@@ -70,6 +70,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         ->afterStateUpdated(fn(callable $set,Get $get)=>$set('main_stock_id',MainStock::query()
                             ->where('item_id', $get('item_id'))->pluck('id')->first()))
                         ->required()
+                        ->autofocus()
                         ->dehydrated(),
                     TextInput::make('quantity')
                     ->reactive()
