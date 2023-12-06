@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -49,10 +50,10 @@ class SupplierResource extends Resource
                     ->required()
                     ->numeric()
                     ->default(0.00),
-                Forms\Components\TextInput::make('current_balance')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
+                // Forms\Components\TextInput::make('current_balance')
+                //     ->required()
+                //     ->numeric()
+                //     ->default(0.00),
                 Forms\Components\Textarea::make('notes')
                     ->maxLength(65535)
                     ->columnSpanFull(),
@@ -66,20 +67,6 @@ class SupplierResource extends Resource
                 Tables\Columns\TextColumn::make('supplier_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('contact_number')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('address')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('city')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('state')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('zip_code')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('supplier_type')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('payment_terms')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('account_number')
                     ->searchable(),
@@ -104,7 +91,9 @@ class SupplierResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
+                Action::make('supplier-details')
+                ->url(fn (Supplier $record):string => static::getUrl('supplier-details',['record' => $record])),
+                ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -116,6 +105,10 @@ class SupplierResource extends Resource
     {
         return [
             'index' => Pages\ManageSuppliers::route('/'),
+            'supplier-details' => Pages\SupplierDetail::route('/{record}/supplier-details'),
+
         ];
     }
+    
 }
+
