@@ -13,7 +13,12 @@ class ManageSuppliers extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+            ->mutateFormDataUsing(function (array $data): array {
+                $data['current_balance'] = $data['initial_balance'];    
+                return $data;
+            }),
         ];
     }
+    
 }
