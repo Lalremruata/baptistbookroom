@@ -5,6 +5,7 @@ namespace App\Filament\Resources\SupplierResource\Pages;
 use App\Filament\Resources\SupplierResource;
 use App\Models\Supplier;
 
+use App\Models\SupplierFinancials;
 use Filament\Resources\Pages\Page;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Concerns\InteractsWithRecord;
@@ -63,12 +64,14 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord
     public function table(Table $table): Table
     {
         return $table
-            ->query(Supplier::query()->where('id', $this->record->id))
+            ->query(SupplierFinancials::query()->where('supplier_id', $this->record->id))
             ->columns([
-                TextColumn::make('supplier_name'),
-                TextColumn::make('contact_number'),
-                TextColumn::make('email'),
-                TextColumn::make('address')
+                TextColumn::make('supplier.supplier_name'),
+                TextColumn::make('created_at')
+                ->label('date'),
+                TextColumn::make('bill'),
+                TextColumn::make('credit'),
+                TextColumn::make('debit'),
             ]);
     }
 }

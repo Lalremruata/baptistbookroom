@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('supplier_id');
             $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
-            $table->decimal('amount_paid', 10, 2);
-            $table->decimal('balance_after_transaction', 10, 2);
-            $table->string('payment_method')->nullable();
+            $table->string('bill_no');
+            $table->decimal('credit', 10, 2)->nullable();
+            $table->decimal('debit', 10, 2)->nullable();
+            $table->decimal('balance', 10, 2);
+            $table->string('remarks')->nullable();
             $table->timestamps();
         });
     }
