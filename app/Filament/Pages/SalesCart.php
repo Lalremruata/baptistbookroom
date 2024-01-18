@@ -72,7 +72,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     ->first();
                     if($branchStock)
                     {
-                        $set('branch_stock_id', $branchStock->mainStock->item->item_name);
+                        $set('branch_stock_id', $branchStock->mainStock->item->id);
                     }
 
                 })

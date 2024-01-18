@@ -62,15 +62,30 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->schema([
                 Section::make()
                 ->schema([
+                    TextInput::make('barcode')
+                    ->label('Barcode Search')
+                    ->autofocus()
+                    ->afterStateUpdated(function(callable $set,Get $get){
+                        $barcode = $get('barcode');
+                        $mainStock = MainStock::where('barcode', $barcode)
+                        ->first();
+                        if($mainStock)
+                        {
+                            $set('item_id', $mainStock->item_id);
+                        }
+
+                    })
+                    ->reactive()
+                    ->live(),
                     Select::make('item_id')
                         ->reactive()
                         ->searchable()
                         ->label('Item')
                         ->options(MainStock::with('item')->get()->pluck('item.item_name', 'item_id')->toArray())
-                        ->afterStateUpdated(fn(callable $set,Get $get)=>$set('main_stock_id',MainStock::query()
+                        ->afterStateUpdated(
+                            fn(callable $set,Get $get)=>$set('main_stock_id',MainStock::query()
                             ->where('item_id', $get('item_id'))->pluck('id')->first()))
                         ->required()
-                        ->autofocus()
                         ->dehydrated(),
                     TextInput::make('quantity')
                     ->reactive()
@@ -78,7 +93,6 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                     ->minValue(1)
                     ->maxValue(function (Get $get) {
                         $itemId = $get('item_id');
-                        // dd($itemId);
                         if ($itemId) {
                             $result=MainStock::where('item_id',$itemId)
                             ->pluck('quantity','id')->first();
@@ -92,15 +106,23 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         if ($itemId) {
                             $result=MainStock::where('item_id',$itemId)
                             ->pluck('quantity','id')->first();
-                            return 'qty available: '.$result;
+                            if($result)
+                            return 'quantity available: '.$result;
+                        else
+                            return 'stock unavailable';
                         }
                             return null;
                     })
                         ->hintColor('danger')
-                    ->numeric(),
+                    ->numeric()
+                    ->hidden(function (Get $get): bool {
+                        if(MainStock::where('barcode', $get('barcode'))->first() || $get('item_id'))
+                            return 0;
+                        else return 1;
+                    }),
                     Hidden::make('user_id')
                     ->default(auth()->user()->id),
-                    Hidden::make('main_stock_id'),
+                    // Hidden::make('main_stock_id'),
 
                 ])->columns(2)
 
@@ -219,6 +241,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                     'cost_price'=> $mainStock->cost_price,
                     'mrp'=> $mainStock->mrp,
                     'batch'=> $mainStock->batch,
+                    'main_stock_id' => $mainStock->id,
                 ];
                 $data += $newData;
                 StockDistributeCart::create($data);
