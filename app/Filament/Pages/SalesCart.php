@@ -62,9 +62,25 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
         ->schema([
             Section::make()
             ->schema([
-                Select::make('branch_stock_id')
+                TextInput::make('barcode')
+                ->label('Barcode Search')
+                ->autofocus()
+                ->afterStateUpdated(function(callable $set,Get $get){
+                    $barcode = $get('barcode');
+                    $branchStock = BranchStock::with('mainStock.item')
+                    ->where('barcode', $barcode)
+                    ->first();
+                    if($branchStock)
+                    {
+                        $set('branch_stock_id', $branchStock->mainStock->item->item_name);
+                    }
+
+                })
                 ->reactive()
-                ->label('Item')
+                ->live(),
+            Select::make('branch_stock_id')
+                ->reactive()
+                ->label('Item Search')
                 ->options(function(){
                      return BranchStock::with(['mainStock' => function ($query) {
                         $query->select('item_id', 'id');
@@ -78,7 +94,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 })
                 ->searchable()
                 ->dehydrated()
-                ->required(),
+                ->required()
+                ->live(),
                 TextInput::make('quantity')
                     ->reactive()
                     ->minValue(1)
@@ -96,16 +113,35 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     ->integer()
                     ->hint(function(Get $get){
                         $branchStockId = $get('branch_stock_id');
+                        $barcode = $get('barcode');
                         if ($branchStockId) {
                                 $result=BranchStock::where('id',$branchStockId)
                                 ->where('branch_id',auth()->user()->branch_id)
                                 ->pluck('quantity','id')->first();
-                                 return 'quantity available: '.$result;
+                                if($result)
+                                    return 'quantity available: '.$result;
+                                else
+                                    return 'stock unavailable';
                         }
+                        elseif ($barcode) {
+                            $result=BranchStock::where('barcode', $barcode)
+                            ->where('branch_id',auth()->user()->branch_id)
+                            ->pluck('quantity','id')->first();
+                            if($result)
+                                return 'quantity available: '.$result;
+                           else
+                               return 'stock unavailable';
+                    }
+                    // elseif()
                             return null;
                     })
                         ->hintColor('danger')
-                        ->required(),
+                        ->required()
+                        ->hidden(function (Get $get): bool {
+                            if(BranchStock::where('barcode', $get('barcode'))->first() || $get('branch_stock_id'))
+                                return 0;
+                            else return 1;
+                        }),
                 Hidden::make('branch_id')
                     ->default(auth()->user()->branch_id),
                 Hidden::make('user_id')

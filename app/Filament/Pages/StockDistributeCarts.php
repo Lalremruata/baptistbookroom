@@ -166,6 +166,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                             $branchstock->main_stock_id = $item->main_stock_id;
                             $branchstock->quantity = $item->quantity;
                             $branchstock->cost_price = $mainstock->cost_price;
+                            $branchstock->barcode = $mainstock->barcode;
                             $branchstock->branch_id = $data['branch_id'];
                             $branchstock->batch = $mainstock->batch;
                             $branchstock->mrp = $mainstock->mrp;
