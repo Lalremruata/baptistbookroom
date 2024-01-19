@@ -9,4 +9,8 @@ use Filament\Resources\Pages\CreateRecord;
 class CreatePrivateBook extends CreateRecord
 {
     protected static string $resource = PrivateBookResource::class;
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

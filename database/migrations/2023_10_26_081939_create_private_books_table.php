@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('author');
             $table->string('file_no');
             $table->unsignedInteger('quantity');
-            $table->unsignedInteger('quantity_return');
+            $table->foreignId('item_id');
             $table->timestamps();
         });
     }

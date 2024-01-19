@@ -30,6 +30,10 @@ class Item extends Model
     {
         return $this->hasMany(StockDistribute::class);
     }
+    public function privateBook(): HasMany
+    {
+        return $this->hasMany(PrivateBook::class);
+    }
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

@@ -9,7 +9,9 @@ use App\Models\PrivateBook;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -28,10 +30,26 @@ class PrivateBookResource extends Resource
             ->schema([
                 Section::make()
                 ->schema([
+                    TextInput::make('barcode')
+                        ->label('search barcode')
+                        ->autofocus()
+                        ->afterStateUpdated(function(callable $set,Get $get){
+                            $barcode = $get('barcode');
+                            $item = Item::where('barcode', $barcode)
+                            ->first();
+                            if($item)
+                            {
+                                $set('item_id', $item->id);
+                            }
+
+                        })
+                        ->reactive()
+                        ->live(),
                     Select::make('item_id')
-                    ->searchable()
-                    ->options(Item::query()->pluck('item_name', 'id'))
-                ]),
+                        ->label('search item')
+                        ->searchable()
+                        ->options(Item::query()->pluck('item_name', 'id')),
+                ])->columns(3),
                 Section::make('')
                 ->schema([
                     Forms\Components\TextInput::make('receive_from')
@@ -46,11 +64,8 @@ class PrivateBookResource extends Resource
                 Forms\Components\TextInput::make('quantity')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('quantity_return')
-                    ->required()
-                    ->numeric(),
                 ])->columns(2),
-                
+
             ]);
     }
 
@@ -65,9 +80,6 @@ class PrivateBookResource extends Resource
                 Tables\Columns\TextColumn::make('file_no')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('quantity')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('quantity_return')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -91,14 +103,14 @@ class PrivateBookResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -106,5 +118,5 @@ class PrivateBookResource extends Resource
             'create' => Pages\CreatePrivateBook::route('/create'),
             'edit' => Pages\EditPrivateBook::route('/{record}/edit'),
         ];
-    }    
+    }
 }
