@@ -72,6 +72,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         if($mainStock)
                         {
                             $set('item_id', $mainStock->item_id);
+                            $set('main_stock_id',$mainStock->value('id'));
                         }
 
                     })
@@ -122,7 +123,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                     }),
                     Hidden::make('user_id')
                     ->default(auth()->user()->id),
-                    // Hidden::make('main_stock_id'),
+                    Hidden::make('main_stock_id'),
 
                 ])->columns(2)
 

@@ -146,7 +146,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     ->default(auth()->user()->branch_id),
                 Hidden::make('user_id')
                     ->default(auth()->user()->id),
-                    ]),
+                    ])->columns(2)
 
         ])->statePath('data');
     }

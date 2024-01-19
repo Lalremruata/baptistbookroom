@@ -4,9 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PrivateBookResource\Pages;
 use App\Filament\Resources\PrivateBookResource\RelationManagers;
+use App\Models\Item;
 use App\Models\PrivateBook;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -24,6 +26,12 @@ class PrivateBookResource extends Resource
     {
         return $form
             ->schema([
+                Section::make()
+                ->schema([
+                    Select::make('item_id')
+                    ->searchable()
+                    ->options(Item::query()->pluck('item_name', 'id'))
+                ]),
                 Section::make('')
                 ->schema([
                     Forms\Components\TextInput::make('receive_from')
