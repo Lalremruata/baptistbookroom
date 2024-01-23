@@ -11,6 +11,7 @@ class PrivateBook extends Model
     use HasFactory;
     protected $fillable = [
         "item_id",
+        "main_stock_id",
         "receive_from",
         "author",
         "file_no",
@@ -19,6 +20,10 @@ class PrivateBook extends Model
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
+    }
+    public function mainStock(): BelongsTo
+    {
+        return $this->belongsTo(MainStock::class);
     }
 
 }

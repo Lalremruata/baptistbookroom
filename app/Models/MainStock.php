@@ -30,4 +30,8 @@ class MainStock extends Model
     {
         return $this->hasMany(BranchStock::class);
     }
+    public function privateBook(): HasMany
+    {
+        return $this->hasMany(PrivateBook::class);
+    }
 }

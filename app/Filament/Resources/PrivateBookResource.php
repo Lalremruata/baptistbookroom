@@ -15,6 +15,7 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -44,6 +45,7 @@ class PrivateBookResource extends Resource
 
                         })
                         ->reactive()
+                        ->dehydrated(false)
                         ->live(),
                     Select::make('item_id')
                         ->label('search item')
@@ -62,6 +64,18 @@ class PrivateBookResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('quantity')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\TextInput::make('cost_price')
+                    ->dehydrated(false)
+                    ->required()
+                    ->numeric(),
+                Forms\Components\TextInput::make('mrp')
+                    ->dehydrated(false)
+                    ->required()
+                    ->numeric(),
+                 Forms\Components\TextInput::make('batch')
+                    ->dehydrated(false)
                     ->required()
                     ->numeric(),
                 ])->columns(2),
@@ -96,6 +110,9 @@ class PrivateBookResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('book-account')
+                ->url(fn (PrivateBook $record): string => static::getUrl('book-account',['record' => $record])),
+                
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -117,6 +134,8 @@ class PrivateBookResource extends Resource
             'index' => Pages\ListPrivateBooks::route('/'),
             'create' => Pages\CreatePrivateBook::route('/create'),
             'edit' => Pages\EditPrivateBook::route('/{record}/edit'),
+            'book-account' => Pages\PrivateBookAccount::route('/{record}/book-account'),
+
         ];
     }
 }
