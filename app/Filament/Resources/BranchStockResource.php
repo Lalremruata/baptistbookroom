@@ -95,7 +95,6 @@ class BranchStockResource extends Resource
                 Tables\Columns\TextColumn::make('mainStock.barcode')
                     ->label('Bar code')
                     ->searchable()
-                    ->numeric()
                     ->sortable(),
             ])
             ->filters([

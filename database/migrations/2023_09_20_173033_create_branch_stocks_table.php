@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedInteger('cost_price');
             $table->unsignedInteger('mrp');
             $table->unsignedInteger('batch');
-            $table->unsignedInteger('barcode');
+            $table->string('barcode');
             $table->foreignId('branch_id')->constrained();
             $table->foreignId('main_stock_id')->constrained();
             $table->timestamps();

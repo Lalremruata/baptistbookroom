@@ -72,7 +72,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         if($mainStock)
                         {
                             $set('item_id', $mainStock->item_id);
-                            $set('main_stock_id',$mainStock->value('id'));
+                            $set('main_stock_id',$mainStock->id);
                         }
 
                     })
@@ -84,8 +84,17 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         ->label('Item')
                         ->options(MainStock::with('item')->get()->pluck('item.item_name', 'item_id')->toArray())
                         ->afterStateUpdated(
-                            fn(callable $set,Get $get)=>$set('main_stock_id',MainStock::query()
-                            ->where('item_id', $get('item_id'))->pluck('id')->first()))
+                            function(callable $set,Get $get){
+                                $itemId = $get('item_id');
+                                $mainStock = MainStock::where('barcode', $itemId)
+                                    ->first();
+                                    if($mainStock)
+                                    {
+                                        $set('barcode',$mainStock->barcode);
+                                        $set('main_stock_id',$mainStock->id);
+                                    }
+                            }
+                            )
                         ->required()
                         ->dehydrated(),
                     TextInput::make('quantity')

@@ -34,6 +34,21 @@ class MainStockResource extends Resource
             ->schema([
                 Section::make()
                 ->schema([
+                    Forms\Components\TextInput::make('barcode')
+                    ->afterStateUpdated(function(callable $set,Get $get){
+                        $barcode = $get('barcode');
+                        $item = Item::where('barcode', $barcode)
+                        ->first();
+                        if($item)
+                        {
+                            $set('item_id', $item->id);
+                        }
+
+                    })
+                    ->autofocus()
+                    ->live()
+                    ->required()
+                    ->dehydrated(),
                     Forms\Components\Select::make('item_id')
                     ->label('Item')
                         ->options(Item::query()->pluck('item_name', 'id'))
@@ -54,10 +69,6 @@ class MainStockResource extends Resource
                     Forms\Components\TextInput::make('batch')
                         ->required()
                         ->numeric(),
-                    Forms\Components\TextInput::make('barcode')
-                        ->required()
-                        ->disabled()
-                        ->dehydrated()
 
                 ])->compact()
                 ->columns(2)
