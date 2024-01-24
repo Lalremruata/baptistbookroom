@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class SupplierFinancials extends Model
 {
     use HasFactory;
-    protected $fillable = ['supplier_id', 'amount_paid', 'balance_after_transaction', 'payment_method'];
+    protected $fillable = ['supplier_id', 'bill_no', 'credit', 'debit', 'balance','remarks'];
 
     public function supplier()
     {

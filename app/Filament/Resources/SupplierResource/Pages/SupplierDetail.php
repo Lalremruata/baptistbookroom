@@ -33,7 +33,7 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasA
     use InteractsWithForms;
     use InteractsWithActions;
     protected static string $resource = SupplierResource::class;
-    public Supplier $supplier;
+    public SupplierFinancials $supplier;
 
     public ?array $data = [];
 
@@ -51,19 +51,18 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasA
     public function resolveRecord($record): ?Supplier
     {
         return Supplier::query()->where('id', $record)->first();
-
     }
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Section::make()
-                ->schema([
-                    TextInput::make('supplier_name')
-                    ->default($this->record->supplier_name)
-                ]),
-            ]);
-    }
+    // public function form(Form $form): Form
+    // {
+    //     return $form
+    //         ->schema([
+    //             Section::make()
+    //             ->schema([
+    //                 TextInput::make('supplier_name')
+    //                 ->default($this->record->supplier_name)
+    //             ]),
+    //         ]);
+    // }
     public function table(Table $table): Table
     {
         return $table
@@ -77,25 +76,25 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasA
                 TextColumn::make('debit'),
             ])
             ->headerActions([
-                // \Filament\Tables\Actions\Action::make('checkout cart')
-                // ->form([
-                //     TextInput::make('credit')
-                //         ->label('Credit')
-                //         ->required(),
-                //     TextInput::make('debit')
-                //         ->label('Debit')
-                //         ->required(),
-                //     TextInput::make('balance')
-                //         ->label('Balance')
-                //         ->required(),
-                // ])
-                // ->label('checkout cart')
-                // ->color('warning')
-                // ->extraAttributes([
-                //     'class' => 'margin',
-                // ])
-                // ->action(function (array $data) {
-                // })
+                \Filament\Tables\Actions\CreateAction::make('checkout cart')
+                ->form([
+                    TextInput::make('credit')
+                        ->label('Credit')
+                        ->required(),
+                    TextInput::make('debit')
+                        ->label('Debit')
+                        ->required(),
+                    TextInput::make('balance')
+                        ->label('Balance')
+                        ->required(),
+                ])
+                ->label('checkout cart')
+                ->color('warning')
+                ->extraAttributes([
+                    'class' => 'margin',
+                ])
+                ->action(function (array $data) {
+                })
             ]);
     }
     public function deleteAction(Form $form): Action

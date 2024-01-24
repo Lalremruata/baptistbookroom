@@ -14,6 +14,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Split;
 
 class SupplierResource extends Resource
 {
@@ -28,9 +29,9 @@ class SupplierResource extends Resource
                 Section::make()
                 ->schema([
                     Forms\Components\TextInput::make('supplier_name')
+                        ->autofocus()
                         ->required()
-                        ->maxLength(255)
-                        ->autofocus(),
+                        ->maxLength(255),
                     Forms\Components\TextInput::make('contact_number')
                         ->maxLength(255),
                     Forms\Components\TextInput::make('email')
@@ -39,7 +40,7 @@ class SupplierResource extends Resource
                     Forms\Components\TextInput::make('address')
                     ->maxLength(255),
                 ])->columns(3)
-                ->compact(),
+                ,
                 Section::make()
                 ->schema([
                     Forms\Components\TextInput::make('account_number')
@@ -51,7 +52,7 @@ class SupplierResource extends Resource
                     Forms\Components\TextInput::make('branch')
                         ->maxLength(255),
                 ])->columns(3)
-                ->compact(),
+                ,
             ]);
     }
 
@@ -83,7 +84,7 @@ class SupplierResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Action::make('supplier-details')
-                ->url(fn (Supplier $record): string => static::getUrl('supplier-details',['record' => $record])),
+                ->url(fn (Supplier $record): string => static::getUrl('supplier-financial',['record' => $record])),
                 ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -96,7 +97,7 @@ class SupplierResource extends Resource
     {
         return [
             'index' => Pages\ManageSuppliers::route('/'),
-            'supplier-details' => Pages\SupplierDetail::route('/{record}/supplier-details'),
+            'supplier-financial' => Pages\SupplierDetail::route('/{record}/supplier-details'),
 
         ];
     }
