@@ -57,6 +57,9 @@ class ItemResource extends Resource
                     })
                     ->reactive()
                     ->required(),
+                ])->columns(2),
+                Section::make()
+                ->schema([
                 Forms\Components\TextInput::make('item_name')
                     ->required()
                     ->maxLength(255),
@@ -65,7 +68,7 @@ class ItemResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('description')
                     ->maxLength(255),
-                ])->columnSpanFull()
+                ])->columns(2)
 
             ]);
     }

@@ -6,6 +6,7 @@ use App\Filament\Resources\MainStockResource\Pages;
 use App\Filament\Resources\MainStockResource\RelationManagers;
 use App\Models\Item;
 use App\Models\MainStock;
+use App\Models\SubCategory;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -35,28 +36,50 @@ class MainStockResource extends Resource
                 Section::make()
                 ->schema([
                     Forms\Components\TextInput::make('barcode')
-                    ->afterStateUpdated(function(callable $set,Get $get){
-                        $barcode = $get('barcode');
-                        $item = Item::where('barcode', $barcode)
-                        ->first();
-                        if($item)
-                        {
-                            $set('item_id', $item->id);
-                        }
+                        ->afterStateUpdated(function(callable $set,Get $get){
+                            $barcode = $get('barcode');
+                            $item = Item::where('barcode', $barcode)
+                            ->first();
+                            if($item)
+                            {
+                                $set('item_id', $item->id);
+                            }
 
-                    })
-                    ->autofocus()
-                    ->live()
-                    ->required()
-                    ->dehydrated(),
-                    Forms\Components\Select::make('item_id')
-                    ->label('Item')
-                        ->options(Item::query()->pluck('item_name', 'id'))
-                        ->afterStateUpdated(fn(callable $set,Get $get)=>$set('barcode',Item::query()
-                            ->where('id', $get('item_id'))->pluck('barcode')->first()))
+                        })
+                        ->autofocus()
+                        ->live()
+                        ->required()
+                        ->dehydrated(),
+                    Forms\Components\Select::make('sub_category_id')
+                        ->label('Sub Category')
+                        ->options(SubCategory::query()->pluck('subcategory_name', 'id'))
+                        ->afterStateUpdated(fn(callable $set)=>$set('item_id', null))
                         ->reactive()
-                        ->searchable()
-                        ->required(),
+                        ->searchable(),
+                    Forms\Components\Select::make('item_id')
+                        ->label('Item')
+                            ->options(function(callable $get){
+                                $subCategory= SubCategory::find($get('sub_category_id'));
+                                $item= Item::find($get('barcode'));
+                                if(!$subCategory && $get('barcode')){
+                                    return (Item::query()->pluck('item_name', 'id'));
+                                    // return null;
+                                }
+                                elseif(!$subCategory && !$item){
+                                    // return (Item::query()->pluck('item_name', 'id'));
+                                    return null;
+                                }
+                                return $subCategory->items->pluck('item_name','id');
+                            })
+                            ->afterStateUpdated(fn(callable $set,Get $get)=>$set('barcode',Item::query()
+                                ->where('id', $get('item_id'))->pluck('barcode')->first()))
+                            ->reactive()
+                            ->searchable()
+                            ->required(),
+                    ])->compact()
+                    ->columns(3),
+                Section::make()
+                ->schema([
                     Forms\Components\TextInput::make('quantity')
                         ->required()
                         ->numeric(),

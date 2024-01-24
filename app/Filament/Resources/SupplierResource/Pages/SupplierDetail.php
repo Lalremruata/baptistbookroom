@@ -46,23 +46,13 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasA
         $this->record = $this->resolveRecord($record);
 
         static::authorizeResourceAccess();
+        // to pre populate fields
         // $this->form->fill($record->toArray());
     }
     public function resolveRecord($record): ?Supplier
     {
         return Supplier::query()->where('id', $record)->first();
     }
-    // public function form(Form $form): Form
-    // {
-    //     return $form
-    //         ->schema([
-    //             Section::make()
-    //             ->schema([
-    //                 TextInput::make('supplier_name')
-    //                 ->default($this->record->supplier_name)
-    //             ]),
-    //         ]);
-    // }
     public function table(Table $table): Table
     {
         return $table
@@ -76,7 +66,7 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasA
                 TextColumn::make('debit'),
             ])
             ->headerActions([
-                \Filament\Tables\Actions\CreateAction::make('checkout cart')
+                \Filament\Tables\Actions\CreateAction::make('add record')
                 ->form([
                     TextInput::make('credit')
                         ->label('Credit')
@@ -88,8 +78,8 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasA
                         ->label('Balance')
                         ->required(),
                 ])
-                ->label('checkout cart')
-                ->color('warning')
+                ->label('add record')
+                ->color('success')
                 ->extraAttributes([
                     'class' => 'margin',
                 ])
@@ -112,19 +102,19 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasA
                 ->required(),
         ]);
     }
-    protected function getActions(): array
-    {
-        return [
-            Action::make('Withdraw')
-            // ->mountUsing(fn (Forms\ComponentContainer $form) => $form->fill([
-            //     'Name' => $this->record->name,
-            // ]))
-            ->successNotification(
-                Notification::make()
-                     ->success()
-                     ->title('User withdrawed')
-                     ->body('The user has withdrawed successfully.'),
-             )
-            ];
-            }
+    // protected function getActions(): array
+    // {
+    //     return [
+    //         Action::make('Withdraw')
+    //         // ->mountUsing(fn (Forms\ComponentContainer $form) => $form->fill([
+    //         //     'Name' => $this->record->name,
+    //         // ]))
+    //         ->successNotification(
+    //             Notification::make()
+    //                  ->success()
+    //                  ->title('User withdrawed')
+    //                  ->body('The user has withdrawed successfully.'),
+    //          )
+    //         ];
+    //         }
 }

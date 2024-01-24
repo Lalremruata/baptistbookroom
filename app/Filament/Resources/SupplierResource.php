@@ -39,7 +39,7 @@ class SupplierResource extends Resource
                         ->maxLength(255),
                     Forms\Components\TextInput::make('address')
                     ->maxLength(255),
-                ])->columns(3)
+                ])->columns(2)->compact()
                 ,
                 Section::make()
                 ->schema([
@@ -51,7 +51,7 @@ class SupplierResource extends Resource
                         ->maxLength(255),
                     Forms\Components\TextInput::make('branch')
                         ->maxLength(255),
-                ])->columns(3)
+                ])->columns(2)->compact()
                 ,
             ]);
     }
