@@ -14,10 +14,10 @@ class ManageSuppliers extends ManageRecords
     {
         return [
             Actions\CreateAction::make()
-            ->mutateFormDataUsing(function (array $data): array {
-                $data['current_balance'] = $data['initial_balance'];    
-                return $data;
-            }),
+            // ->mutateFormDataUsing(function (array $data): array {
+            //     // $data['current_balance'] = $data['initial_balance'];    
+            //     // return $data;
+            // }),
         ];
     }
     

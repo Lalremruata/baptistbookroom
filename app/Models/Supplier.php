@@ -14,16 +14,10 @@ class Supplier extends Model
         'contact_number',
         'email',
         'address',
-        'city',
-        'state',
-        'zip_code',
-        'country',
-        'supplier_type',
-        'payment_terms',
         'account_number',
-        'initial_balance',
-        'current_balance',
-        'notes',
+        'ifsc_code',
+        'bank_name',
+        'branch',
     ];
 
     public function financials()

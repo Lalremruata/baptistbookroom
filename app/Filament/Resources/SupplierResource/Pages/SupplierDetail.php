@@ -6,6 +6,8 @@ use App\Filament\Resources\SupplierResource;
 use App\Models\Supplier;
 
 use App\Models\SupplierFinancials;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Concerns\InteractsWithRecord;
@@ -24,11 +26,12 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Filament\Resources\Pages\ViewRecord;
 
-class SupplierDetail extends Page implements HasForms, HasTable, HasRecord
+class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasActions
 {
     use InteractsWithRecord;
     use InteractsWithTable;
     use InteractsWithForms;
+    use InteractsWithActions;
     protected static string $resource = SupplierResource::class;
     public Supplier $supplier;
 
@@ -72,6 +75,57 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord
                 TextColumn::make('bill'),
                 TextColumn::make('credit'),
                 TextColumn::make('debit'),
+            ])
+            ->headerActions([
+                // \Filament\Tables\Actions\Action::make('checkout cart')
+                // ->form([
+                //     TextInput::make('credit')
+                //         ->label('Credit')
+                //         ->required(),
+                //     TextInput::make('debit')
+                //         ->label('Debit')
+                //         ->required(),
+                //     TextInput::make('balance')
+                //         ->label('Balance')
+                //         ->required(),
+                // ])
+                // ->label('checkout cart')
+                // ->color('warning')
+                // ->extraAttributes([
+                //     'class' => 'margin',
+                // ])
+                // ->action(function (array $data) {
+                // })
             ]);
     }
+    public function deleteAction(Form $form): Action
+    {
+        return $form
+        ->form([
+            TextInput::make('credit')
+                ->label('Credit')
+                ->required(),
+            TextInput::make('debit')
+                ->label('Debit')
+                ->required(),
+            TextInput::make('balance')
+                ->label('Balance')
+                ->required(),
+        ]);
+    }
+    protected function getActions(): array
+    {
+        return [
+            Action::make('Withdraw')
+            // ->mountUsing(fn (Forms\ComponentContainer $form) => $form->fill([
+            //     'Name' => $this->record->name,
+            // ]))
+            ->successNotification(
+                Notification::make()
+                     ->success()
+                     ->title('User withdrawed')
+                     ->body('The user has withdrawed successfully.'),
+             )
+            ];
+            }
 }

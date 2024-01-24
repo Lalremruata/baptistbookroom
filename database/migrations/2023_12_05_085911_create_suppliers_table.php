@@ -17,15 +17,10 @@ return new class extends Migration
             $table->string('contact_number')->nullable();
             $table->string('email')->nullable();
             $table->string('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('state')->nullable();
-            $table->string('zip_code')->nullable();
-            $table->string('supplier_type')->nullable();
-            $table->string('payment_terms')->nullable();
             $table->string('account_number')->nullable();
-            $table->decimal('initial_balance', 10, 2)->default(0.00);
-            $table->decimal('current_balance', 10, 2)->default(0.00);
-            $table->text('notes')->nullable();
+            $table->string('ifsc_code')->nullable();
+            $table->string('bank_name')->nullable();
+            $table->string('branch')->nullable();
             $table->timestamps();
         });
     }

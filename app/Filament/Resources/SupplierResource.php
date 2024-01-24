@@ -6,6 +6,7 @@ use App\Filament\Resources\SupplierResource\Pages;
 use App\Filament\Resources\SupplierResource\RelationManagers;
 use App\Models\Supplier;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -24,39 +25,33 @@ class SupplierResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('supplier_name')
-                    ->required()
+                Section::make()
+                ->schema([
+                    Forms\Components\TextInput::make('supplier_name')
+                        ->required()
+                        ->maxLength(255)
+                        ->autofocus(),
+                    Forms\Components\TextInput::make('contact_number')
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('email')
+                        ->email()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('address')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('contact_number')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('address')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('city')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('state')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('zip_code')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('supplier_type')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('payment_terms')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('account_number')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('initial_balance')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                // Forms\Components\TextInput::make('current_balance')
-                //     ->required()
-                //     ->numeric()
-                //     ->default(0.00),
-                Forms\Components\Textarea::make('notes')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
+                ])->columns(3)
+                ->compact(),
+                Section::make()
+                ->schema([
+                    Forms\Components\TextInput::make('account_number')
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('ifsc_code')
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('bank_name')
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('branch')
+                        ->maxLength(255),
+                ])->columns(3)
+                ->compact(),
             ]);
     }
 
@@ -69,11 +64,7 @@ class SupplierResource extends Resource
                 Tables\Columns\TextColumn::make('contact_number')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('account_number')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('initial_balance')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('current_balance')
+                    ->searchable()
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
