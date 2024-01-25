@@ -83,7 +83,13 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasA
                 ->extraAttributes([
                     'class' => 'margin',
                 ])
-                ->action(function (array $data) {
+                ->action(function (array $data, $record) {
+                    $supplierFinancial = new SupplierFinancials();
+                    $supplierFinancial->id = 1;
+                    $supplierFinancial->credit = $data['credit'];
+                    $supplierFinancial->debit = $data['debit'];
+                    $supplierFinancial->balance = $data['balance'];
+                    $supplierFinancial->save();
                 })
             ]);
     }

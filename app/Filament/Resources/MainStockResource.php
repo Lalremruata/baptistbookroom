@@ -105,7 +105,9 @@ class MainStockResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('item.item_name')
                     ->searchable()
-                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('item.SubCategory.subcategory_name')
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextInputColumn::make('quantity')
                     ->rules(['required', 'numeric'])
@@ -149,12 +151,13 @@ class MainStockResource extends Resource
                     // ExcelExport::make('form')->fromForm(),
                 ])
             ], position: HeaderActionsPosition::Bottom)
-            ->defaultGroup('item_id')
-            ->groupRecordsTriggerAction(
-                fn (Action $action) => $action
-                    ->button()
-                    ->label('Group records'),
-            );
+            // ->defaultGroup('item_id')
+            // ->groupRecordsTriggerAction(
+            //     fn (Action $action) => $action
+            //         ->button()
+            //         ->label('Group records'),
+            // )
+            ;
     }
 
     public static function getRelations(): array
