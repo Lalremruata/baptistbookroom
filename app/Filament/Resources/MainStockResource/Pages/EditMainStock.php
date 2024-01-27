@@ -24,7 +24,10 @@ class EditMainStock extends EditRecord
         $subCategoryName = Item::with('subCategory')
         ->where('barcode', $this->getRecord()->barcode)
         ->first();
-        $data['sub_category_id'] = $subCategoryName->subCategory->subcategory_name;
+        if($subCategoryName)
+        {
+            $data['sub_category_id'] = $subCategoryName->subCategory->subcategory_name;   
+        }
         return $data;
     }
 }

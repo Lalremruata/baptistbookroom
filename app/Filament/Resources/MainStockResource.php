@@ -118,10 +118,9 @@ class MainStockResource extends Resource
                 Tables\Columns\TextInputColumn::make('mrp')
                     ->rules(['required', 'numeric'])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('batch')
-                    ->numeric()
+                Tables\Columns\TextInputColumn::make('batch')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('barcode')
+                Tables\Columns\TextInputColumn::make('barcode')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

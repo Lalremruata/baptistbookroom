@@ -67,12 +67,15 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->autofocus()
                 ->afterStateUpdated(function(callable $set,Get $get){
                     $barcode = $get('barcode');
-                    $branchStock = BranchStock::with('mainStock.item')
-                    ->where('barcode', $barcode)
-                    ->first();
-                    if($branchStock)
+                    if($barcode)
                     {
-                        $set('branch_stock_id', $branchStock->mainStock->item->id);
+                        $branchStock = BranchStock::with('mainStock.item')
+                        ->where('barcode', $barcode)
+                        ->first();
+                        if($branchStock)
+                        {
+                            $set('branch_stock_id', $branchStock->mainStock->item->id);
+                        }
                     }
 
                 })
