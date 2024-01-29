@@ -13,13 +13,21 @@ return new class extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('branch_stock_id')->constrained();
-            $table->foreignId('branch_id')->constrained();
+            $table->foreignId('branch_stock_id')
+                ->constrained()
+                ->onDelete('cascade');
+            $table->foreignId('branch_id')
+                ->constrained()
+                ->onDelete('no action');
             $table->foreignId('user_id')->constrained();
+            $table->foreignId('customer_id')
+                ->constrained()
+                ->onDelete('no action');
             $table->date('sale_date')->nullable();
-            $table->integer('quantity')->nullable();
-            $table->unsignedInteger('cost_price')->nullable();
-            $table->unsignedInteger('selling_price')->nullable();
+            $table->decimal('cost_price', 8, 2)->nullable();
+            $table->decimal('selling_price', 8, 2)->nullable();
+            $table->string('payment_mode'); // Cash, Online, etc.
+            $table->string('transaction_number')->nullable();
             $table->timestamps();
         });
     }
