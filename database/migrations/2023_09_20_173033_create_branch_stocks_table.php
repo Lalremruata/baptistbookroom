@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedInteger('batch');
             $table->string('barcode');
             $table->foreignId('branch_id')->constrained();
-            $table->foreignId('main_stock_id')->constrained();
+            $table->foreignId('main_stock_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

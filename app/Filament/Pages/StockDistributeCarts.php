@@ -86,7 +86,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         ->afterStateUpdated(
                             function(callable $set,Get $get){
                                 $itemId = $get('item_id');
-                                $mainStock = MainStock::where('barcode', $itemId)
+                                $mainStock = MainStock::where('item_id', $itemId)
                                     ->first();
                                     if($mainStock)
                                     {
