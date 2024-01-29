@@ -13,13 +13,11 @@ class Sale extends Model
         "branch_stock_id",
         "user_id",
         "item_id",
-        'customer_id',
         "sale_date",
         "quantity",
         "cost_price",
         "selling_price",
-        'payment_type',
-        'transaction_number',
+        "discount",
     ];
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);
@@ -29,9 +27,5 @@ class Sale extends Model
     }
     public function branchStock(): BelongsTo{
         return $this->belongsTo(BranchStock::class);
-    }
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
     }
 }

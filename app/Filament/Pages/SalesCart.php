@@ -69,12 +69,12 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     $barcode = $get('barcode');
                     if($barcode)
                     {
-                        $branchStock = BranchStock::with('mainStock')
+                        $branchStock = BranchStock::with('mainStock.item')
                         ->where('barcode', $barcode)
                         ->first();
                         if($branchStock)
                         {
-                            $set('branch_stock_id', $branchStock->id);
+                            $set('branch_stock_id', $branchStock->mainStock->item->id);
                         }
                     }
 
@@ -145,8 +145,6 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                 return 0;
                             else return 1;
                         }),
-                    TextInput::make('discount')
-                    ->default(0),
                 Hidden::make('branch_id')
                     ->default(auth()->user()->branch_id),
                 Hidden::make('user_id')
