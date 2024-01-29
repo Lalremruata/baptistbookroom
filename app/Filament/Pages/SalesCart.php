@@ -179,6 +179,11 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             ])
             ->headerActions([
                 \Filament\Tables\Actions\Action::make('checkout cart')
+                ->form([
+                    TextInput::make('customer_name')
+                        ->label('customer name')
+                        ->required(),
+                ])
                 ->label('checkout cart')
                 ->color('warning')
                 ->extraAttributes([
