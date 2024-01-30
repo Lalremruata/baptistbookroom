@@ -19,8 +19,10 @@ use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
@@ -162,7 +164,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             ->query(SalesCartItem::query()->where('branch_id', auth()->user()->branch_id))
             ->columns([
                 TextColumn::make('branchStock.mainStock.item.item_name'),
-                TextColumn::make('quantity'),   
+                TextColumn::make('quantity'),
                 TextColumn::make('selling_price')
                 ->money('INR')
                 ->summarize(Summarizer::make()
@@ -170,8 +172,9 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->using(function (Builder $query): string {
                     return $query->sum(DB::raw('selling_price * quantity'));
                 })
-                ), 
-                TextColumn::make('discount'),
+                ),
+                TextColumn::make('discount')
+                    ->suffix('%'),
                 TextColumn::make('Total')
                 ->summarize(Summarizer::make()
                 ->label('Total')
@@ -189,9 +192,17 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             ->headerActions([
                 \Filament\Tables\Actions\Action::make('checkout cart')
                 ->form([
+                    Toggle::make('is_fully_paid')
+                    ->label("Paid Full?")
+                    ->default(1)
+                    ->live(),
                     TextInput::make('customer_name')
                         ->label('customer name')
-                        ->required(),
+                        ->required()
+                        ->hidden(fn (Get $get): bool => ! $get('is_fully_paid')),
+                    TextInput::make('phone')
+                        ->label('Contact')
+                        ->hidden(fn (Get $get): bool => ! $get('is_fully_paid')),
                 ])
                 ->label('checkout cart')
                 ->color('warning')
@@ -246,7 +257,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 $totalCostPrice = $branchStock->cost_price * $data['quantity'];
                 $sellingPrice = $totalCostPrice - ($totalCostPrice * ($data['discount']/100));
                 $newData = [
-                    'cost_price'=> $branchStock->cost_price,
+                    // 'cost_price'=> $branchStock->cost_price,
                     'selling_price'=> $sellingPrice,
                 ];
                 $data += $newData;

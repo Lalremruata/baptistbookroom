@@ -37,7 +37,8 @@ class Login extends BaseAuth implements HasForms
         return TextInput::make('password')
             ->label('password')
             ->required()
-            ->password();
+            ->password()
+            ->revealable();
     }
     protected function getCredentialsFromFormData(array $data): array
     {
