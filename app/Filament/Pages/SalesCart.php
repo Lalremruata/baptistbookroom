@@ -146,6 +146,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                             else return 1;
                         }),
                     TextInput::make('discount')
+                    ->numeric()
                     ->default(0),
                 Hidden::make('branch_id')
                     ->default(auth()->user()->branch_id),
@@ -161,15 +162,23 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             ->query(SalesCartItem::query()->where('branch_id', auth()->user()->branch_id))
             ->columns([
                 TextColumn::make('branchStock.mainStock.item.item_name'),
-                TextColumn::make('quantity'),
-                TextColumn::make('cost_price'),
+                TextColumn::make('quantity'),   
                 TextColumn::make('selling_price')
+                ->money('INR')
                 ->summarize(Summarizer::make()
                 ->label('Total')
                 ->using(function (Builder $query): string {
                     return $query->sum(DB::raw('selling_price * quantity'));
                 })
-                ),
+                ), 
+                TextColumn::make('discount'),
+                TextColumn::make('Total')
+                ->summarize(Summarizer::make()
+                ->label('Total')
+                ->using(function (Builder $query): string {
+                    return $query->sum(DB::raw('selling_price * quantity * discount'));
+                })
+                )
             ])
             ->actions([
                 DeleteAction::make()
@@ -234,9 +243,11 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             $cartItem = SalesCartItem::where('branch_stock_id', $data['branch_stock_id'])->first();
             if (!$cartItem) {
                 $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
+                $totalCostPrice = $branchStock->cost_price * $data['quantity'];
+                $sellingPrice = $totalCostPrice - ($totalCostPrice * ($data['discount']/100));
                 $newData = [
                     'cost_price'=> $branchStock->cost_price,
-                    'selling_price'=> $branchStock->mrp,
+                    'selling_price'=> $sellingPrice,
                 ];
                 $data += $newData;
                 SalesCartItem::create($data);

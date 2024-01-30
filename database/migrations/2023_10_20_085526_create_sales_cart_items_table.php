@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained();
             $table->foreignId('user_id')->constrained();
             $table->integer('quantity')->unsigned();
-            $table->integer('cost_price')->unsigned();
             $table->integer('selling_price')->unsigned();
             $table->integer('discount')->unsigned();
             $table->timestamps();

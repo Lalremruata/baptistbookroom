@@ -23,6 +23,7 @@ class CreatePrivateBook extends CreateRecord
         $mainStock->batch = $this->data['batch'];
         $mainStock->item_id = $this->data['item_id'];
         $mainStock->quantity = $this->data['quantity'];
+        $mainStock->barcode = $this->data['barcode'];
         $mainStock->save();
     }
 }

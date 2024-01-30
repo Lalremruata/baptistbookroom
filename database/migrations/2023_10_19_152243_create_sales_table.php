@@ -25,6 +25,7 @@ return new class extends Migration
                 ->onDelete('no action');
             $table->date('sale_date')->nullable();
             $table->decimal('cost_price', 8, 2)->nullable();
+            $table->decimal('discount', 8, 2)->nullable()->default(0);
             $table->decimal('selling_price', 8, 2)->nullable();
             $table->string('payment_mode'); // Cash, Online, etc.
             $table->string('transaction_number')->nullable();

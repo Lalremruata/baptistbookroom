@@ -86,6 +86,7 @@ class ItemResource extends Resource
                 Tables\Columns\TextColumn::make('item_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('barcode')
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
