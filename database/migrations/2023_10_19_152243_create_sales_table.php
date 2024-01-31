@@ -23,10 +23,8 @@ return new class extends Migration
             $table->foreignId('customer_id')
                 ->constrained()
                 ->onDelete('no action');
-            $table->date('sale_date')->nullable();
-            $table->decimal('cost_price', 8, 2)->nullable();
             $table->decimal('discount', 8, 2)->nullable()->default(0);
-            $table->decimal('selling_price', 8, 2)->nullable();
+            $table->decimal('total_amount', 8, 2)->nullable()->default(0);
             $table->string('payment_mode'); // Cash, Online, etc.
             $table->string('transaction_number')->nullable();
             $table->timestamps();

@@ -16,7 +16,6 @@ class CreatePrivateBook extends CreateRecord
     }
     protected function beforeCreate(): void
     {
-        // Runs after the form fields are saved to the database.
         $mainStock = new MainStock;
         $mainStock->cost_price = $this->data['cost_price'];
         $mainStock->mrp = $this->data['mrp'];

@@ -14,7 +14,6 @@ class Sale extends Model
         "user_id",
         "item_id",
         'customer_id',
-        "sale_date",
         "quantity",
         "cost_price",
         "selling_price",

@@ -93,7 +93,7 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('branchStock.mainStock.item.item_name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('sale_date')
+                Tables\Columns\TextColumn::make('created_at')
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')

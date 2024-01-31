@@ -15,9 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('customer_name');
             $table->string('phone')->nullable();
-            $table->decimal('recieved_amount')->nullable();
-            $table->decimal('total_amount')->nullable();
-            $table->decimal('recovered_amount')->nullable();
+            $table->string('address')->nullable();
             $table->timestamps();
         });
     }

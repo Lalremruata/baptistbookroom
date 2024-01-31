@@ -192,14 +192,15 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             ])
             ->headerActions([
                 \Filament\Tables\Actions\Action::make('checkout cart')
-                // Toggle::make('is_fully_paid')
-                // ->label("Paid Full?")
-                // ->default(1)
-                // ->live(),
+
                 ->steps([
                     Step::make('Customer Detail')
                     // ->description('Give the category a unique name')
                     ->schema([
+                        Toggle::make('is_fully_paid')
+                        ->label("Paid Full?")
+                        ->default(1)
+                        ->live(),
                         Section::make([
                             TextInput::make('customer_name')
                             ->label('customer name')
@@ -229,7 +230,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                             ])
                             ->required(),
                             TextInput::make('Transaction_number')
-                        ])->columns(2)         
+                        ])->columns(2)
                         ])
 
 

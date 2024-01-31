@@ -6,6 +6,7 @@ use App\Filament\Resources\AssetResource\Pages;
 use App\Filament\Resources\AssetResource\RelationManagers;
 use App\Models\Asset;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -24,6 +25,10 @@ class AssetResource extends Resource
     {
         return $form
             ->schema([
+                Select::make('branch_id')
+                    ->label('branch')
+                    ->relationship('branch','branch_name')
+                    ->required(),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
@@ -32,6 +37,11 @@ class AssetResource extends Resource
                     ->numeric(),
                 Forms\Components\DatePicker::make('purchase_date'),
                 Forms\Components\TextInput::make('condition')
+                ->datalist([
+                    'New',
+                    'Good',
+                    'Bad',
+                ])
                     ->maxLength(255),
             ]);
     }

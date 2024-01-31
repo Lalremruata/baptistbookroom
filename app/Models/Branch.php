@@ -28,5 +28,9 @@ class Branch extends Model
     {
         return $this->hasMany(User::class);
     }
+    public function asset(): HasMany
+    {
+        return $this->hasMany(Asset::class);
+    }
 
 }

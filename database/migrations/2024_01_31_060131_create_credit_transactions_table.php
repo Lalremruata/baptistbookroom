@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assets', function (Blueprint $table) {
+        Schema::create('credit_transactions', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->unsignedInteger('quantity');
-            $table->date('purchase_date')->nullable();
-            $table->string('condition')->nullable();
-            $table->foreignId('branch_id')->constrained();
+            $table->foreignId('customer_id')->constrained();
+            $table->decimal('recieved_amount')->nullable();
+            $table->decimal('total_amount')->nullable();
+            $table->decimal('recovered_amount')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('assets');
+        Schema::dropIfExists('credit_transactions');
     }
 };
