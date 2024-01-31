@@ -9,7 +9,10 @@ use App\Models\Sale;
 use Filament\Actions\Action;
 use App\Models\SalesCartItem;
 use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Get;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\VerticalAlignment;
 use Filament\Support\Exceptions\Halt;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Hidden;
@@ -163,25 +166,23 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
         return $table
             ->query(SalesCartItem::query()->where('branch_id', auth()->user()->branch_id))
             ->columns([
-                TextColumn::make('branchStock.mainStock.item.item_name'),
-                TextColumn::make('quantity'),
+                TextColumn::make('branchStock.mainStock.item.item_name')
+                    ->wrapHeader()
+                    ->verticalAlignment(VerticalAlignment::Start),
+                TextColumn::make('quantity')
+                    ->verticallyAlignStart(),
+                TextColumn::make('cost_price')
+                ->suffix('/-'),
                 TextColumn::make('selling_price')
-                ->money('INR')
-                ->summarize(Summarizer::make()
-                ->label('Total')
-                ->using(function (Builder $query): string {
-                    return $query->sum(DB::raw('selling_price * quantity'));
-                })
-                ),
+                ->suffix('/-')
+                // ->summarize(Summarizer::make()
+                // ->label('Total')
+                // ->using(function (Builder $query): string {
+                //     return $query->sum(DB::raw('selling_price * quantity'));
+                // }))
+                ,
                 TextColumn::make('discount')
                     ->suffix('%'),
-                TextColumn::make('Total')
-                ->summarize(Summarizer::make()
-                ->label('Total')
-                ->using(function (Builder $query): string {
-                    return $query->sum(DB::raw('selling_price * quantity * discount'));
-                })
-                )
             ])
             ->actions([
                 DeleteAction::make()
@@ -191,18 +192,47 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             ])
             ->headerActions([
                 \Filament\Tables\Actions\Action::make('checkout cart')
-                ->form([
-                    Toggle::make('is_fully_paid')
-                    ->label("Paid Full?")
-                    ->default(1)
-                    ->live(),
-                    TextInput::make('customer_name')
-                        ->label('customer name')
-                        ->required()
-                        ->hidden(fn (Get $get): bool => ! $get('is_fully_paid')),
-                    TextInput::make('phone')
-                        ->label('Contact')
-                        ->hidden(fn (Get $get): bool => ! $get('is_fully_paid')),
+                // Toggle::make('is_fully_paid')
+                // ->label("Paid Full?")
+                // ->default(1)
+                // ->live(),
+                ->steps([
+                    Step::make('Customer Detail')
+                    // ->description('Give the category a unique name')
+                    ->schema([
+                        Section::make([
+                            TextInput::make('customer_name')
+                            ->label('customer name')
+                            ->required()
+                            // ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
+                            ,
+                        TextInput::make('phone')
+                            ->label('Contact')
+                            // ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
+                            ,
+                        ])->columns(2),
+                    ]),
+                    Step::make('Payment')
+                    // ->description('Give the category a unique name')
+                    ->schema([
+                        Section::make([
+                            TextInput::make('recieved_amount')
+                            ->prefix('₹')
+                            ->numeric()
+                            ->required(),
+                            Select::make('payment_mode')
+                            ->options([
+                                "cash" => "cash",
+                                "upi" => "upi",
+                                "bank transfer"=>"bank transfer",
+                                "cheque" => "cheque"
+                            ])
+                            ->required(),
+                            TextInput::make('Transaction_number')
+                        ])->columns(2)         
+                        ])
+
+
                 ])
                 ->label('checkout cart')
                 ->color('warning')
@@ -233,8 +263,10 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     }
                     Sale::insert($salesData);
                 })
+                ->slideOver()
                 ->modalIcon('heroicon-o-check-circle')
                 ->modalIconColor('danger')
+                ->modalWidth(MaxWidth::TwoExtraLarge)
             ])
             ->paginated([25, 50, 100, 'all']);
 
@@ -257,14 +289,19 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 $totalCostPrice = $branchStock->cost_price * $data['quantity'];
                 $sellingPrice = $totalCostPrice - ($totalCostPrice * ($data['discount']/100));
                 $newData = [
-                    // 'cost_price'=> $branchStock->cost_price,
+                    'cost_price'=> $totalCostPrice,
                     'selling_price'=> $sellingPrice,
                 ];
                 $data += $newData;
                 SalesCartItem::create($data);
             }
             else {
+                $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
+                $totalCostPrice = $branchStock->cost_price * $data['quantity'];
+                $sellingPrice = $totalCostPrice - ($totalCostPrice * ($data['discount']/100));
                 $cartItem->quantity += $data['quantity'];
+                $cartItem->cost_price += $totalCostPrice;
+                $cartItem->selling_price += $sellingPrice;
                 $cartItem->update();
             }
             $this->form->fill();
