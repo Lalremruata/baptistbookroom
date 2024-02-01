@@ -26,7 +26,8 @@ class CreateMainStock extends CreateRecord
             $mainStock->batch = $this->data['batch'];
             $mainStock->quantity += $this->data['quantity'];
             $mainStock->barcode = $this->data['barcode'];
-            return static::getModel()::create($data);
+            $mainStock->update();
+            return $mainStock;
         }
         else
             return static::getModel()::create($data);

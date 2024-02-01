@@ -27,6 +27,7 @@ return new class extends Migration
             $table->decimal('total_amount', 8, 2)->nullable()->default(0);
             $table->string('payment_mode'); // Cash, Online, etc.
             $table->string('transaction_number')->nullable();
+            $table->integer('memo');
             $table->timestamps();
         });
     }

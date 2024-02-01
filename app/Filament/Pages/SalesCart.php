@@ -3,8 +3,11 @@
 namespace App\Filament\Pages;
 
 use App\Models\BranchStock;
+use App\Models\CreditTransaction;
+use App\Models\Customer;
 use App\Models\Item;
 use App\Models\MainStock;
+use App\Models\Memo;
 use App\Models\Sale;
 use Filament\Actions\Action;
 use App\Models\SalesCartItem;
@@ -112,7 +115,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         if ($branchStockId) {
                             $result=BranchStock::where('id',$branchStockId)
                             ->where('branch_id',auth()->user()->branch_id)
-                            ->pluck('quantity','id')->first();
+                            ->pluck('quantity')->first();
                                 return $result;
 
                         }
@@ -171,15 +174,14 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     ->verticalAlignment(VerticalAlignment::Start),
                 TextColumn::make('quantity')
                     ->verticallyAlignStart(),
-                TextColumn::make('cost_price')
-                ->suffix('/-'),
                 TextColumn::make('selling_price')
                 ->suffix('/-')
-                // ->summarize(Summarizer::make()
-                // ->label('Total')
-                // ->using(function (Builder $query): string {
-                //     return $query->sum(DB::raw('selling_price * quantity'));
-                // }))
+                 ->summarize(Summarizer::make()
+                 ->label('Total')
+                 ->using(function (Builder $query): string {
+                    return $query->sum('selling_price');
+                    //  return $query->sum(DB::raw('selling_price * quantity'));
+                 }))
                 ,
                 TextColumn::make('discount')
                     ->suffix('%'),
@@ -194,33 +196,20 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 \Filament\Tables\Actions\Action::make('checkout cart')
 
                 ->steps([
-                    Step::make('Customer Detail')
-                    // ->description('Give the category a unique name')
-                    ->schema([
-                        Toggle::make('is_fully_paid')
-                        ->label("Paid Full?")
-                        ->default(1)
-                        ->live(),
-                        Section::make([
-                            TextInput::make('customer_name')
-                            ->label('customer name')
-                            ->required()
-                            // ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
-                            ,
-                        TextInput::make('phone')
-                            ->label('Contact')
-                            // ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
-                            ,
-                        ])->columns(2),
-                    ]),
                     Step::make('Payment')
                     // ->description('Give the category a unique name')
+
                     ->schema([
                         Section::make([
                             TextInput::make('recieved_amount')
                             ->prefix('₹')
                             ->numeric()
-                            ->required(),
+                            ->required()
+                            ->hint(function(Get $get){
+                                $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)->sum('selling_price');
+                                return 'Total Amount : ' . $totalAmount;
+                            })
+                            ->hintColor('danger'),
                             Select::make('payment_mode')
                             ->options([
                                 "cash" => "cash",
@@ -229,11 +218,35 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                 "cheque" => "cheque"
                             ])
                             ->required(),
-                            TextInput::make('Transaction_number')
+                            TextInput::make('transaction_number')
                         ])->columns(2)
-                        ])
+                            ]),
 
-
+                    Step::make('Customer Detail')
+                    ->afterValidation(function (array $data) {
+                        // $customer = new Customer;
+                        // dd($data);
+                    })
+                    // ->description('Give the category a unique name')
+                    ->schema([
+                        Toggle::make('is_fully_paid')
+                        ->label("Paid Full?")
+                        ->default(1)
+                        ->live(),
+                        Section::make([
+                            TextInput::make('customer_name')
+                            ->autofocus()
+                            ->label('customer name')
+                            ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
+                            ,
+                        TextInput::make('phone')
+                            ->label('Contact')
+                            ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
+                            ,
+                        TextInput::make('address')
+                            ->label('address')
+                        ])->columns(2),
+                    ]),
                 ])
                 ->label('checkout cart')
                 ->color('warning')
@@ -242,6 +255,30 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ])
                 ->requiresConfirmation()
                 ->action(function (array $data) {
+                    if($data['customer_name'])
+                    {
+                        $customer = new Customer;
+                        $customer->customer_name = $data['customer_name'];
+                        $customer->phone = $data['phone'];
+                        $customer->address = $data['address'];
+                        $customer->save();
+                        $customer_id = Customer::latest()->pluck('id')->first();
+                    }
+                    else{
+                        $customer_id = null;
+                    }
+
+                    $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)->sum('selling_price');
+
+                    if($data['recieved_amount'] < $totalAmount){
+                        $creditTransaction = new CreditTransaction;
+                        $creditTransaction->customer_id = $customer_id;
+                        $creditTransaction->recieved_amount = $totalAmount;
+                        $creditTransaction->total_amount = $customer_id;
+                        $creditTransaction->customer_id = $customer_id;
+                    }
+
+                    $memo = Memo::latest()->first();
                     $salesData = [];
                     $cartItems = SalesCartItem::where('branch_id',auth()->user()->branch_id)
                     ->where('user_id',auth()->user()->id)->get();
@@ -252,17 +289,23 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         $branchStock->quantity -= $item->quantity;
                         $branchStock->update();
                         $salesData[] = [
+                            'branch_stock_id' => $item->branch_stock_id,
                             'branch_id' => auth()->user()->branch_id,
                             'user_id' => auth()->user()->id,
-                            'branch_stock_id' => $item->branch_stock_id,
+                            'customer_id' => $customer_id,
                             'sale_date' => now(),
-                            'cost_price' => $branchStock['cost_price'],
-                            'selling_price' => $branchStock['mrp'],
-                            'quantity' =>$item->quantity,
+                            'discount' => $item->discount,
+                            'total_amount' => $item->selling_price,
+                            'quantity' => $item->quantity,
+                            'payment_mode' => $data['payment_mode'],
+                            'transaction_number' => $data['transaction_number'],
+                            'memo' => ($memo->memo + 1) . auth()->user()->branch_id,
                         ];
                         $item->delete();
                     }
                     Sale::insert($salesData);
+                    $memo->memo = $memo->memo + 1;
+                    $memo->update();
                 })
                 ->slideOver()
                 ->modalIcon('heroicon-o-check-circle')
