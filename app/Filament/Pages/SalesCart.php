@@ -273,9 +273,10 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     if($data['recieved_amount'] < $totalAmount){
                         $creditTransaction = new CreditTransaction;
                         $creditTransaction->customer_id = $customer_id;
-                        $creditTransaction->recieved_amount = $totalAmount;
-                        $creditTransaction->total_amount = $customer_id;
-                        $creditTransaction->customer_id = $customer_id;
+                        $creditTransaction->recieved_amount = $data['recieved_amount'];
+                        $creditTransaction->total_amount = $totalAmount;
+                        $creditTransaction->recovered_amount = 0;
+                        $creditTransaction->save();
                     }
 
                     $memo = Memo::latest()->first();
