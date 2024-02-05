@@ -7,15 +7,14 @@ use App\Models\Supplier;
 
 use App\Models\SupplierFinancials;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Concerns\InteractsWithRecord;
+use Filament\Actions\Concerns\InteractsWithActions;;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Contracts\HasRecord;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -26,48 +25,39 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Filament\Resources\Pages\ViewRecord;
 
-class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasActions
+class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
 {
-    use InteractsWithRecord;
     use InteractsWithTable;
     use InteractsWithForms;
     use InteractsWithActions;
     protected static string $resource = SupplierResource::class;
-    public SupplierFinancials $supplier;
+    public Supplier $record;
 
     public ?array $data = [];
 
     protected static string $view = 'filament.pages.supplier-detail';
-
-
-    public function mount(int | string $record): void
+    public function mount(): void
     {
-
-        $this->record = $this->resolveRecord($record);
-
-        static::authorizeResourceAccess();
-        // to pre populate fields
-        // $this->form->fill($record->toArray());
-    }
-    public function resolveRecord($record): ?Supplier
-    {
-        return Supplier::query()->where('id', $record)->first();
+        $this->form->fill();
     }
     public function table(Table $table): Table
     {
         return $table
             ->query(SupplierFinancials::query()->where('supplier_id', $this->record->id))
             ->columns([
-                TextColumn::make('supplier.supplier_name'),
-                TextColumn::make('created_at')
-                ->label('date'),
-                TextColumn::make('bill'),
+                TextColumn::make('bill_no'),
                 TextColumn::make('credit'),
                 TextColumn::make('debit'),
+                TextColumn::make('created_at')
+                ->label('date')
+                ->date(),
             ])
             ->headerActions([
                 \Filament\Tables\Actions\CreateAction::make('add record')
                 ->form([
+                    Section::make([
+                        TextInput::make('bill_no')
+                        ->required(),
                     TextInput::make('credit')
                         ->label('Credit')
                         ->required(),
@@ -77,7 +67,10 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasA
                     TextInput::make('balance')
                         ->label('Balance')
                         ->required(),
-                ])
+                    Textarea::make('remarks')
+                    ])->columns(2)
+                    ])
+
                 ->label('add record')
                 ->color('success')
                 ->extraAttributes([
@@ -85,28 +78,15 @@ class SupplierDetail extends Page implements HasForms, HasTable, HasRecord, HasA
                 ])
                 ->action(function (array $data, $record) {
                     $supplierFinancial = new SupplierFinancials();
-                    $supplierFinancial->id = 1;
+                    $supplierFinancial->supplier_id = $this->record->id;
+                    $supplierFinancial->bill_no = $data['bill_no'];
                     $supplierFinancial->credit = $data['credit'];
                     $supplierFinancial->debit = $data['debit'];
                     $supplierFinancial->balance = $data['balance'];
+                    $supplierFinancial->remarks = $data['remarks'];
                     $supplierFinancial->save();
                 })
             ]);
-    }
-    public function deleteAction(Form $form): Action
-    {
-        return $form
-        ->form([
-            TextInput::make('credit')
-                ->label('Credit')
-                ->required(),
-            TextInput::make('debit')
-                ->label('Debit')
-                ->required(),
-            TextInput::make('balance')
-                ->label('Balance')
-                ->required(),
-        ]);
     }
     // protected function getActions(): array
     // {

@@ -103,6 +103,17 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     ->pluck('mainStock.item.item_name', 'id')
                     ->toArray();
                 })
+                ->afterStateUpdated(
+                    function(callable $set,Get $get){
+                        $branchStockId = $get('branch_stock_id');
+                        $branchStock = BranchStock::where('id', $branchStockId)
+                            ->first();
+                            if($branchStock)
+                            {
+                                $set('barcode',$branchStock->barcode);
+                            }
+                    }
+                    )
                 ->searchable()
                 ->dehydrated()
                 ->required()
@@ -130,7 +141,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                 ->where('branch_id',auth()->user()->branch_id)
                                 ->pluck('quantity','id')->first();
                                 if($result)
-                                    return 'quantity available: '.$result;
+                                    return 'qty. available: '.$result;
                                 else
                                     return 'stock unavailable';
                         }
@@ -201,7 +212,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
 
                     ->schema([
                         Section::make([
-                            TextInput::make('recieved_amount')
+                            TextInput::make('received_amount')
                             ->prefix('₹')
                             ->numeric()
                             ->required()
@@ -229,19 +240,20 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     })
                     // ->description('Give the category a unique name')
                     ->schema([
-                        Toggle::make('is_fully_paid')
-                        ->label("Paid Full?")
-                        ->default(1)
-                        ->live(),
+                        // Toggle::make('is_fully_paid')
+                        // ->label("Paid Full?")
+                        // ->default(1)
+                        // ->live(),
                         Section::make([
                             TextInput::make('customer_name')
                             ->autofocus()
                             ->label('customer name')
-                            ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
+                            // ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
                             ,
                         TextInput::make('phone')
                             ->label('Contact')
-                            ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
+                            ->numeric()
+                            // ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
                             ,
                         TextInput::make('address')
                             ->label('address')
@@ -270,10 +282,10 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
 
                     $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)->sum('selling_price');
 
-                    if($data['recieved_amount'] < $totalAmount){
+                    if($data['received_amount'] < $totalAmount){
                         $creditTransaction = new CreditTransaction;
                         $creditTransaction->customer_id = $customer_id;
-                        $creditTransaction->recieved_amount = $data['recieved_amount'];
+                        $creditTransaction->received_amount = $data['received_amount'];
                         $creditTransaction->total_amount = $totalAmount;
                         $creditTransaction->recovered_amount = 0;
                         $creditTransaction->save();
@@ -294,13 +306,15 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                             'branch_id' => auth()->user()->branch_id,
                             'user_id' => auth()->user()->id,
                             'customer_id' => $customer_id,
-                            'sale_date' => now(),
                             'discount' => $item->discount,
                             'total_amount' => $item->selling_price,
                             'quantity' => $item->quantity,
                             'payment_mode' => $data['payment_mode'],
                             'transaction_number' => $data['transaction_number'],
                             'memo' => ($memo->memo + 1) . auth()->user()->branch_id,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+
                         ];
                         $item->delete();
                     }

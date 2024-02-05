@@ -79,7 +79,7 @@ class AdminPanelProvider extends PanelProvider
                      ->label('Stocks')
                      ->collapsible(false),
                 NavigationGroup::make()
-                     ->label('Manage Private Books')
+                     ->label('Private Books')
                      ->collapsed(),
                 NavigationGroup::make()
                     ->label('Manage Items')

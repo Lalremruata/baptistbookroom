@@ -52,8 +52,12 @@ class SubCategoriesRelationManager extends RelationManager
                 ]),
             ]);
     }
-    protected function getRedirectUrl(): string
+    public static function getPages(): array
     {
-        return SubCategoryResource::getUrl('index');
+        return [
+            // 'index' => Pages\ListCategories::route('/'),
+            // 'create' => Pages\CreateCategory::route('/create'),
+            'edit' => SubCategoryResource\Pages\EditSubCategory::route('/{record}/edit'),
+        ];
     }
 }

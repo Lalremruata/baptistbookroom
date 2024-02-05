@@ -15,10 +15,11 @@ class Sale extends Model
         "item_id",
         'customer_id',
         "quantity",
-        "cost_price",
-        "selling_price",
-        'payment_type',
+        "discount",
+        "total_amount",
+        'payment_mode',
         'transaction_number',
+        'memo',
     ];
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);

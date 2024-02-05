@@ -99,10 +99,19 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('quantity')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('cost_price')
+                Tables\Columns\TextColumn::make('discount')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('selling_price')
+                Tables\Columns\TextColumn::make('total_amount')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('payment_mode')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('memo')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('transaction_number')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

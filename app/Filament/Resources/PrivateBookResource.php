@@ -24,7 +24,7 @@ class PrivateBookResource extends Resource
     protected static ?string $model = PrivateBook::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Manage Private Books';
+    protected static ?string $navigationGroup = 'Private Books';
     public static function form(Form $form): Form
     {
         return $form
@@ -45,12 +45,15 @@ class PrivateBookResource extends Resource
 
                         })
                         ->reactive()
-                        ->dehydrated(false)
+                        // ->dehydrated(false)
                         ->live(),
                     Select::make('item_id')
                         ->label('search item')
+                        ->reactive()
                         ->searchable()
-                        ->options(Item::query()->pluck('item_name', 'id')),
+                        ->options(Item::query()->pluck('item_name', 'id'))
+                        ->afterStateUpdated(fn(callable $set,Get $get)=>$set('barcode',Item::query()
+                        ->where('id', $get('item_id'))->pluck('barcode')->first())),
                 ])->columns(3),
                 Section::make('')
                 ->schema([
@@ -134,7 +137,7 @@ class PrivateBookResource extends Resource
             'index' => Pages\ListPrivateBooks::route('/'),
             'create' => Pages\CreatePrivateBook::route('/create'),
             'edit' => Pages\EditPrivateBook::route('/{record}/edit'),
-            'book-account' => Pages\PrivateBookAccount::route('/{record}/book-account'),
+            'book-account' => Pages\BookAccount::route('/{record}/book-account'),
 
         ];
     }

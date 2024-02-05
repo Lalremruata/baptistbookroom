@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CreditTransactionResource\Pages;
-use App\Filament\Resources\CreditTransactionResource\RelationManagers;
-use App\Models\CreditTransaction;
+use App\Filament\Resources\CustomerResource\Pages;
+use App\Filament\Resources\CustomerResource\RelationManagers;
+use App\Models\Customer;
 use App\Models\Sale;
-use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -15,21 +14,21 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class CreditTransactionResource extends Resource
+class CustomerResource extends Resource
 {
-    protected static ?string $model = CreditTransaction::class;
+    protected static ?string $model = Customer::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationLabel = 'Customer Credit';
+    protected static ?string $navigationGroup = 'Sales';
+    protected static ?int$navigationSort = 3;
     public static function canCreate(): bool
     {
         return 0;
     }
-    public static function canAccess(): bool
-{
-    return 0;
-}
     public static function getEloquentQuery(): Builder
     {
         if(auth()->user()->user_type == '1') {
@@ -46,10 +45,7 @@ class CreditTransactionResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('customer.customer_name'),
-                TextInput::make('recieved_amount'),
-                TextInput::make('total_amount'),
-                TextInput::make('recovered_amount'),
+                //
             ]);
     }
 
@@ -57,26 +53,27 @@ class CreditTransactionResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('customer.customer_name'),
-                TextColumn::make('recieved_amount'),
-                TextColumn::make('total_amount'),
-                TextColumn::make('recovered_amount'),
-                ])
+                TextColumn::make('customer_name')
+                    ->searchable(),
+                TextColumn::make('phone'),
+                TextColumn::make('address'),
+            ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\Action::make('transactions')
-                ->url(fn (CreditTransaction $record): string => static::getUrl('transactions',['record' => $record])),
-
+                // Tables\Actions\EditAction::make(),
+                // Tables\Actions\Action::make('transactions')
+                // ->url(fn (Customer $record): string => static::getUrl('transactions',['record' => $record])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->recordUrl(
+                fn (Model $record): string => static::getUrl('transactions',['record' => $record]),
+            );
     }
 
     public static function getRelations(): array
@@ -89,10 +86,11 @@ class CreditTransactionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCreditTransactions::route('/'),
-            'edit' => Pages\EditCreditTransaction::route('/{record}/edit'),
-            'view' => Pages\ViewCreditTransactions::route('/{record}'),
+            'index' => Pages\ListCustomers::route('/'),
+            'create' => Pages\CreateCustomer::route('/create'),
+            'edit' => Pages\EditCustomer::route('/{record}/edit'),
             'transactions' => Pages\CustomerCreditTransactions::route('/{record}/transactions'),
+
         ];
     }
 }

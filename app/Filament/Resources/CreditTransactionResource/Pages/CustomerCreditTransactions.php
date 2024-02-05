@@ -20,28 +20,34 @@ use Filament\Tables\Table;
 use Illuminate\Http\Request;
 use Livewire\Component;
 
-class CustomerCreditTransactions extends Page implements HasForms, HasTable, HasRecord
+class CustomerCreditTransactions extends Page implements HasForms, HasTable
 {
     protected static string $resource = CreditTransactionResource::class;
     use InteractsWithTable;
     use InteractsWithForms;
-    use InteractsWithRecord;
+    // use InteractsWithRecord;
+    public ?array $data = [];
 
-    // public CreditTransaction $record;
+    public CreditTransaction $record;
+   
     protected static string $view = 'filament.resources.credit-transaction-resource.pages.customer-credit-transactions';
-    public function mount(int | string $record): void
+    public function mount(): void
     {
-
-        $this->record = $this->resolveRecord($record);
-
-        static::authorizeResourceAccess();
-        // to pre populate fields
         $this->form->fill();
     }
-    public function resolveRecord($record): ?CreditTransaction
-    {
-        return CreditTransaction::query()->where('id', $record)->first();
-    }
+    // public function mount(int | string $record): void
+    // {
+
+    //     $this->record = $this->resolveRecord($record);
+
+    //     static::authorizeResourceAccess();
+    //     // to pre populate fields
+    //     $this->form->fill();
+    // }
+    // public function resolveRecord($record): ?CreditTransaction
+    // {
+    //     return CreditTransaction::query()->where('id', $record)->first();
+    // }
     public function form(Form $form): Form
     {
         return $form
@@ -51,13 +57,12 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
     }
     public function table(Table $table): Table
     {
-        // dd($this->getRecord());
         return $table
-            ->query(CreditTransaction::query()->where('id',$this->record->id))
+            ->query(CreditTransaction::query()->where('customer_id',$this->record->customer_id))
             ->columns([
                 TextColumn::make('customer.customer_name'),
-                TextColumn::make('recieved_amount')
-                ->label('Initial Recieved Amount'),
+                TextColumn::make('received_amount')
+                ->label('Initial Received Amount'),
                 TextColumn::make('total_amount'),
             ])
             ->filters([
@@ -70,22 +75,23 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
                 // ...
             ])
             ->headerActions([
-                // \Filament\Tables\Actions\Action::make('New Recovered Amount')
-                // ->form([
-                //     TextInput::make('recovered_amount')
-                //     ,
-                // ])
-                // ->requiresConfirmation()
-                // ->action(function (array $data) {
-                //     $customerTransaction = CreditTransaction::query()->where('id', $this->record->id);
-                //     $newTransaction = [];
-                //     $newTransaction = [
-                //         "recovered_amount" => $data['recovered_amount'],
-                //         "total_amount" => $customerTransaction->total_amount,
-                //         "recieved_amount" => $customerTransaction->recieved_amount,
-                //     ];
-                //     CreditTransaction::insert($newTransaction);
-                // })
+                \Filament\Tables\Actions\Action::make('New Recovered Amount')
+                ->form([
+                    TextInput::make('recovered_amount')
+                    ,
+                ])
+                ->requiresConfirmation()
+                ->action(function (array $data) {
+                    $customerTransaction = CreditTransaction::query()->where('id', $this->record->id)->first();
+                    $newTransaction = [];
+                    $newTransaction = [
+                        "customer_id" => $customerTransaction->customer_id,
+                        "recovered_amount" => $data['recovered_amount'],
+                        "total_amount" => $customerTransaction->total_amount,
+                        "received_amount" => $customerTransaction->received_amount,
+                    ];
+                    CreditTransaction::insert($newTransaction);
+                })
             ]);
     }
     protected function getFormActions(): array
@@ -100,13 +106,15 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
     {
         try {
             $data = $this->form->getState();
-            $customer=CreditTransaction::where('customer_id', $this->record->id);
-            $data = [
-                'recieved_amount'=> $customer->recieved_amount,
-                'total_amount'=> $customer->total_amount,
-                'recovered_amount' =>$data['recovered_amount'],
+            $customerTransaction = CreditTransaction::query()->where('id', $this->record->id)->first();
+            $newTransaction = [];
+            $newTransaction = [
+                "customer_id" => $customerTransaction->customer_id,
+                "recovered_amount" => $data['recovered_amount'],
+                "total_amount" => $customerTransaction->total_amount,
+                "received_amount" => $customerTransaction->received_amount,
             ];
-            CreditTransaction::create($data);
+            CreditTransaction::create($newTransaction);
         }
         catch(Halt $exception){
             return;

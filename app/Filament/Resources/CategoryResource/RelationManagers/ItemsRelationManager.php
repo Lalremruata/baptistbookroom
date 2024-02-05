@@ -18,6 +18,13 @@ class ItemsRelationManager extends RelationManager
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('sub_category_id')
+                ->label('Sub Category')
+                ->options(function (RelationManager $livewire): array {
+                    return $livewire->getOwnerRecord()->subcategories()
+                        ->pluck('subcategory_name', 'id')
+                        ->toArray();
+                }),
                 Forms\Components\TextInput::make('item_name')
                     ->required()
                     ->maxLength(255),
@@ -35,12 +42,14 @@ class ItemsRelationManager extends RelationManager
             ->recordTitleAttribute('item_name')
             ->columns([
                 Tables\Columns\TextColumn::make('item_name'),
+                Tables\Columns\TextColumn::make('barcode'),
+                Tables\Columns\TextColumn::make('description'),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                // Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make(),
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),

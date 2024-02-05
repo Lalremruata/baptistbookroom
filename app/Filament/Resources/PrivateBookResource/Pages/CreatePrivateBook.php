@@ -6,6 +6,7 @@ use App\Filament\Resources\PrivateBookResource;
 use App\Models\MainStock;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class CreatePrivateBook extends CreateRecord
 {
@@ -24,5 +25,14 @@ class CreatePrivateBook extends CreateRecord
         $mainStock->quantity = $this->data['quantity'];
         $mainStock->barcode = $this->data['barcode'];
         $mainStock->save();
+    }
+    protected function handleRecordCreation(array $data): Model
+    {
+        $mainStockId = MainStock::latest()->pluck('id')->first();
+        $newData = [
+            'main_stock_id'=> $mainStockId,
+        ];
+        $data += $newData;
+        return static::getModel()::create($data);
     }
 }

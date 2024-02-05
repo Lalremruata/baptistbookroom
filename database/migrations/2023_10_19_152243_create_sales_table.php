@@ -23,6 +23,7 @@ return new class extends Migration
             $table->foreignId('customer_id')
                 ->constrained()
                 ->onDelete('no action');
+            $table->integer('quantity');
             $table->decimal('discount', 8, 2)->nullable()->default(0);
             $table->decimal('total_amount', 8, 2)->nullable()->default(0);
             $table->string('payment_mode'); // Cash, Online, etc.
