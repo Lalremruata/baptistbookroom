@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SubCategoryResource\RelationManagers;
 
 use Filament\Forms;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
@@ -20,13 +21,10 @@ class ItemsRelationManager extends RelationManager
 
         return $form
             ->schema([
-                Forms\Components\TextInput::make('category_id')
+                Hidden::make('category_id')
                 ->default(function (){
                     return $this->getOwnerRecord()->category_id;
-                })
-                // ->hidden()
-                ->dehydrated()
-                ->required(),
+                }),
                 Forms\Components\TextInput::make('item_name')
                     ->required()
                     ->maxLength(255),

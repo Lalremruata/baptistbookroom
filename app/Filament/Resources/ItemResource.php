@@ -77,14 +77,14 @@ class ItemResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('item_name')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('category.category_name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('subCategory.subcategory_name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('item_name')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('barcode')
                     ->searchable()
                     ->sortable(),

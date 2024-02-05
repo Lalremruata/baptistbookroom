@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CategoryResource\RelationManagers;
 
+use App\Filament\Resources\SubCategoryResource;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -38,7 +39,8 @@ class SubCategoriesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                // ->successRedirectUrl(route('posts.list')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -49,5 +51,9 @@ class SubCategoriesRelationManager extends RelationManager
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+    protected function getRedirectUrl(): string
+    {
+        return SubCategoryResource::getUrl('index');
     }
 }
