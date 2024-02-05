@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SubCategoryResource\Pages;
 use App\Filament\Resources\SubCategoryResource\RelationManagers;
+use App\Filament\Resources\SubCategoryResource\RelationManagers\ItemsRelationManager;
 use App\Models\Category;
 use App\Models\SubCategory;
 use Filament\Forms;
@@ -53,11 +54,11 @@ class SubCategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('category_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('subcategory_name')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('category.category_name')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -85,7 +86,7 @@ class SubCategoryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ItemsRelationManager::class,
         ];
     }
 

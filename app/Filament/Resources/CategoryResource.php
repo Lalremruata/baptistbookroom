@@ -3,6 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
+use App\Filament\Resources\CategoryResource\RelationManagers\ItemsRelationManager;
+use App\Filament\Resources\CategoryResource\RelationManagers\SubCategoriesRelationManager;
 use App\Models\Category;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -27,6 +29,11 @@ class CategoryResource extends Resource
         return $form
             ->schema([
                 Section::make()
+                ->columnSpan([
+                    'sm' => 2,
+                    'xl' => 3,
+                    '2xl' => 4,
+                ])
                 ->schema([
                     Forms\Components\TextInput::make('category_name')
                     ->autofocus()
@@ -34,7 +41,7 @@ class CategoryResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('description')
                     ->maxLength(255),
-                ])->columns(2)->compact(),
+                ])->columnSpan(2),
 
             ]);
     }
@@ -72,7 +79,8 @@ class CategoryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            SubCategoriesRelationManager::class,
+            ItemsRelationManager::class,
         ];
     }
 
