@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SaleResource\Pages;
 use App\Filament\Resources\SaleResource\RelationManagers;
+use App\Models\BranchStock;
 use App\Models\Sale;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Builder;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use Filament\Tables\Actions\HeaderActionsPosition;
-
+use Illuminate\Database\Eloquent\Model;
 
 class SaleResource extends Resource
 {
@@ -109,7 +110,6 @@ class SaleResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('memo')
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('transaction_number')
                     ->numeric()
@@ -145,7 +145,15 @@ class SaleResource extends Resource
                         ->hidden(! auth()->user()->user_type=='1')
                 ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                ->before(function (Model $record) {
+                    $branchStock = BranchStock::where('branch_id', $record->branch_id)
+                    ->where('id', $record->branch_stock_id)
+                    ->first();
+                    $branchStock->quantity += $record->quantity;
+                    $branchStock->update();
+                })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -170,8 +178,8 @@ class SaleResource extends Resource
     {
         return [
             'index' => Pages\ListSales::route('/'),
-            'create' => Pages\CreateSale::route('/create'),
-            'edit' => Pages\EditSale::route('/{record}/edit'),
+            // 'create' => Pages\CreateSale::route('/create'),
+            // 'edit' => Pages\EditSale::route('/{record}/edit'),
         ];
     }
 }

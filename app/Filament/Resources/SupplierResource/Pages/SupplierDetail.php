@@ -15,6 +15,8 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -24,6 +26,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Tables\Actions\DeleteAction as ActionsDeleteAction;
 
 class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
 {
@@ -40,6 +43,7 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
     {
         $this->form->fill();
     }
+
     public function table(Table $table): Table
     {
         return $table
@@ -48,15 +52,39 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
                 TextColumn::make('bill_no'),
                 TextColumn::make('credit'),
                 TextColumn::make('debit'),
+                TextColumn::make('balance'),
+                TextColumn::make('remarks'),
                 TextColumn::make('created_at')
                 ->label('date')
                 ->date(),
             ])
+            ->actions([
+                DeleteAction::make(),
+                EditAction::make()
+                ->form([
+                    Section::make([
+                        TextInput::make('bill_no')
+                        ->autofocus()
+                        ->required(),
+                    TextInput::make('credit')
+                        ->label('Credit')
+                        ->required(),
+                    TextInput::make('debit')
+                        ->label('Debit')
+                        ->required(),
+                    TextInput::make('balance')
+                        ->label('Balance')
+                        ->required(),
+                    Textarea::make('remarks')
+                    ])->columns(2)
+                    ]),
+                ])
             ->headerActions([
                 \Filament\Tables\Actions\CreateAction::make('add record')
                 ->form([
                     Section::make([
                         TextInput::make('bill_no')
+                        ->autofocus()
                         ->required(),
                     TextInput::make('credit')
                         ->label('Credit')

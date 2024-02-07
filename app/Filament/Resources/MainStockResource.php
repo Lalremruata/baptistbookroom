@@ -4,20 +4,26 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MainStockResource\Pages;
 use App\Filament\Resources\MainStockResource\RelationManagers;
+use App\Models\Category;
 use App\Models\Item;
 use App\Models\MainStock;
 use App\Models\SubCategory;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\HeaderActionsPosition;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Livewire\Attributes\Layout;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
@@ -107,6 +113,9 @@ class MainStockResource extends Resource
                 Tables\Columns\TextColumn::make('item.item_name')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('item.category.category_name')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('item.SubCategory.subcategory_name')
                     ->searchable()
                     ->sortable(),
@@ -118,8 +127,6 @@ class MainStockResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextInputColumn::make('mrp')
                     ->rules(['required', 'numeric'])
-                    ->sortable(),
-                Tables\Columns\TextInputColumn::make('batch')
                     ->sortable(),
                 Tables\Columns\TextInputColumn::make('barcode')
                     ->searchable()
@@ -134,8 +141,16 @@ class MainStockResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                // SelectFilter::make('item_id')
+                //     ->options(MainStock::with('item.category')
+                //         ->get()->pluck('item.category.category_name', 'id'))
+                //     ->searchable()
+                //     ->hidden(! auth()->user()->user_type=='1'),
+                // SelectFilter::make('sub_category')
+                //     ->options(SubCategory::all()->pluck('subcategory_name', 'id'))
+                //     ->searchable()
+                //     ->hidden(! auth()->user()->user_type=='1')
+            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

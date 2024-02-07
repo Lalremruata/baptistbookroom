@@ -22,6 +22,10 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\Summarizers\Summarizer;
+use Illuminate\Database\Query\Builder;
+
 class CustomerCreditTransactions extends Page implements HasForms, HasTable, HasActions
 {
     protected static string $resource = CustomerResource::class;
@@ -42,16 +46,24 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
         return $form
             ->schema([
                 TextInput::make('recovered_amount')
+                ->prefix('₹')
                 ->autofocus()
-            ])->statePath('data');
+            ])->columns(2)->statePath('data');
     }
     public function table(Table $table): Table
     {
+        $customerId = $this->record->id;
+
+        $creditTransactions = CreditTransaction::where('customer_id', $customerId)
+        ->skip(1)  // Skip the first record
+        ->take(PHP_INT_MAX);
+            // dd($creditTransactions->toSql());
         return $table
-            ->query(CreditTransaction::query()->where('customer_id',$this->record->id))
+            ->query($creditTransactions)
             ->columns([
                 // TextColumn::make('customer.customer_name'),
-                TextColumn::make('recovered_amount'),
+                TextColumn::make('recovered_amount')
+                ->summarize(Sum::make()->label('Total')),
                 TextColumn::make('updated_at')
                 ->label('Received date')
                 ->date(),

@@ -267,7 +267,9 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ])
                 ->requiresConfirmation()
                 ->action(function (array $data) {
-                    if($data['customer_name'])
+                    $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)->sum('selling_price');
+
+                    if($data['customer_name'] && $data['received_amount'] < $totalAmount)
                     {
                         $customer = new Customer;
                         $customer->customer_name = $data['customer_name'];
@@ -280,7 +282,6 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         $customer_id = null;
                     }
 
-                    $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)->sum('selling_price');
 
                     if($data['received_amount'] < $totalAmount){
                         $creditTransaction = new CreditTransaction;
