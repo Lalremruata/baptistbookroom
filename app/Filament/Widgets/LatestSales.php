@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Sale;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -18,9 +19,13 @@ class LatestSales extends BaseWidget
                 Sale::query()
             )
             ->columns([
+                TextColumn::make('')
+                ->weight(FontWeight::Bold)
+                ->rowIndex(),
                 TextColumn::make('branchStock.mainStock.item.item_name'),
+                TextColumn::make('branchStock.branch.branch_name'),
                 TextColumn::make('quantity'),
-                TextColumn::make('sale_date')
+                TextColumn::make('created_at')
                     ->label('date')
                     ->date()
                     ->sortable(),

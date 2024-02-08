@@ -12,12 +12,13 @@ use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use Filament\Tables\Actions\HeaderActionsPosition;
-
+use Filament\Tables\Columns\TextColumn;
 
 class ItemResource extends Resource
 {
@@ -77,24 +78,33 @@ class ItemResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('item_name')
+                TextColumn::make('*')
+                    ->weight(FontWeight::Bold)
+                    ->rowIndex(),
+                TextColumn::make('item_name')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('category.category_name')
-                    ->numeric()
+                TextColumn::make('category.category_name')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('subCategory.subcategory_name')
-                    ->numeric()
+                TextColumn::make('subCategory.subcategory_name')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('barcode')
+                TextColumn::make('barcode')
+                    ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
+                    ->weight(FontWeight::Bold)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

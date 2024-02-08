@@ -35,9 +35,12 @@ class CustomerResource extends Resource
             return parent::getEloquentQuery()->withoutGlobalScopes();
         }
         else {
-            $customer = Sale::where('branch_id',auth()->user()->branch_id)->first();
-                return parent::getEloquentQuery()->where('customer_id', $customer->customer_id);
+            // If user type is not '1'
+            // Retrieve a customer based on the user's branch
+            $customer = Sale::where('branch_id', auth()->user()->branch_id)->first();
 
+            // Use the relationship to access the customer_id
+            return parent::getEloquentQuery()->where('id', optional($customer)->customer_id);
         }
     }
 

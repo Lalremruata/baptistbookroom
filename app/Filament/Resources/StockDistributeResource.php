@@ -7,6 +7,7 @@ use App\Models\StockDistribute;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -17,6 +18,7 @@ use Illuminate\Support\Carbon;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use Filament\Tables\Actions\HeaderActionsPosition;
+use Filament\Tables\Columns\TextColumn;
 
 class StockDistributeResource extends Resource
 {
@@ -86,34 +88,42 @@ class StockDistributeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->striped()
             ->columns([
-                Tables\Columns\TextColumn::make('mainStock.item.item_name')
+                TextColumn::make('')
+                    ->weight(FontWeight::Bold)
+                    ->rowIndex(),
+                TextColumn::make('mainStock.item.item_name')
+                    ->weight(FontWeight::Bold)
                     ->searchable()
-                    ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('branch.branch_name')
+                TextColumn::make('branch.branch_name')
+                    ->weight(FontWeight::Bold)
                     ->searchable()
-                    ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('quantity')
+                TextColumn::make('quantity')
+                    ->weight(FontWeight::Bold)
                     ->label('quantities')
-                    ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('cost_price')
+                TextColumn::make('cost_price')
+                    ->weight(FontWeight::Bold)
                     ->numeric()
                     ->money('inr'),
-                Tables\Columns\TextColumn::make('mrp')
+                TextColumn::make('mrp')
+                    ->weight(FontWeight::Bold)
                     ->numeric()
                     ->money('inr'),
-                Tables\Columns\TextColumn::make('batch'),
-                Tables\Columns\TextColumn::make('mainStock.barcode')
+                TextColumn::make('batch')
+                    ->weight(FontWeight::Bold),
+                TextColumn::make('mainStock.barcode')
+                    ->weight(FontWeight::Bold)
                     ->label('Bar Code')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                      ->label('Transfer date')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

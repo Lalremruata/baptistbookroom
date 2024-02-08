@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 // use Filament\Http\Livewire\Auth\Login;
 use App\Filament\Pages\Auth\Login;
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -21,6 +22,8 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\MenuItem;
+use Filament\Support\Enums\MaxWidth;
+use App\Filament\Pages\Auth\EditProfile;
 
 
 class AdminPanelProvider extends PanelProvider
@@ -29,8 +32,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('admin')
-            ->path('admin')
+            ->id('')
+            ->path('')
             ->login(Login::class)
             ->colors([
                 'danger' => Color::Red,
@@ -44,6 +47,8 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Baptist BookRoom')
             ->favicon(asset('images/favicon.jpg'))
             ->darkMode(true)
+            ->defaultThemeMode(ThemeMode::Dark)
+            ->maxContentWidth(MaxWidth::Full)
             // ->brandLogo(asset('/images/bcm-logo.svg'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -91,6 +96,7 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Settings')
                     ->collapsed()
             ])
+            ->profile(EditProfile::class)
             ->userMenuItems([
                 'profile' => MenuItem::make()->label('Edit profile'),
                 // ...

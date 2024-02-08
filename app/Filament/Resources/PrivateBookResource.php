@@ -13,9 +13,11 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -25,6 +27,10 @@ class PrivateBookResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Private Books';
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->user_type=='1';
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -90,20 +96,26 @@ class PrivateBookResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('receive_from')
+                TextColumn::make('*')
+                    ->weight(FontWeight::Bold)
+                    ->rowIndex(),
+                TextColumn::make('receive_from')
+                    ->weight(FontWeight::Bold)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('author')
+                TextColumn::make('author')
+                    ->weight(FontWeight::Bold)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('file_no')
+                TextColumn::make('file_no')
+                    ->weight(FontWeight::Bold)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('quantity')
-                    ->numeric()
+                TextColumn::make('quantity')
+                    ->weight(FontWeight::Bold)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -115,7 +127,7 @@ class PrivateBookResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Action::make('book-account')
                 ->url(fn (PrivateBook $record): string => static::getUrl('book-account',['record' => $record])),
-                
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

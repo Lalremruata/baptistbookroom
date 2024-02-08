@@ -12,7 +12,9 @@ use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -54,18 +56,26 @@ class SubCategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('subcategory_name')
+                TextColumn::make('')
+                    ->weight(FontWeight::Bold)
+                    ->rowIndex(),
+                TextColumn::make('subcategory_name')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('category.category_name')
-                    ->numeric()
+                TextColumn::make('category.category_name')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

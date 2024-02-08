@@ -9,7 +9,11 @@ use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,7 +24,6 @@ class AssetResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Assets';
-
     public static function form(Form $form): Form
     {
         return $form
@@ -50,28 +53,37 @@ class AssetResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('quantity')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('purchase_date')
+                TextColumn::make('')
+                    ->weight(FontWeight::Bold)
+                    ->rowIndex(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->weight(FontWeight::Bold),
+                TextColumn::make('branch.branch_name')
+                    ->searchable()
+                    ->weight(FontWeight::Bold),
+                TextColumn::make('quantity')
+                    ->sortable()
+                    ->weight(FontWeight::Bold),
+                TextColumn::make('purchase_date')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('condition')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('condition')
+                    ->searchable()
+                    ->weight(FontWeight::Bold),
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                SelectFilter::make('branch')
+                        ->relationship('branch','branch_name')
+            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

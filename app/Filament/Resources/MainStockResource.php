@@ -14,9 +14,12 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\HeaderActionsPosition;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
@@ -107,49 +110,87 @@ class MainStockResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table
-        ->striped()
+        if(auth()->user()->user_type=='1'){
+            return $table
             ->columns([
-                Tables\Columns\TextColumn::make('item.item_name')
+                TextColumn::make('')
+                    ->weight(FontWeight::Bold)
+                    ->rowIndex(),
+                TextColumn::make('item.item_name')
+                    ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('item.category.category_name')
+                TextColumn::make('item.category.category_name')
+                    ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('item.SubCategory.subcategory_name')
+                TextColumn::make('item.SubCategory.subcategory_name')
+                    ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextInputColumn::make('quantity')
+                TextInputColumn::make('quantity')
                     ->rules(['required', 'numeric'])
                     ->sortable(),
-                Tables\Columns\TextInputColumn::make('cost_price')
+                TextInputColumn::make('cost_price')
                     ->rules(['required', 'numeric'])
                     ->sortable(),
-                Tables\Columns\TextInputColumn::make('mrp')
+                TextInputColumn::make('mrp')
                     ->rules(['required', 'numeric'])
                     ->sortable(),
-                Tables\Columns\TextInputColumn::make('barcode')
+                TextInputColumn::make('barcode')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ]);
+        }
+        else{
+            return $table
+            ->columns([
+                TextColumn::make('')
+                    ->weight(FontWeight::Bold)
+                    ->rowIndex(),
+                TextColumn::make('item.item_name')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('item.category.category_name')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('item.SubCategory.subcategory_name')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('quantity')
+                    ->sortable(),
+                TextColumn::make('cost_price')
+                    ->sortable(),
+                TextColumn::make('mrp')
+                    ->sortable(),
+                TextColumn::make('barcode')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                // SelectFilter::make('item_id')
-                //     ->options(MainStock::with('item.category')
-                //         ->get()->pluck('item.category.category_name', 'id'))
-                //     ->searchable()
-                //     ->hidden(! auth()->user()->user_type=='1'),
-                // SelectFilter::make('sub_category')
-                //     ->options(SubCategory::all()->pluck('subcategory_name', 'id'))
-                //     ->searchable()
-                //     ->hidden(! auth()->user()->user_type=='1')
+
             ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -173,6 +214,8 @@ class MainStockResource extends Resource
             //         ->label('Group records'),
             // )
             ;
+        }
+
     }
 
     public static function getRelations(): array

@@ -24,7 +24,7 @@ class StatsOverview extends BaseWidget
                 // ->descriptionIcon('heroicon-m-arrow-trending-down'),
                 ->chart([7, 2, 10, 3, 15, 4, 17])
                 ->color('primary'),
-            Stat::make('Total Sales Today', Sale::where('created_at',today())->count())
+            Stat::make('Total Sales Today', Sale::whereDate('created_at',today())->count())
                 // ->description('3% increase')
                 ->descriptionIcon('heroicon-m-arrow-trending-up'),
         ];

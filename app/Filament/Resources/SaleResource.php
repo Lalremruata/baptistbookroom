@@ -11,6 +11,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use Filament\Tables\Actions\HeaderActionsPosition;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 
 class SaleResource extends Resource
@@ -85,34 +87,46 @@ class SaleResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('')
+                ->size(TextColumn\TextColumnSize::Medium)
+                ->weight(FontWeight::Bold)
+                ->rowIndex(),
                 Tables\Columns\TextColumn::make('branch.branch_name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('user.name')
-                    ->numeric()
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('branchStock.mainStock.item.item_name')
-                    ->numeric()
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->date()
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
-                    ->numeric()
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('discount')
-                    ->numeric()
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_amount')
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('payment_mode')
-                    ->numeric()
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('memo')
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('transaction_number')
-                    ->numeric()
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                 ->label('date')

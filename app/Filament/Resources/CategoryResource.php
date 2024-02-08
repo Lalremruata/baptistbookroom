@@ -10,7 +10,9 @@ use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class CategoryResource extends Resource
@@ -50,9 +52,16 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('*')
+                    ->weight(FontWeight::Bold)
+                    ->rowIndex(),
                 Tables\Columns\TextColumn::make('category_name')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextColumn\TextColumnSize::Large)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

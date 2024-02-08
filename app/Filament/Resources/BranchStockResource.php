@@ -10,6 +10,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Builder;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use Filament\Tables\Actions\HeaderActionsPosition;
-
+use Filament\Tables\Columns\TextColumn;
 
 class BranchStockResource extends Resource
 {
@@ -51,7 +52,7 @@ class BranchStockResource extends Resource
             ->schema([
                 Section::make()
                 ->schema([
-                    Forms\Components\Select::make('branch_id')
+                Forms\Components\Select::make('branch_id')
                     ->relationship('branch','branch_name')
                     ->required(),
                 Forms\Components\Select::make('item_id')
@@ -77,22 +78,29 @@ class BranchStockResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('branch.branch_name')
+                TextColumn::make('')
+                ->weight(FontWeight::Bold)
+                ->rowIndex(),
+                TextColumn::make('branch.branch_name')
+                    ->weight(FontWeight::Bold)
                     ->searchable(isIndividual: true)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('mainStock.item.item_name')
+                TextColumn::make('mainStock.item.item_name')
+                    ->weight(FontWeight::Bold)
                     ->searchable(isIndividual: true)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('quantity')
+                TextColumn::make('quantity')
+                    ->weight(FontWeight::Bold)
+                    ->sortable(),
+                TextColumn::make('cost_price')
+                    ->weight(FontWeight::Bold)
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('cost_price')
+                TextColumn::make('mrp')
+                    ->weight(FontWeight::Bold)
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('mrp')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('mainStock.barcode')
+                TextColumn::make('mainStock.barcode')
                     ->label('Bar code')
                     ->searchable()
                     ->sortable(),
