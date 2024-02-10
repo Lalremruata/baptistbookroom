@@ -50,6 +50,11 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
     protected static ?string $navigationGroup = 'Sales';
 
     protected static string $view = 'filament.pages.sales-cart';
+    public static function shouldRegisterNavigation(): bool
+    {
+        $allowedRoles = ['Admin', 'Agent'];
+        return in_array(auth()->user()->roles->first()->title, $allowedRoles);
+    }
     public function mount(): void
     {
         $this->form->fill();

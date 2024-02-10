@@ -29,6 +29,11 @@ class CustomerResource extends Resource
     {
         return 0;
     }
+    public static function shouldRegisterNavigation(): bool
+    {
+        $allowedRoles = ['Admin', 'Agent'];
+        return in_array(auth()->user()->roles->first()->title, $allowedRoles);
+    }
     public static function getEloquentQuery(): Builder
     {
         if(auth()->user()->user_type == '1') {
