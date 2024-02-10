@@ -18,7 +18,7 @@ class CreateMainStock extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         // Runs after the form fields are saved to the database.
-        $mainStock = MainStock::where('barcode',$this->data['barcode'])->first();
+        $mainStock = MainStock::where('item_id',$this->data['item_id'])->first();
         if($mainStock)
         {
             $mainStock->cost_price = $this->data['cost_price'];
