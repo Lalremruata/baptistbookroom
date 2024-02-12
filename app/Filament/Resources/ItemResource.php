@@ -2,23 +2,21 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\ItemExporter;
 use App\Filament\Resources\ItemResource\Pages;
-use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Category;
 use App\Models\Item;
-use Closure;
 use Filament\Forms;
-use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\ExportAction;
+
 
 class ItemResource extends Resource
 {
@@ -121,9 +119,8 @@ class ItemResource extends Resource
                 // ]),
             ])
             ->headerActions([
-                ExportAction::make()->exports([
-                    ExcelExport::make()->fromTable(),
-                ])
+                ExportAction::make()
+                    ->exporter(ItemExporter::class)
             ], position: HeaderActionsPosition::Bottom)
             ->paginated([25, 50, 100, 'all']);
     }

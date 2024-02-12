@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\PrivateBookExporter;
 use App\Filament\Resources\PrivateBookResource\Pages;
-use App\Filament\Resources\PrivateBookResource\RelationManagers;
 use App\Models\Item;
 use App\Models\PrivateBook;
 use Filament\Forms;
@@ -15,12 +15,12 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\ExportAction;
 
 class PrivateBookResource extends Resource
 {
@@ -137,7 +137,12 @@ class PrivateBookResource extends Resource
                 // Tables\Actions\BulkActionGroup::make([
                 //     Tables\Actions\DeleteBulkAction::make(),
                 // ]),
-            ]);
+            ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(PrivateBookExporter::class)
+                ], position: HeaderActionsPosition::Bottom)
+            ->paginated([25, 50, 100, 'all']);
     }
 
     public static function getRelations(): array

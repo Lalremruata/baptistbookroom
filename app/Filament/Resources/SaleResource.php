@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\SaleExporter;
 use App\Filament\Resources\SaleResource\Pages;
-use App\Filament\Resources\SaleResource\RelationManagers;
 use App\Models\BranchStock;
 use App\Models\Sale;
 use Filament\Forms;
@@ -18,8 +18,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -175,9 +174,8 @@ class SaleResource extends Resource
                 ]),
             ])
             ->headerActions([
-                ExportAction::make()->exports([
-                    ExcelExport::make()->fromTable(),
-                ])
+                ExportAction::make()
+                    ->exporter(SaleExporter::class)
             ], position: HeaderActionsPosition::Bottom);;
     }
 
