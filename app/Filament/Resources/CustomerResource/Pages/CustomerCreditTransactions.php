@@ -11,6 +11,7 @@ use Filament\Forms\Components\Section;
 use Filament\Resources\Pages\Page;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Exceptions\Halt;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
@@ -130,5 +131,9 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
         catch(Halt $exception){
             return;
         }
+    }
+    public function getMaxContentWidth(): MaxWidth
+    {
+        return MaxWidth::FiveExtraLarge;
     }
 }

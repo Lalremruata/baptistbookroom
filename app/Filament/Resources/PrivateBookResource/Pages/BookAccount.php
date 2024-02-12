@@ -18,6 +18,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Filament\Support\Enums\MaxWidth;
 class BookAccount extends Page implements HasForms, HasTable,  HasActions
 {
     use InteractsWithTable;
@@ -66,5 +67,9 @@ class BookAccount extends Page implements HasForms, HasTable,  HasActions
                     $privateBookAccount->save();
                 })
             ]);
+    }
+    public function getMaxContentWidth(): MaxWidth
+    {
+        return MaxWidth::FiveExtraLarge;
     }
 }
