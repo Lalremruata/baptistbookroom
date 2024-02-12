@@ -31,6 +31,10 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
+use Filament\Actions\StaticAction;
+use Filament\Support\Enums\Alignment;
+use Filament\Support\Enums\MaxWidth;
+use Illuminate\Contracts\View\View;
 
 
 class StockDistributeCarts extends Page implements HasForms, HasTable, HasActions
@@ -273,5 +277,25 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
         return Action::make('delete')
             ->requiresConfirmation()
             ->action(fn () => $this->cartItem->delete());
+    }
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('help')
+            ->modalContent(function (): View {
+                $record = "privateBook";
+                return view('filament.pages.help', [
+                    'record' => $record,
+                ]);
+            } 
+            )
+            ->icon('heroicon-m-question-mark-circle')
+            // ->iconButton()
+            ->slideOver()
+            ->modalCancelAction(fn (StaticAction $action) => $action->label('Close'))
+            ->modalSubmitAction(false)
+            ->modalWidth(MaxWidth::Medium)
+            ->modalAlignment(Alignment::Center)
+        ];
     }
 }

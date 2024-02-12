@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('supplier_financials', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
-            $table->string('bill_no');
-            $table->decimal('credit', 10, 2)->nullable();
-            $table->decimal('debit', 10, 2)->nullable();
-            $table->decimal('balance', 10, 2);
+            $table->foreignId('type_id')->references('id')->on('suppliers')->onDelete('cascade');
+            $table->string('voucher_no');
+            $table->decimal('amount', 10, 2)->nullable();
+            $table->string('payment_mode'); // Cash, Online, etc.
+            $table->string('transaction_number')->nullable();
             $table->string('remarks')->nullable();
             $table->timestamps();
         });

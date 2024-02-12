@@ -96,15 +96,17 @@ class SupplierResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
                 Tables\Actions\Action::make('supplier-details')
                 ->url(fn (Supplier $record): string => static::getUrl('supplier-financial',['record' => $record])),
+                Tables\Actions\EditAction::make()
+                ->iconButton(),
+                Tables\Actions\DeleteAction::make()
+                ->iconButton(),
                 ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ])
             ->recordUrl(
                 fn (Model $record): string => static::getUrl('supplier-financial',['record' => $record]),

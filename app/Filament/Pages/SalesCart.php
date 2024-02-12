@@ -5,8 +5,6 @@ namespace App\Filament\Pages;
 use App\Models\BranchStock;
 use App\Models\CreditTransaction;
 use App\Models\Customer;
-use App\Models\Item;
-use App\Models\MainStock;
 use App\Models\Memo;
 use App\Models\Sale;
 use Filament\Actions\Action;
@@ -25,10 +23,8 @@ use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
@@ -36,6 +32,9 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
+use Filament\Actions\StaticAction;
+use Filament\Support\Enums\Alignment;
+use Illuminate\Contracts\View\View;
 
 class SalesCart extends Page implements HasForms, HasTable, HasActions
 {
@@ -374,6 +373,26 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
         } catch (Halt $exception) {
             return;
         }
+    }
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('help')
+            ->modalContent(function (): View {
+                $record = "privateBook";
+                return view('filament.pages.help', [
+                    'record' => $record,
+                ]);
+            } 
+            )
+            ->icon('heroicon-m-question-mark-circle')
+            // ->iconButton()
+            ->slideOver()
+            ->modalCancelAction(fn (StaticAction $action) => $action->label('Close'))
+            ->modalSubmitAction(false)
+            ->modalWidth(MaxWidth::Medium)
+            ->modalAlignment(Alignment::Center)
+        ];
     }
 
 }

@@ -19,6 +19,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PrivateBookResource extends Resource
@@ -129,10 +130,13 @@ class PrivateBookResource extends Resource
                 ->url(fn (PrivateBook $record): string => static::getUrl('book-account',['record' => $record])),
 
             ])
+            ->recordUrl(
+                fn (Model $record): string => static::getUrl('book-account',['record' => $record])
+            )     
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 

@@ -101,6 +101,7 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 'profile' => MenuItem::make()->label('Edit profile'),
                 // ...
-            ]);
+            ])
+            ;
     }
 }
