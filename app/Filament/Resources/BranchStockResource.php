@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\BranchStockExporter;
 use App\Filament\Resources\BranchStockResource\Pages;
-use App\Filament\Resources\BranchStockResource\RelationManagers;
 use App\Models\BranchStock;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -11,14 +11,12 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Columns\TextColumn;
 
@@ -127,10 +125,8 @@ class BranchStockResource extends Resource
                         ->hidden(! auth()->user()->user_type=='1')
                 ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->headerActions([
-                ExportAction::make()->exports([
-                    ExcelExport::make()->fromTable(),
-                    // ExcelExport::make('form')->fromForm(),
-                    ])
+                ExportAction::make()
+                    ->exporter(BranchStockExporter::class)
                 ], position: HeaderActionsPosition::Bottom)
             ->paginated([25, 50, 100, 'all']);
 

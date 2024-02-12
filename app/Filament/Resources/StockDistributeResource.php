@@ -2,21 +2,18 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\StockDistributeExporter;
 use App\Filament\Resources\StockDistributeResource\Pages;
 use App\Models\StockDistribute;
-use Filament\Forms\Components\Card;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Columns\TextColumn;
 
@@ -38,52 +35,6 @@ class StockDistributeResource extends Resource
     {
         return auth()->user()->user_type=='1';
     }
-
-    // public static function form(Form $form): Form
-    // {
-
-    //     return $form
-    //         ->schema([
-    //             Card::make()
-    //             ->schema([
-    //                 Forms\Components\Select::make('branch_id')
-    //                 ->relationship('branch', 'branch_name')
-    //                 ->required(),
-    //             ])->columns(3),
-
-
-    //             Card::make()
-    //             ->schema([
-    //                 Repeater::make('stockDistributeItem')
-    //                 ->relationship()
-    //                 ->schema([
-    //                     Forms\Components\Select::make('item_id')
-    //                     ->live()
-    //                     ->searchable()
-    //                     ->options(Item::query()->pluck('item_name', 'id'))
-    //                     // ->afterStateUpdated(fn(callable $set) => $set('quantity', null))
-    //                     ->required(),
-    //                     Forms\Components\TextInput::make('quantity')
-    //                     ->live()
-    //                     ->hint(function(Get $get){
-    //                         $itemId = $get('item_id');
-    //                         if ($itemId) {
-    //                             $result=MainStock::where('item_id',$itemId)->select('quantity')->first();
-    //                             $quantity = $result->quantity;
-    //                             return 'quantity available: '.$quantity;
-    //                         }
-    //                         return null;
-    //                     })
-    //                     ->hintColor('primary')
-    //                     ->required()
-    //                     ->integer(),
-
-
-    //                 ])->columns(2)
-    //             ])
-    //         ]);
-    // }
-
 
     public static function table(Table $table): Table
     {
@@ -149,9 +100,8 @@ class StockDistributeResource extends Resource
                     ->relationship('branch','branch_name')
                     ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
                 ->headerActions([
-                    ExportAction::make()->exports([
-                        ExcelExport::make()->fromTable(),
-                        ])
+                    ExportAction::make()
+                    ->exporter(StockDistributeExporter::class)
                     ], position: HeaderActionsPosition::Bottom)
                 ->paginated([25, 50, 100, 'all']);
     }
