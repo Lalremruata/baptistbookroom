@@ -14,6 +14,8 @@ use Illuminate\Support\Collection;
 class BranchSalesChart extends ChartWidget
 {
     protected static ?int $sort = 2;
+    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
     protected int | string | array $columnSpan = 'half';
     protected static ?string $heading = 'Branch Sales Chart';
     public ?string $filter = 'today';

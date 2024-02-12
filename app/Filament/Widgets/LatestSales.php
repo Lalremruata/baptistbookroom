@@ -12,6 +12,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class LatestSales extends BaseWidget
 {
     protected static ?int $sort = 3;
+    protected static bool $isLazy = false;
+    protected static ?string $pollingInterval = null;
     public function table(Table $table): Table
     {
         return $table

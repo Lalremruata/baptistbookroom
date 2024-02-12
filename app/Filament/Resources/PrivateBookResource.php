@@ -6,6 +6,8 @@ use App\Filament\Exports\PrivateBookExporter;
 use App\Filament\Resources\PrivateBookResource\Pages;
 use App\Models\Item;
 use App\Models\PrivateBook;
+use App\Tables\Columns\TotalBookAmount;
+use App\Tables\Columns\TotalBookSale;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -115,6 +117,10 @@ class PrivateBookResource extends Resource
                 TextColumn::make('quantity')
                     ->weight(FontWeight::Bold)
                     ->sortable(),
+                TextColumn::make('mainStock.mrp')
+                    ->weight(FontWeight::Bold),
+                TotalBookSale::make('total_sale'),
+                TotalBookAmount::make('total_sale_amount'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

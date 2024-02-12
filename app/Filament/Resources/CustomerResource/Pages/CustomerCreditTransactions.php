@@ -41,15 +41,15 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('recovered_amount')
-                ->prefix('₹')
-                ->autofocus()
-            ])->columns(2)->statePath('data');
-    }
+    // public function form(Form $form): Form
+    // {
+    //     return $form
+    //         ->schema([
+    //             TextInput::make('recovered_amount')
+    //             ->prefix('₹')
+    //             ->autofocus()
+    //         ])->columns(2)->statePath('data');
+    // }
     public function table(Table $table): Table
     {
         $customerId = $this->record->id;
@@ -79,23 +79,23 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
                 // ...
             ])
             ->headerActions([
-                // \Filament\Tables\Actions\Action::make('New Recovered Amount')
-                // ->form([
-                //     TextInput::make('recovered_amount')
-                //     ,
-                // ])
-                // ->requiresConfirmation()
-                // ->action(function (array $data) {
-                //     $customerTransaction = CreditTransaction::query()->where('customer_id', $this->record->id)->first();
-                //     $newTransaction = [];
-                //     $newTransaction = [
-                //         "customer_id" => $customerTransaction->customer_id,
-                //         "recovered_amount" => $data['recovered_amount'],
-                //         "total_amount" => $customerTransaction->total_amount,
-                //         "received_amount" => $customerTransaction->received_amount,
-                //     ];
-                //     CreditTransaction::create($newTransaction);
-                // })
+                \Filament\Tables\Actions\Action::make('New Recovered Amount')
+                ->form([
+                    TextInput::make('recovered_amount')
+                    ,
+                ])
+                ->requiresConfirmation()
+                ->action(function (array $data) {
+                    $customerTransaction = CreditTransaction::query()->where('customer_id', $this->record->id)->first();
+                    $newTransaction = [];
+                    $newTransaction = [
+                        "customer_id" => $customerTransaction->customer_id,
+                        "recovered_amount" => $data['recovered_amount'],
+                        "total_amount" => $customerTransaction->total_amount,
+                        "received_amount" => $customerTransaction->received_amount,
+                    ];
+                    CreditTransaction::create($newTransaction);
+                })
             ]);
     }
     // public static function getPages(): array
@@ -104,14 +104,14 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
     //         'edit' => CreditTransactionResource\Pages\EditCreditTransaction::route('/{record}/edit'),
     //     ];
     // }
-    protected function getFormActions(): array
-    {
-        return [
-            Action::make('save')
-                ->label(__('update'))
-                ->submit('save'),
-        ];
-    }
+    // protected function getFormActions(): array
+    // {
+    //     return [
+    //         Action::make('save')
+    //             ->label(__('update'))
+    //             ->submit('save'),
+    //     ];
+    // }
     public function save(): void
     {
         try {

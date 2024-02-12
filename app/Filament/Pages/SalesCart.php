@@ -350,7 +350,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             $cartItem = SalesCartItem::where('branch_stock_id', $data['branch_stock_id'])->first();
             if (!$cartItem) {
                 $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
-                $totalCostPrice = $branchStock->cost_price * $data['quantity'];
+                $totalCostPrice = $branchStock->mrp * $data['quantity'];
                 $sellingPrice = $totalCostPrice - ($totalCostPrice * ($data['discount']/100));
                 $newData = [
                     'cost_price'=> $totalCostPrice,

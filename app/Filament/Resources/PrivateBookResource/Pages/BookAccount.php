@@ -9,7 +9,6 @@ use App\Models\PrivateBookAccount;
 use Filament\Resources\Pages\Page;
 
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Actions\Concerns\InteractsWithActions;;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -19,7 +18,6 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-
 class BookAccount extends Page implements HasForms, HasTable,  HasActions
 {
     use InteractsWithTable;
@@ -39,8 +37,9 @@ class BookAccount extends Page implements HasForms, HasTable,  HasActions
         return $table
             ->query(PrivateBookAccount::query()->where('private_book_id', $this->record->id))
             ->columns([
-                TextColumn::make('item.item_name'),
-                TextColumn::make('return_amount'),
+                TextColumn::make('return_amount')
+                ->extraAttributes(['class' => 'w-[8]'])
+                ->numeric(),
                 TextColumn::make('created_at')
                 ->label('date')
                 ->date(),

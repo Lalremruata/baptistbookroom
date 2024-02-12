@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PrivateBook extends Model
 {
@@ -24,6 +25,10 @@ class PrivateBook extends Model
     public function mainStock(): BelongsTo
     {
         return $this->belongsTo(MainStock::class);
+    }
+    public function privateBookAccounts(): HasMany
+    {
+        return $this->hasMany(PrivateBookAccount::class);
     }
 
 }
