@@ -77,14 +77,17 @@ class PrivateBookResource extends Resource
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('cost_price')
+                    ->hiddenOn('edit')
                     ->dehydrated(false)
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('mrp')
+                    ->hiddenOn('edit')
                     ->dehydrated(false)
                     ->required()
                     ->numeric(),
                  Forms\Components\TextInput::make('batch')
+                    ->hiddenOn('edit')
                     ->dehydrated(false)
                     ->required()
                     ->numeric(),
@@ -132,7 +135,7 @@ class PrivateBookResource extends Resource
             ])
             ->recordUrl(
                 fn (Model $record): string => static::getUrl('book-account',['record' => $record])
-            )     
+            )
             ->bulkActions([
                 // Tables\Actions\BulkActionGroup::make([
                 //     Tables\Actions\DeleteBulkAction::make(),

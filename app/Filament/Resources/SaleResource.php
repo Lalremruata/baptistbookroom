@@ -161,6 +161,7 @@ class SaleResource extends Resource
             ->actions([
                 // Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
+                ->iconButton()
                 ->before(function (Model $record) {
                     $branchStock = BranchStock::where('branch_id', $record->branch_id)
                     ->where('id', $record->branch_stock_id)
@@ -170,9 +171,9 @@ class SaleResource extends Resource
                 })
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ])
             ->headerActions([
                 ExportAction::make()->exports([

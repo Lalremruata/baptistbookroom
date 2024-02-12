@@ -3,23 +3,19 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SupplierResource\Pages;
-use App\Filament\Resources\SupplierResource\RelationManagers;
 use App\Models\Supplier;
+use App\Tables\Columns\SupplierBalance;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Split;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
-use stdClass;
+use Filament\Tables\Columns\ViewColumn;
 
 class SupplierResource extends Resource
 {
@@ -37,12 +33,15 @@ class SupplierResource extends Resource
                         ->required()
                         ->maxLength(255),
                     Forms\Components\TextInput::make('contact_number')
+                        ->numeric()
                         ->maxLength(255),
                     Forms\Components\TextInput::make('email')
                         ->email()
                         ->maxLength(255),
                     Forms\Components\TextInput::make('address')
                     ->maxLength(255),
+                    Forms\Components\TextInput::make('opening_balance')
+                    ->numeric(),
                 ])->columns(2)->compact()
                 ,
                 Section::make()
@@ -83,6 +82,7 @@ class SupplierResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
+                SupplierBalance::make('balance'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -110,13 +110,15 @@ class SupplierResource extends Resource
             ])
             ->recordUrl(
                 fn (Model $record): string => static::getUrl('supplier-financial',['record' => $record]),
-            );
+            )
+            ;
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ManageSuppliers::route('/'),
+            'edit' => Pages\ManageSuppliers::route('/{record}/edit'),
             'supplier-financial' => Pages\SupplierDetail::route('/{record}/supplier-details'),
 
         ];

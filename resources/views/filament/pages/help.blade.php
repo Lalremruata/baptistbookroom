@@ -2,5 +2,5 @@
         <iframe src="https://www.youtube.com/embed/FyBeZT5H9uo"
                 frameborder="0" allowfullscreen class="w-full h-full">
         </iframe>
-        {{$record}}
+        {{-- {{$record}} --}}
 </div>

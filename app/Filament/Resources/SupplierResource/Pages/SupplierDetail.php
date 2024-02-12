@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\SupplierResource\Pages;
 
+use App\Enums\Type;
 use App\Filament\Resources\SupplierResource;
+use App\Models\PaymentType;
 use App\Models\Supplier;
 
 use App\Models\SupplierFinancials;
@@ -27,6 +29,8 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Tables\Actions\DeleteAction as ActionsDeleteAction;
+use Filament\Tables\Columns\Summarizers\Summarizer;
+use Illuminate\Database\Query\Builder;
 
 class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
 {
@@ -46,13 +50,23 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
 
     public function table(Table $table): Table
     {
+        $balance = SupplierFinancials::query()
+        ->where('supplier_id', $this->record->id)
+        ->selectRaw('SUM(CASE WHEN type = "debit" THEN amount ELSE 0 END) - SUM(CASE WHEN type = "credit" THEN amount ELSE 0 END) AS balance')
+        ->value('balance');
+
         return $table
             ->query(SupplierFinancials::query()->where('supplier_id', $this->record->id))
             ->columns([
-                TextColumn::make('bill_no'),
-                TextColumn::make('credit'),
-                TextColumn::make('debit'),
-                TextColumn::make('balance'),
+                TextColumn::make('voucher_no'),
+                TextColumn::make('amount')
+                ->summarize(Summarizer::make()
+                ->label('Balance')
+                ->using(fn (Builder $query): string => $balance)),
+                TextColumn::make('type')
+                ->badge(),
+                TextColumn::make('payment_mode'),
+                TextColumn::make('transaction_number'),
                 TextColumn::make('remarks'),
                 TextColumn::make('created_at')
                 ->label('date')
@@ -63,38 +77,47 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
                 EditAction::make()
                 ->form([
                     Section::make([
-                        TextInput::make('bill_no')
-                        ->autofocus()
-                        ->required(),
-                    TextInput::make('credit')
-                        ->label('Credit')
-                        ->required(),
-                    TextInput::make('debit')
-                        ->label('Debit')
-                        ->required(),
-                    TextInput::make('balance')
-                        ->label('Balance')
-                        ->required(),
-                    Textarea::make('remarks')
-                    ])->columns(2)
+                        TextInput::make('voucher_no')
+                            ->autofocus()
+                            ->required(),
+                        TextInput::make('amount')
+                            ->required(),
+                        Select::make('type')
+                            ->options(Type::class)
+                            ->required(),
+                        Select::make('payment_mode')
+                            ->options([
+                                "cash" => "cash",
+                                "upi" => "upi",
+                                "bank transfer"=>"bank transfer",
+                                "cheque" => "cheque"
+                            ])
+                            ->required(),
+                        TextInput::make('transaction_number'),
+                        Textarea::make('remarks')
+                        ])->columns(2)
                     ]),
                 ])
             ->headerActions([
                 \Filament\Tables\Actions\CreateAction::make('add record')
                 ->form([
                     Section::make([
-                        TextInput::make('bill_no')
+                        TextInput::make('voucher_no')
                         ->autofocus()
                         ->required(),
-                    TextInput::make('credit')
-                        ->label('Credit')
+                    TextInput::make('amount')
                         ->required(),
-                    TextInput::make('debit')
-                        ->label('Debit')
+                    Select::make('type')
+                        ->options(Type::class)
                         ->required(),
-                    TextInput::make('balance')
-                        ->label('Balance')
-                        ->required(),
+                        Select::make('payment_mode')
+                            ->options([
+                                "cash" => "cash",
+                                "upi" => "upi",
+                                "bank transfer"=>"bank transfer",
+                                "cheque" => "cheque"
+                            ]),
+                    TextInput::make('transaction_number'),
                     Textarea::make('remarks')
                     ])->columns(2)
                     ])
@@ -105,14 +128,17 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
                     'class' => 'margin',
                 ])
                 ->action(function (array $data, $record) {
-                    $supplierFinancial = new SupplierFinancials();
-                    $supplierFinancial->supplier_id = $this->record->id;
-                    $supplierFinancial->bill_no = $data['bill_no'];
-                    $supplierFinancial->credit = $data['credit'];
-                    $supplierFinancial->debit = $data['debit'];
-                    $supplierFinancial->balance = $data['balance'];
-                    $supplierFinancial->remarks = $data['remarks'];
-                    $supplierFinancial->save();
+                    // $supplierFinancial = new SupplierFinancials();
+                    $data = [
+                        'supplier_id' => $this->record->id,
+                        'voucher_no' => $data['voucher_no'],
+                        'amount' => $data['amount'],
+                        'type' => $data['type'],
+                        'payment_mode' => $data['payment_mode'],
+                        'transaction_number' => $data['transaction_number'],
+                        'remarks' => $data['remarks'],
+                    ];
+                    SupplierFinancials::create($data);
                 })
             ]);
     }

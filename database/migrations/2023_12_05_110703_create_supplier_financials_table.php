@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('supplier_financials', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
-            $table->foreignId('type_id')->references('id')->on('suppliers')->onDelete('cascade');
+            $table->string('type')->default(\App\Enums\Type::Debit);// Default to 'debit'
             $table->string('voucher_no');
             $table->decimal('amount', 10, 2)->nullable();
             $table->string('payment_mode'); // Cash, Online, etc.
