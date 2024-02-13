@@ -23,7 +23,7 @@ class BookAccount extends Page implements HasForms, HasTable,  HasActions
 {
     use InteractsWithTable;
     use InteractsWithForms;
-    use InteractsWithActions;   
+    use InteractsWithActions;
      protected static string $resource = PrivateBookResource::class;
 
      public PrivateBook $record;
@@ -39,7 +39,7 @@ class BookAccount extends Page implements HasForms, HasTable,  HasActions
             ->query(PrivateBookAccount::query()->where('private_book_id', $this->record->id))
             ->columns([
                 TextColumn::make('return_amount')
-                ->extraAttributes(['class' => 'w-[8]'])
+                ->width('5%')
                 ->numeric(),
                 TextColumn::make('created_at')
                 ->label('date')

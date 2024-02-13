@@ -20,6 +20,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\HeaderActionsPosition;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 
@@ -114,7 +115,8 @@ class SaleResource extends Resource
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total')),
                 Tables\Columns\TextColumn::make('payment_mode')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)

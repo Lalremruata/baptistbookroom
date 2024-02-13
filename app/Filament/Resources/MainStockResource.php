@@ -7,6 +7,7 @@ use App\Filament\Exports\MainStockExporter;
 use App\Filament\Resources\MainStockResource\Pages;
 use App\Models\Item;
 use App\Models\MainStock;
+use App\Models\PrivateBook;
 use App\Models\SubCategory;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -122,7 +123,14 @@ class MainStockResource extends Resource
                     ->sortable(),
                 TextInputColumn::make('quantity')
                     ->rules(['required', 'numeric'])
-                    ->sortable(),
+                    ->sortable()
+                    ->afterStateUpdated(function ($record, $state) {
+                        $privateBook = PrivateBook::where('main_stock_id', $record['id'])->first();
+                        if ($privateBook) {
+                            // Update the quantity column
+                            $privateBook->update(['quantity' => $state]);
+                        }
+                    }),
                 TextInputColumn::make('cost_price')
                     ->rules(['required', 'numeric'])
                     ->sortable(),

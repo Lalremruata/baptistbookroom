@@ -118,6 +118,7 @@ class PrivateBookResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->sortable(),
                 TextColumn::make('mainStock.mrp')
+                    ->label('mrp')
                     ->weight(FontWeight::Bold),
                 TotalBookSale::make('total_sale'),
                 TotalBookAmount::make('total_sale_amount'),
