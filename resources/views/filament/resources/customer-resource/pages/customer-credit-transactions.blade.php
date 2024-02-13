@@ -4,7 +4,7 @@
         $remainingCredit = $value->total_amount - $sum;
     @endphp
 <x-filament-panels::page>
-<x-filament::section collapsible icon="heroicon-o-book-open"
+<x-filament::section collapsible icon="heroicon-o-user"
     icon-color="info" icon-size="lg">
     <x-slot name="heading">
     <h1 class="text-xl font-bold">Customer Name : {{ $this->record->customer_name }}</h1>

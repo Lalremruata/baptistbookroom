@@ -55,10 +55,7 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
     {
         $customerId = $this->record->id;
 
-        $creditTransactions = CreditTransaction::where('customer_id', $customerId)
-        ->skip(1)  // Skip the first record
-        ->take(PHP_INT_MAX);
-            // dd($creditTransactions->toSql());
+        $creditTransactions = CreditTransaction::where('customer_id', $customerId);
         return $table
             ->query($creditTransactions)
             ->columns([
@@ -117,7 +114,9 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
     {
         try {
             $data = $this->form->getState();
-            $customerTransaction = CreditTransaction::query()->where('customer_id', $this->record->id)->first();
+            $customerTransaction = CreditTransaction::query()
+                                    ->where('customer_id', $this->record->id)
+                                    ->first();
             $newTransaction = [];
             $newTransaction = [
                 "customer_id" => $customerTransaction->customer_id,
