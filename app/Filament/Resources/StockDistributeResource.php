@@ -16,12 +16,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\Exports\Enums\ExportFormat;
 
 class StockDistributeResource extends Resource
 {
     protected static ?string $model = StockDistribute::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-line';
     protected static ?string $navigationLabel = 'Distribute Report';
     protected static ?string $navigationGroup = 'Stocks';
     protected static ?int $navigationSort = 3;
@@ -41,7 +42,7 @@ class StockDistributeResource extends Resource
         return $table
         ->striped()
             ->columns([
-                TextColumn::make('')
+                TextColumn::make('*')
                     ->weight(FontWeight::Bold)
                     ->rowIndex(),
                 TextColumn::make('mainStock.item.item_name')
@@ -101,7 +102,12 @@ class StockDistributeResource extends Resource
                     ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
                 ->headerActions([
                     ExportAction::make()
-                    ->exporter(StockDistributeExporter::class)
+                        ->exporter(StockDistributeExporter::class)
+                        ->formats([
+                            ExportFormat::Xlsx,
+                        ])
+                        ->icon('heroicon-m-arrow-down-tray')
+                        ->color('success')
                     ], position: HeaderActionsPosition::Bottom)
                 ->paginated([25, 50, 100, 'all']);
     }

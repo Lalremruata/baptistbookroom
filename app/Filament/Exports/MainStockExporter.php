@@ -14,16 +14,17 @@ class MainStockExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('id')
-                ->label('ID'),
+            // ExportColumn::make('id')
+            //     ->label('ID'),
             ExportColumn::make('item.item_name'),
             ExportColumn::make('cost_price'),
             ExportColumn::make('mrp'),
             ExportColumn::make('batch'),
             ExportColumn::make('quantity'),
             ExportColumn::make('barcode'),
-            ExportColumn::make('created_at'),
-            ExportColumn::make('updated_at'),
+            ExportColumn::make('created_at')
+            ->label('date'),
+            // ExportColumn::make('updated_at'),
         ];
     }
 

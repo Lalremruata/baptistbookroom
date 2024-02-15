@@ -287,7 +287,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 return view('filament.pages.help', [
                     'record' => $record,
                 ]);
-            } 
+            }
             )
             ->icon('heroicon-m-question-mark-circle')
             // ->iconButton()

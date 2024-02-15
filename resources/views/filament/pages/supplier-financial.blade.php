@@ -1,3 +1,6 @@
-<x-filament-panels::page>
 
-</x-filament-panels::page>
+<tr>
+    <td>
+        Column 1
+    </td>
+</tr>

@@ -14,16 +14,17 @@ class StockDistributeExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('id')
-                ->label('ID'),
-            ExportColumn::make('main_stock_id'),
-            ExportColumn::make('branch_id'),
+            // ExportColumn::make('id')
+            //     ->label('ID'),
+            ExportColumn::make('mainStock.item.item_name'),
+            ExportColumn::make('branch.branch_name'),
             ExportColumn::make('quantity'),
             ExportColumn::make('cost_price'),
             ExportColumn::make('mrp'),
             ExportColumn::make('batch'),
-            ExportColumn::make('created_at'),
-            ExportColumn::make('updated_at'),
+            ExportColumn::make('created_at')
+                ->label('Transfer Date'),
+            // ExportColumn::make('updated_at'),
         ];
     }
 

@@ -21,7 +21,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
-
+use Filament\Actions\Exports\Enums\ExportFormat;
 
 class MainStockResource extends Resource
 {
@@ -106,7 +106,7 @@ class MainStockResource extends Resource
         if(auth()->user()->user_type=='1'){
             return $table
             ->columns([
-                TextColumn::make('')
+                TextColumn::make('*')
                     ->weight(FontWeight::Bold)
                     ->rowIndex(),
                 TextColumn::make('item.item_name')
@@ -164,6 +164,11 @@ class MainStockResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->exporter(MainStockExporter::class)
+                    ->formats([
+                        ExportFormat::Xlsx,
+                    ])
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->color('success')
             ], position: HeaderActionsPosition::Bottom)
             // ->defaultGroup('item_id')
             // ->groupRecordsTriggerAction(

@@ -14,8 +14,8 @@ class SaleExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('id')
-                ->label('ID'),
+            // ExportColumn::make('id')
+            //     ->label('ID'),
             ExportColumn::make('branchStock.mainStock.item.item_name'),
             ExportColumn::make('branch.branch_name'),
             ExportColumn::make('quantity'),
@@ -24,8 +24,9 @@ class SaleExporter extends Exporter
             ExportColumn::make('payment_mode'),
             ExportColumn::make('transaction_number'),
             ExportColumn::make('memo'),
-            ExportColumn::make('created_at'),
-            ExportColumn::make('updated_at'),
+            ExportColumn::make('created_at')
+                ->label('date'),
+            // ExportColumn::make('updated_at'),
         ];
     }
 

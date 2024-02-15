@@ -56,7 +56,7 @@ class SubCategoryResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('')
+                TextColumn::make('*')
                     ->weight(FontWeight::Bold)
                     ->rowIndex(),
                 TextColumn::make('subcategory_name')

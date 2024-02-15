@@ -16,7 +16,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\ExportAction;
-
+use Filament\Actions\Exports\Enums\ExportFormat;
 
 class ItemResource extends Resource
 {
@@ -121,6 +121,11 @@ class ItemResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->exporter(ItemExporter::class)
+                    ->formats([
+                        ExportFormat::Xlsx,
+                    ])
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->color('success')
             ], position: HeaderActionsPosition::Bottom)
             ->paginated([25, 50, 100, 'all']);
     }

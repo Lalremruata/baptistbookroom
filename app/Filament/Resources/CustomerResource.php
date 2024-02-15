@@ -21,7 +21,7 @@ class CustomerResource extends Resource
 {
     protected static ?string $model = Customer::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-plus';
     protected static ?string $navigationLabel = 'Customer Credit';
     protected static ?string $navigationGroup = 'Sales';
     protected static ?int$navigationSort = 3;
@@ -70,7 +70,7 @@ class CustomerResource extends Resource
                 //
             ])
             ->actions([
-                // Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make(),
                 // Tables\Actions\Action::make('transactions')
                 // ->url(fn (Customer $record): string => static::getUrl('transactions',['record' => $record])),
             ])

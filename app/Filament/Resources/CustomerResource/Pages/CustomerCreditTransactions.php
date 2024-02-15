@@ -59,7 +59,8 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
         return $table
             ->query($creditTransactions)
             ->columns([
-                // TextColumn::make('customer.customer_name'),
+                TextColumn::make('*')
+                ->rowIndex(),
                 TextColumn::make('recovered_amount')
                 ->summarize(Sum::make()->label('Total')),
                 TextColumn::make('updated_at')

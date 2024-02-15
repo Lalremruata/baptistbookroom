@@ -57,6 +57,7 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
 
         return $table
             ->query(SupplierFinancials::query()->where('supplier_id', $this->record->id))
+        // ->defaultGroup('voucher_no')
             ->columns([
                 TextColumn::make('voucher_no'),
                 TextColumn::make('amount')
@@ -72,6 +73,7 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
                 ->label('date')
                 ->date(),
             ])
+            ->contentFooter(view('filament.pages.supplier-financial'))
             ->actions([
                 DeleteAction::make(),
                 EditAction::make()

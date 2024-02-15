@@ -23,12 +23,13 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Tables\Actions\ExportAction;
+use Filament\Actions\Exports\Enums\ExportFormat;
 
 class PrivateBookResource extends Resource
 {
     protected static ?string $model = PrivateBook::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
     protected static ?string $navigationGroup = 'Private Books';
     public static function shouldRegisterNavigation(): bool
     {
@@ -151,6 +152,11 @@ class PrivateBookResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->exporter(PrivateBookExporter::class)
+                    ->formats([
+                        ExportFormat::Xlsx,
+                    ])
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->color('success')
                 ], position: HeaderActionsPosition::Bottom)
             ->paginated([25, 50, 100, 'all']);
     }

@@ -21,7 +21,7 @@ class SupplierResource extends Resource
 {
     protected static ?string $model = Supplier::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-home-modern';
     public static function form(Form $form): Form
     {
         return $form
@@ -63,7 +63,7 @@ class SupplierResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('')
+                TextColumn::make('*')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->rowIndex(),
@@ -96,12 +96,12 @@ class SupplierResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\Action::make('supplier-details')
-                ->url(fn (Supplier $record): string => static::getUrl('supplier-financial',['record' => $record])),
                 Tables\Actions\EditAction::make()
                 ->iconButton(),
                 Tables\Actions\DeleteAction::make()
                 ->iconButton(),
+                Tables\Actions\Action::make('supplier-details')
+                ->url(fn (Supplier $record): string => static::getUrl('supplier-financial',['record' => $record])),
                 ])
             ->bulkActions([
                 // Tables\Actions\BulkActionGroup::make([
