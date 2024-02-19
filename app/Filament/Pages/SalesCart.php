@@ -266,6 +266,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ])
                 ->label('checkout cart')
                 ->color('warning')
+                ->icon('heroicon-o-bolt')
                 ->extraAttributes([
                     'class' => 'margin',
                 ])
@@ -297,7 +298,6 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     }
 
                     $memo = Memo::latest()->first();
-                    $salesData = [];
                     $cartItems = SalesCartItem::where('branch_id',auth()->user()->branch_id)
                     ->where('user_id',auth()->user()->id)->get();
                     foreach ($cartItems as $item) {
@@ -306,7 +306,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         ->first();
                         $branchStock->quantity -= $item->quantity;
                         $branchStock->update();
-                        $salesData[] = [
+                        Sale::create([
                             'branch_stock_id' => $item->branch_stock_id,
                             'branch_id' => auth()->user()->branch_id,
                             'user_id' => auth()->user()->id,
@@ -317,13 +317,10 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                             'payment_mode' => $data['payment_mode'],
                             'transaction_number' => $data['transaction_number'],
                             'memo' => ($memo->memo + 1) . auth()->user()->branch_id,
-                            'created_at' => now(),
-                            'updated_at' => now(),
 
-                        ];
+                        ]);
                         $item->delete();
                     }
-                    Sale::insert($salesData);
                     $memo->memo = $memo->memo + 1;
                     $memo->update();
                 })
@@ -340,7 +337,9 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
         return [
             Action::make('save')
                 ->label(__('Add to cart'))
-                ->submit('save'),
+                ->submit('save')
+                ->color('warning')
+                ->icon('heroicon-o-shopping-cart'),
         ];
     }
     public function save(): void

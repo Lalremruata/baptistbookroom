@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class MainStock extends Model
 {
@@ -33,5 +34,9 @@ class MainStock extends Model
     public function privateBook(): HasMany
     {
         return $this->hasMany(PrivateBook::class);
+    }
+    public function sales(): HasManyThrough
+    {
+        return $this->hasManyThrough(Sale::class,BranchStock::class);
     }
 }

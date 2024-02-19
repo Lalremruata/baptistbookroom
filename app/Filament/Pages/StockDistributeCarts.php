@@ -178,6 +178,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 ])
                 ->label('checkout cart')
                 ->color('warning')
+                ->icon('heroicon-o-bolt')
                 ->extraAttributes([
                     'class' => 'flex justify-start',
                 ])
@@ -198,15 +199,25 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                             $branchstock->update();
                         }
                         else{
-                            $branchstock = new Branchstock();
-                            $branchstock->main_stock_id = $item->main_stock_id;
-                            $branchstock->quantity = $item->quantity;
-                            $branchstock->cost_price = $mainstock->cost_price;
-                            $branchstock->barcode = $mainstock->barcode;
-                            $branchstock->branch_id = $data['branch_id'];
-                            $branchstock->batch = $mainstock->batch;
-                            $branchstock->mrp = $mainstock->mrp;
-                            $branchstock->save();
+                            BranchStock::create([
+                                'main_stock_id' => $item->main_stock_id,
+                                'quantity' => $item->quantity,
+                                'cost_price' => $mainstock->cost_price,
+                                'barcode' => $mainstock->barcode,
+                                'branch_id' => $data['branch_id'],
+                                'batch' => $mainstock->batch,
+                                'mrp' => $mainstock->mrp,
+                            ]);
+
+                            // $branchstock = new Branchstock();
+                            // $branchstock->main_stock_id = $item->main_stock_id;
+                            // $branchstock->quantity = $item->quantity;
+                            // $branchstock->cost_price = $mainstock->cost_price;
+                            // $branchstock->barcode = $mainstock->barcode;
+                            // $branchstock->branch_id = $data['branch_id'];
+                            // $branchstock->batch = $mainstock->batch;
+                            // $branchstock->mrp = $mainstock->mrp;
+                            // $branchstock->save();
                         }
                         $stockdistribute = new StockDistribute();
                         $stockdistribute->main_stock_id = $item->main_stock_id;
@@ -236,7 +247,9 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
         return [
             Action::make('save')
                 ->label(__('Add to cart'))
-                ->submit('save'),
+                ->submit('save')
+                ->color('warning')
+                ->icon('heroicon-o-shopping-cart'),
         ];
     }
     public function save(): void

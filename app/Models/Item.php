@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Item extends Model
 {
+    use \Staudenmeir\EloquentHasManyDeep\HasRelationships;
     use HasFactory;
     protected $fillable = [
         'category_id',
@@ -22,12 +24,17 @@ class Item extends Model
     {
         return $this->hasMany(MainStock::class);
     }
-    public function branchStock(): HasMany
+    public function sales()
     {
-        return $this->hasMany(BranchStock::class);
+        return $this->hasManyDeepFromRelations($this->branchStocks(), (new BranchStock())->sales());
     }
-    public function stockDistribute(): HasMany
+    public function branchStocks()
     {
+        return $this->hasManyThrough(BranchStock::class, MainStock::class );
+    }
+
+    public function stockDistribute(): HasMany
+    { 
         return $this->hasMany(StockDistribute::class);
     }
     public function privateBook(): HasMany
