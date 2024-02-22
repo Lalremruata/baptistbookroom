@@ -100,6 +100,7 @@ class AllBranchStock extends Page implements HasForms
                             ->afterStateUpdated(function(callable $set,Get $get){
                                 $set('barcode',Item::query()
                                 ->where('id', $get('item_id'))->pluck('barcode')->first());
+                                AllBranchStock::showTable();
                             })
                             ->reactive()
                             ->searchable()
@@ -111,14 +112,14 @@ class AllBranchStock extends Page implements HasForms
             ])
             ->statePath('data');
     }
-    protected function getFormActions(): array
-    {
-        return [
-            Action::make('showTable')
-                ->label(__('Apply Filter'))
-                ->submit('showTable'),
-        ];
-    }
+    // protected function getFormActions(): array
+    // {
+    //     return [
+    //         Action::make('showTable')
+    //             ->label(__('Apply Filter'))
+    //             ->submit('showTable'),
+    //     ];
+    // }
 
     public function showTable(): void
     {
@@ -144,10 +145,10 @@ class AllBranchStock extends Page implements HasForms
             $query->where('items.id', $itemId);
         })
         ->groupBy('branch_stock_id')
-        ->selectRaw('branch_stock_id, SUM(quantity) AS total_quantity, SUM(total_amount) AS total_amount')  
+        ->selectRaw('branch_stock_id, SUM(quantity) AS total_quantity, SUM(total_amount) AS total_amount')
         ->get();
-        
-    
+
+
         $this->sales = $sales;
         // $columns = [
         //     TextColumn::make('item_name')

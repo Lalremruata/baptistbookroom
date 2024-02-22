@@ -27,7 +27,7 @@ class Login extends BaseAuth implements HasForms
     protected function getLoginFormComponent(): Component
     {
         return TextInput::make('login')
-            ->label('Login')
+            ->label('User name or email')
             ->required()
             ->autocomplete()
             ->autofocus();

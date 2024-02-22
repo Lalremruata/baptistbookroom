@@ -2,16 +2,19 @@
     {{--<livewire:SaleFilterComponent />--}}
     <x-filament::section collapsible>
         <x-filament-panels::form wire:submit="showTable">
+
             {{ $this->form }}
+            {{--
             <x-filament-panels::form.actions
                 :actions="$this->getFormActions()"
             />
+            --}}
         </x-filament-panels::form>
     </x-filament::section>
     <x-filament::section>
         {{--@if($sales->count() > 0)
             --}}
-        <div class="flex"> 
+        <div class="flex">
             @foreach($sales as $sale)
             <div class="inline-block mx-4">
             <table class="w-full border border-collapse">
