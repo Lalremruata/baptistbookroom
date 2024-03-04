@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Branch;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\Sale;
@@ -28,6 +29,8 @@ class AllBranchStock extends Page implements HasForms
     protected static string $view = 'filament.pages.all-branch-stock';
     protected static ?int $navigationSort = 5;
     public ?array $data = [];
+    public $itemName = "";
+    public $branches = [];
     public $sales = [];
 
     public function mount(): void
@@ -125,31 +128,34 @@ class AllBranchStock extends Page implements HasForms
     {
         $data = $this->form->getState();
         $itemId = $data['item_id'];
+        $itemName =Item::where('id', $itemId)->pluck('item_name')->first();
 
-        // $sales = Sale::when($this->data['item_id'], function ($query) {
-        //     $query->whereHas('branchStock.mainStock.item', function ($itemQuery) {
-        //         $itemQuery->where('id', $this->data['item_id']);
-        //     });
-        // })
-        // ->groupBy('branch_id') // Group by branch_id
-        // ->selectRaw('branch_id, sum(quantity) as total_quantity, sum(total_amount) as total_amount')
-        // ->with('branchStock')
-        // ->get();
-        $sales = Sale::with([
-            'branchStock' => function($query) {
-                $query->select('id', 'quantity','branch_id'); // Select specific columns
-            },
-            'item:item_name',
-        ])
+        $branches = Branch::all();
+
+        $sales = Sale::with(['branchStock:quantity','item:item_name'])
         ->whereHas('item', function($query) use ($itemId) {
             $query->where('items.id', $itemId);
         })
-        ->groupBy('branch_stock_id')
-        ->selectRaw('branch_stock_id, SUM(quantity) AS total_quantity, SUM(total_amount) AS total_amount')
         ->get();
+        // $sales = Sale::with([
+        //     'branchStock' => function($query) {
+        //         $query->select('id', 'quantity', 'branch_id', 'main_stock_id')
+        //         ->with('mainStock:item_id')
+        //         ->with('branch:id');
+        //     },
+        //     'item:item_name',
+        // ])
+        // ->whereHas('item', function($query) use ($itemId) {
+        //     $query->where('items.id', $itemId);
+        // })
+        // ->groupBy('branch_stock_id')
+        // ->selectRaw('branch_id, SUM(quantity) AS total_quantity, SUM(total_amount) AS total_amount')
+        // ->get();
 
-
+        $this->itemName = $itemName;
+        $this->branches = $branches;
         $this->sales = $sales;
+
         // $columns = [
         //     TextColumn::make('item_name')
         //         ->label('Item Name')

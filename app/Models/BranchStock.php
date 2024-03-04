@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use \Znck\Eloquent\Traits\BelongsToThrough;
 
 class BranchStock extends Model
 {
     use HasFactory;
+    use \Znck\Eloquent\Traits\BelongsToThrough;
     protected $fillable = [
         'quantity',
         'cost_price',
@@ -33,7 +33,7 @@ class BranchStock extends Model
     {
         return $this->hasMany(Sale::class);
     }
-    public function item(): BelongsToThrough
+    public function item()
     {
         return $this->belongsToThrough(Item::class,MainStock::class);
     }

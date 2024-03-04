@@ -39,9 +39,9 @@ class SupplierResource extends Resource
                         ->email()
                         ->maxLength(255),
                     Forms\Components\TextInput::make('address')
-                    ->maxLength(255),
+                        ->maxLength(255),
                     Forms\Components\TextInput::make('opening_balance')
-                    ->numeric(),
+                        ->numeric(),
                 ])->columns(2)->compact()
                 ,
                 Section::make()

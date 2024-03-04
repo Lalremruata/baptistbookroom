@@ -14,6 +14,7 @@ class Supplier extends Model
         'contact_number',
         'email',
         'address',
+        'opening_balance',
         'account_number',
         'ifsc_code',
         'bank_name',

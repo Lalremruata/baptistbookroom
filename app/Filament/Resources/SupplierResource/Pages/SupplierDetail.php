@@ -17,6 +17,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Forms\Components\Section;
@@ -30,7 +31,11 @@ use Filament\Tables\Table;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Tables\Actions\DeleteAction as ActionsDeleteAction;
 use Filament\Tables\Columns\Summarizers\Summarizer;
-use Illuminate\Database\Query\Builder;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+// use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
 {
@@ -54,6 +59,7 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
         ->where('supplier_id', $this->record->id)
         ->selectRaw('SUM(CASE WHEN type = "debit" THEN amount ELSE 0 END) - SUM(CASE WHEN type = "credit" THEN amount ELSE 0 END) AS balance')
         ->value('balance');
+        $openingBalance = Supplier::where('id',$this->record->id)->pluck('opening_balance')->first();
 
         return $table
             ->query(SupplierFinancials::query()->where('supplier_id', $this->record->id))
@@ -63,8 +69,9 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
                 TextColumn::make('amount')
                 ->summarize(Summarizer::make()
                 ->label('Balance')
-                ->using(fn (Builder $query): string => $balance)),
+                ->using(fn (\Illuminate\Database\Query\Builder $query) => $openingBalance - $balance)),
                 TextColumn::make('type')
+                ->sortable()
                 ->badge(),
                 TextColumn::make('payment_mode'),
                 TextColumn::make('transaction_number'),
@@ -100,6 +107,33 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
                         ])->columns(2)
                     ]),
                 ])
+                ->filters([
+                    Filter::make('created_at')
+                ->form([
+                    DatePicker::make('from'),
+                    DatePicker::make('to'),
+                ])->columns(2)
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                        )
+                        ->when(
+                            $data['to'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                        );
+                    }),
+                    SelectFilter::make('type')
+                    ->options(Type::class),
+                    SelectFilter::make('payment_mode')
+                    ->options([
+                        "cash" => "cash",
+                        "upi" => "upi",
+                        "bank transfer"=>"bank transfer",
+                        "cheque" => "cheque"
+                    ])
+                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->headerActions([
                 \Filament\Tables\Actions\CreateAction::make('add record')
                 ->form([

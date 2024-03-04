@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('ifsc_code')->nullable();
             $table->string('bank_name')->nullable();
             $table->string('branch')->nullable();
-            $table->unsignedInteger('opening_balance')->nullable();
+            $table->decimal('opening_balance',8,2)->nullable();
             $table->timestamps();
         });
     }
