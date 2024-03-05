@@ -40,9 +40,9 @@
                 <tr>
                     <th class="p-2 border"></th>
                     @foreach ($branches as $branch)
-                        <td class="p-2 border">{{ $sales->total_quantity }}</td>
-                        <td class="p-2 border">{{ $sale->total_amount }}</td>
-                        <td class="p-2 border">{{ $sale->branchStock->quantity }}</td>
+                        <td class="p-2 border">{{ $sales->total_sale_amoun}}</td>
+                        <td class="p-2 border">{{ $sale->total_sale_amount }}</td>
+                        <td class="p-2 border">{{ $sale->branch_quantity }}</td>
                     @endforeach
                 </tr>
             </tbody>

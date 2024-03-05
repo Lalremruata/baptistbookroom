@@ -132,11 +132,15 @@ class AllBranchStock extends Page implements HasForms
 
         $branches = Branch::all();
 
-        $sales = Sale::with(['branchStock:quantity','item:item_name'])
-        ->whereHas('item', function($query) use ($itemId) {
+        $sales = Sale::with('branch:branch_name', 'branchStock:quantity')
+        ->whereHas('item', function ($query) use ($itemId) {
             $query->where('items.id', $itemId);
         })
+        ->select('branch_id', 'branch_stock_id')
+        ->groupBy('branch_id') // Group only by branch_id (assuming you want sales aggregated per branch)
+        ->selectRaw('COALESCE(SUM(total_amount), 0) as total_sale_amount, branchStock.quantity as branch_quantity')
         ->get();
+        dd($sales);
         // $sales = Sale::with([
         //     'branchStock' => function($query) {
         //         $query->select('id', 'quantity', 'branch_id', 'main_stock_id')
