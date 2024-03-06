@@ -24,6 +24,8 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Enums\MaxWidth;
 use App\Filament\Pages\Auth\EditProfile;
+use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
+use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 
 
 class AdminPanelProvider extends PanelProvider
@@ -101,6 +103,13 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 'profile' => MenuItem::make()->label('Edit profile'),
                 // ...
+            ])
+        ->plugins([
+            FilamentBackgroundsPlugin::make()
+                ->imageProvider(
+                    MyImages::make()
+                        ->directory('images/backgrounds')
+                ),
             ])
             ;
     }
