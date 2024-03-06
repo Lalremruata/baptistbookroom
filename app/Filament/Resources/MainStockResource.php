@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use Filament\Tables\Actions\ExportAction;
 use App\Filament\Exports\MainStockExporter;
 use App\Filament\Resources\MainStockResource\Pages;
+use App\Models\BranchStock;
 use App\Models\Item;
 use App\Models\MainStock;
 use App\Models\PrivateBook;
@@ -133,13 +134,34 @@ class MainStockResource extends Resource
                     }),
                 TextInputColumn::make('cost_price')
                     ->rules(['required', 'numeric'])
-                    ->sortable(),
+                    ->sortable()
+                    ->afterStateUpdated(function ($record, $state) {
+                        $branchStock = BranchStock::where('main_stock_id', $record['id']);
+                        if ($branchStock) {
+                            $branchStock->update(['cost_price' => $state]);
+                        }
+                    }),
                 TextInputColumn::make('mrp')
                     ->rules(['required', 'numeric'])
-                    ->sortable(),
+                    ->sortable()
+                    ->afterStateUpdated(function ($record, $state) {
+                        $branchStock = BranchStock::where('main_stock_id', $record['id']);
+                        if ($branchStock) {
+                            $branchStock->update(['mrp' => $state]);
+                        }
+                    }),
                 TextInputColumn::make('barcode')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->afterStateUpdated(function ($record, $state) {
+                        $branchStock = BranchStock::where('main_stock_id', $record['id']);
+                        $item = Item::where('id', $record['item_id'])->first();
+                        if ($branchStock) {
+                            // Update the quantity column
+                            $branchStock->update(['barcode' => $state]);
+                            $item->update(['barcode' => $state]);
+                        }
+                    }),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

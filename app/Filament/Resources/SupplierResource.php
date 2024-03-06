@@ -11,6 +11,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -98,7 +100,7 @@ class SupplierResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()
                 ->iconButton(),
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                 ->iconButton(),
                 Tables\Actions\Action::make('supplier-details')
                 ->url(fn (Supplier $record): string => static::getUrl('supplier-financial',['record' => $record])),

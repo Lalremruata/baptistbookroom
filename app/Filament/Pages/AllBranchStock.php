@@ -3,11 +3,10 @@
 namespace App\Filament\Pages;
 
 use App\Models\Branch;
-use App\Models\Category;
+use App\Models\BranchStock;
 use App\Models\Item;
 use App\Models\Sale;
 use App\Models\SubCategory;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -16,10 +15,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Table;
+
 
 class AllBranchStock extends Page implements HasForms
 {
@@ -32,6 +28,7 @@ class AllBranchStock extends Page implements HasForms
     public $itemName = "";
     public $branches = [];
     public $sales = [];
+    public $branchStock = [];
 
     public function mount(): void
     {
@@ -59,25 +56,6 @@ class AllBranchStock extends Page implements HasForms
                     ->live()
                     ->required()
                     ->dehydrated(),
-                // Select::make('category_id')
-                //     ->label('Category')
-                //     ->searchable()
-                //     ->options(Category::query()->pluck('category_name', 'id'))
-                //     ->reactive()
-                //     ->afterStateUpdated(fn(callable $set)=>$set('sub_category_id', null))
-                //     ->required(),
-                // Select::make('sub_category_id')
-                //     ->label('Sub Categoty')
-                //     ->searchable()
-                //     ->options(function(callable $get){
-                //         $category= Category::find($get('category_id'));
-                //         if(!$category){
-                //             return null;
-                //         }
-                //         return $category->subcategories->pluck('subcategory_name','id');
-                //     })
-                //     ->reactive()
-                //     ->required(),
                 Select::make('sub_category_id')
                     ->label('Sub Categoty')
                     ->searchable()
@@ -115,14 +93,6 @@ class AllBranchStock extends Page implements HasForms
             ])
             ->statePath('data');
     }
-    // protected function getFormActions(): array
-    // {
-    //     return [
-    //         Action::make('showTable')
-    //             ->label(__('Apply Filter'))
-    //             ->submit('showTable'),
-    //     ];
-    // }
 
     public function showTable(): void
     {
@@ -131,62 +101,23 @@ class AllBranchStock extends Page implements HasForms
         $itemName =Item::where('id', $itemId)->pluck('item_name')->first();
 
         $branches = Branch::all();
+        $branchStock = BranchStock::
+        whereHas('item', function ($query) use ($itemId) {
+            $query->where('items.id', $itemId);
+        })
+        ->get();
 
-        $sales = Sale::with('branch:branch_name', 'branchStock:quantity')
+        $sales = Sale::with('branch:branch_name')
         ->whereHas('item', function ($query) use ($itemId) {
             $query->where('items.id', $itemId);
         })
-        ->select('branch_id', 'branch_stock_id')
-        ->groupBy('branch_id') // Group only by branch_id (assuming you want sales aggregated per branch)
-        ->selectRaw('COALESCE(SUM(total_amount), 0) as total_sale_amount, branchStock.quantity as branch_quantity')
         ->get();
-        dd($sales);
-        // $sales = Sale::with([
-        //     'branchStock' => function($query) {
-        //         $query->select('id', 'quantity', 'branch_id', 'main_stock_id')
-        //         ->with('mainStock:item_id')
-        //         ->with('branch:id');
-        //     },
-        //     'item:item_name',
-        // ])
-        // ->whereHas('item', function($query) use ($itemId) {
-        //     $query->where('items.id', $itemId);
-        // })
-        // ->groupBy('branch_stock_id')
-        // ->selectRaw('branch_id, SUM(quantity) AS total_quantity, SUM(total_amount) AS total_amount')
-        // ->get();
 
         $this->itemName = $itemName;
         $this->branches = $branches;
         $this->sales = $sales;
+        $this->branchStock = $branchStock;
 
-        // $columns = [
-        //     TextColumn::make('item_name')
-        //         ->label('Item Name')
-        //         ->sortable(),
-        //     TextColumn::make('quantity')
-        //         ->label('Quantity')
-        //         ->sortable(),
-        // ];
-        // return $table
-        // ->columns($columns)
-        // ->rows(function (callable $get) use ($data) {
-        //     // Query your data based on filters
-        //     // ... (update filter conditions based on $data)
-        //     $items = Sale::when($data['item_id'], function ($query) {
-        //         $query->whereHas('branchStock.mainStock.item', function ($itemQuery) {
-        //             $itemQuery->where('id', $this->itemId);
-        //         });
-        //     })->get();
-
-        //     return $items->map(function ($item) use ($get) {
-        //         return [
-        //             'item_name' => $item->item_name,
-        //             'quantity' => $item->stock->quantity, // Assuming you have a "stock" relationship
-        //             'is_available' => $item->stock->is_available,
-        //         ];
-        //     });
-        // });
     }
 
 }
