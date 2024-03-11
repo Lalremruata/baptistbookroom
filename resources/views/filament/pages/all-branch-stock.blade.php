@@ -24,9 +24,10 @@
                     <tr>
                         <th class="p-2 border">Item Name</th>
                         @foreach ($branches as $branch)
-                        <th colspan="3" class="p-2 border">{{ $branch->branch_name }}</th>
+                        <th colspan="4" class="p-2 border">{{ $branch->branch_name }}</th>
                         @endforeach
-                        <th colspan="3" class="p-2 border">Summary</th>
+                        <th colspan="4" class="p-2 border">Summary</th>
+                        <th colspan="3" class="p-2 border">Main Stock quantity</th>
                     </tr>
                 </thead>
             <tbody>
@@ -36,6 +37,7 @@
                         <th class="p-2 border">Quantity Sale</th>
                         <th class="p-2 border">Total Amount</th>
                         <th class="p-2 border">Branch Stock Quantity</th>
+                        <th class="p-2 border">Transferred Quantity</th>
                     @endfor
 
                 </tr>
@@ -53,12 +55,15 @@
                         <td class="p-2 border">{{ $saleQty}}</td>
                         <td class="p-2 border">{{ $saleAmt }}</td>
                         <td class="p-2 border">{{ $branchStockQty }}</td>
+                        <td class="p-2 border">{{ $branchStockQty + $saleQty }}</td>
 
                     @endif
                     @endforeach
                     <td class="p-2 border">{{ $sales->sum('quantity')}}</td>
                     <td class="p-2 border">{{ $sales->sum('total_amount') }}</td>
                     <td class="p-2 border">{{ $branchStock->sum('quantity') }}</td>
+                    <td class="p-2 border">{{ $branchStock->sum('quantity') + $sales->sum('quantity') }}</td>
+                    <td class="p-2 text-center">{{ $mainStock ?? 0}}</td>
                 </tr>
             </tbody>
             </table>

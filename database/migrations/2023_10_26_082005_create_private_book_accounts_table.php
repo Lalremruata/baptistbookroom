@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('private_book_accounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('private_book_id')->references('id')->on('private_books');
+            $table->foreignId('private_book_id')->references('id')
+                ->on('private_books')
+                ->onDelete('cascade');
             $table->unsignedInteger('return_amount');
             $table->date('return_date');
             $table->timestamps();

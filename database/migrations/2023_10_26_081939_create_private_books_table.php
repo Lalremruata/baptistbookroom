@@ -18,7 +18,9 @@ return new class extends Migration
             $table->string('file_no');
             $table->unsignedInteger('quantity');
             $table->foreignId('item_id');
-            $table->foreignId('main_stock_id')->constrained()->cascadeOnUpdate();
+            $table->foreignId('main_stock_id')->constrained()
+            ->onUpdate('cascade') // Add ON UPDATE CASCADE
+            ->onDelete('cascade'); // Add ON DELETE CASCADE;
             $table->timestamps();
         });
     }

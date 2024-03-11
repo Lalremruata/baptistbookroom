@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Branch;
 use App\Models\BranchStock;
 use App\Models\Item;
+use App\Models\MainStock;
 use App\Models\Sale;
 use App\Models\SubCategory;
 use Filament\Forms\Components\Section;
@@ -29,6 +30,7 @@ class AllBranchStock extends Page implements HasForms
     public $branches = [];
     public $sales = [];
     public $branchStock = [];
+    public $mainStock = "";
 
     public function mount(): void
     {
@@ -101,8 +103,10 @@ class AllBranchStock extends Page implements HasForms
         $itemName =Item::where('id', $itemId)->pluck('item_name')->first();
 
         $branches = Branch::all();
-        $branchStock = BranchStock::
-        whereHas('item', function ($query) use ($itemId) {
+        $branchStock = BranchStock::with(['mainStock' => function ($query) {
+            $query->select('id', 'quantity');
+        }])
+        ->whereHas('item', function ($query) use ($itemId) {
             $query->where('items.id', $itemId);
         })
         ->get();
@@ -113,10 +117,19 @@ class AllBranchStock extends Page implements HasForms
         })
         ->get();
 
+        $mainStock = MainStock::
+        whereHas('item', function ($query) use ($itemId) {
+            $query->where('items.id', $itemId);
+        })
+        ->pluck('quantity')
+        ->first();
+
+
         $this->itemName = $itemName;
         $this->branches = $branches;
         $this->sales = $sales;
         $this->branchStock = $branchStock;
+        $this->mainStock = $mainStock;
 
     }
 

@@ -26,6 +26,7 @@ use Filament\Support\Enums\MaxWidth;
 use App\Filament\Pages\Auth\EditProfile;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
 use Swis\Filament\Backgrounds\ImageProviders\MyImages;
+use Swis\Filament\Backgrounds\ImageProviders\Triangles;
 
 
 class AdminPanelProvider extends PanelProvider
@@ -106,6 +107,10 @@ class AdminPanelProvider extends PanelProvider
             ])
         ->plugins([
             FilamentBackgroundsPlugin::make()
+            // ->showAttribution(false)
+            ->imageProvider(
+                Triangles::make()
+            )
                 ->imageProvider(
                     MyImages::make()
                         ->directory('images/backgrounds')
