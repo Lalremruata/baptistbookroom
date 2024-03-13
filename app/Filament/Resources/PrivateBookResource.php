@@ -106,6 +106,9 @@ class PrivateBookResource extends Resource
                 TextColumn::make('*')
                     ->weight(FontWeight::Bold)
                     ->rowIndex(),
+                TextColumn::make('mainStock.item.item_name')
+                    ->weight(FontWeight::Bold)
+                    ->searchable(),
                 TextColumn::make('receive_from')
                     ->weight(FontWeight::Bold)
                     ->searchable(),

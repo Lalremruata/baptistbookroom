@@ -12,7 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+// use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -120,7 +120,7 @@ class SupplierResource extends Resource
     {
         return [
             'index' => Pages\ManageSuppliers::route('/'),
-            'edit' => Pages\ManageSuppliers::route('/{record}/edit'),
+            // 'edit' => Pages\ManageSuppliers::route('/{record}/edit'),
             'supplier-financial' => Pages\SupplierDetail::route('/{record}/supplier-details'),
 
         ];

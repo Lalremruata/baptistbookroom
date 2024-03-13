@@ -43,6 +43,7 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
     use InteractsWithForms;
     use InteractsWithActions;
     protected static string $resource = SupplierResource::class;
+    protected static ?string $recordTitleAttribute = 'Supplier.supplier_name';
     public Supplier $record;
 
     public ?array $data = [];
