@@ -7,6 +7,7 @@ use App\Filament\Resources\CustomerResource\RelationManagers;
 use App\Models\Customer;
 use App\Models\Sale;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -53,7 +54,21 @@ class CustomerResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Section::make([
+                    'default' => 1,
+                    'sm' => 2,
+                    'md' => 3,
+                    'lg' => 4,
+                    'xl' => 6,
+                    '2xl' => 8,
+                ])
+                ->description('Edit the customer details')
+                    ->schema([
+                        TextInput::make('customer_name'),
+                        TextInput::make('phone')
+                            ->tel(),
+                        TextInput::make('address'),
+                    ])
             ]);
     }
 
@@ -71,6 +86,7 @@ class CustomerResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
                 // Tables\Actions\Action::make('transactions')
                 // ->url(fn (Customer $record): string => static::getUrl('transactions',['record' => $record])),
             ])

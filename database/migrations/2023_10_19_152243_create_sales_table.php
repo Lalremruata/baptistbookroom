@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained();
             $table->foreignId('customer_id')
                 ->constrained()
-                ->onDelete('no action')
+                ->onDelete('cascade')
                 ->nullable();
             $table->integer('quantity');
             $table->decimal('discount', 8, 2)->nullable()->default(0);
