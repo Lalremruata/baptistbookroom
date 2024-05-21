@@ -17,6 +17,7 @@ class SaleExporter extends Exporter
             // ExportColumn::make('id')
             //     ->label('ID'),
             ExportColumn::make('branchStock.mainStock.item.item_name'),
+            ExportColumn::make('branchStock.mainStock.item.subCategory.subcategory_name'),
             ExportColumn::make('branch.branch_name'),
             ExportColumn::make('quantity'),
             ExportColumn::make('discount'),
