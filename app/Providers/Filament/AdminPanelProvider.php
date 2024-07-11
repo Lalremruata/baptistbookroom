@@ -39,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('')
             ->login(Login::class)
             ->databaseNotifications(true)
+            ->viteTheme('resources/css/filament/Admin/theme.css')
             ->colors([
                 'danger' => Color::Red,
                 'gray' => Color::Gray,
@@ -104,17 +105,6 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 'profile' => MenuItem::make()->label('Edit profile'),
                 // ...
-            ])
-        ->plugins([
-            FilamentBackgroundsPlugin::make()
-            // ->showAttribution(false)
-            ->imageProvider(
-                Triangles::make()
-            )
-                ->imageProvider(
-                    MyImages::make()
-                        ->directory('images/backgrounds')
-                ),
             ])
             ;
     }

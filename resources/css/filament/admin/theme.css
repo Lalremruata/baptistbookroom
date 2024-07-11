@@ -1,3 +1,19 @@
 @import '/vendor/filament/filament/resources/css/theme.css';
 
 @config 'tailwind.config.js';
+
+.fi-simple-layout{
+    @apply bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500;
+}
+
+.choices .choices__list .choices__item{
+    @apply hover:bg-blue-300 dark:hover:bg-primary-600
+}
+
+.fi-dropdown-list .fi-dropdown-list-item
+{
+    @apply hover:bg-blue-200 dark:hover:bg-primary-600
+}
+.fi-simple-main-ctn .fi-simple-main{
+    @apply bg-opacity-100;
+}
