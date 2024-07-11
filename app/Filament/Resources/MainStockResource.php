@@ -23,6 +23,7 @@ use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Filament\Actions\Exports\Enums\ExportFormat;
+use Filament\Resources\Pages\CreateRecord;
 
 class MainStockResource extends Resource
 {
@@ -51,8 +52,8 @@ class MainStockResource extends Resource
                         })
                         ->autofocus()
                         ->live()
-                        ->required()
-                        ->dehydrated(),
+                        ->disabled()
+                        ->dehydrated(false),
                     Forms\Components\Select::make('sub_category_id')
                         ->label('Sub Category')
                         ->options(SubCategory::query()->pluck('subcategory_name', 'id'))
@@ -150,18 +151,19 @@ class MainStockResource extends Resource
                             $branchStock->update(['mrp' => $state]);
                         }
                     }),
-                TextInputColumn::make('barcode')
+                TextColumn::make('barcode')
                     ->searchable()
                     ->sortable()
-                    ->afterStateUpdated(function ($record, $state) {
-                        $branchStock = BranchStock::where('main_stock_id', $record['id']);
-                        $item = Item::where('id', $record['item_id'])->first();
-                        if ($branchStock) {
-                            // Update the quantity column
-                            $branchStock->update(['barcode' => $state]);
-                            $item->update(['barcode' => $state]);
-                        }
-                    }),
+                    // ->afterStateUpdated(function ($record, $state) {
+                    //     $branchStock = BranchStock::where('main_stock_id', $record['id']);
+                    //     $item = Item::where('id', $record['item_id'])->first();
+                    //     if ($branchStock) {
+                    //         // Update the quantity column
+                    //         $branchStock->update(['barcode' => $state]);
+                    //         $item->update(['barcode' => $state]);
+                    //     }
+                    // })
+                    ,
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

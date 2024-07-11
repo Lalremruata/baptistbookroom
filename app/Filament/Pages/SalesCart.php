@@ -31,7 +31,6 @@ use Filament\Pages\Page;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\DB;
 use Filament\Actions\StaticAction;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Contracts\View\View;
@@ -369,6 +368,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             }
             $this->form->fill();
             // auth()->cartitem->save($data);
+                    // Dispatch the browser event to focus the input
+                    $this->dispatch('focusBarcodeInput');
         } catch (Halt $exception) {
             return;
         }
@@ -382,7 +383,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 return view('filament.pages.help', [
                     'record' => $record,
                 ]);
-            } 
+            }
             )
             ->icon('heroicon-m-question-mark-circle')
             // ->iconButton()

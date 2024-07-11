@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SupplierResource\Pages;
 use App\Models\Supplier;
+use App\Models\SupplierFinancials;
 use App\Tables\Columns\SupplierBalance;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -64,6 +65,8 @@ class SupplierResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->description('Manage your clients here.')
+        ->header(view('tables.header.supplier-header'))
             ->columns([
                 TextColumn::make('*')
                     ->size(TextColumn\TextColumnSize::Medium)

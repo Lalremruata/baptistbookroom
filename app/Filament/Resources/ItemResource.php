@@ -64,7 +64,8 @@ class ItemResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('barcode')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->unique(),
                 Forms\Components\TextInput::make('description')
                     ->maxLength(255),
                 ])->columns(2)

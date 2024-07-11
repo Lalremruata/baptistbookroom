@@ -19,4 +19,15 @@
                 {{ $this->table }}
             </div>
     </div>
+
+    <script>
+        document.addEventListener('livewire:load', function () {
+            Livewire.on('focusBarcodeInput', () => {
+                const barcodeInput = document.querySelector('input[name="data[barcode]"]');
+                if (barcodeInput) {
+                    barcodeInput.focus();
+                }
+            });
+        });
+    </script>
 </x-filament-panels::page>
