@@ -6,5 +6,8 @@
     $debits = SupplierFinancials::where('supplier_id', $getRecord()->id)->where('type', 'debit')->sum('amount');
     $credits = SupplierFinancials::where('supplier_id', $getRecord()->id)->where('type', 'credit')->sum('amount');
     @endphp
-    {{  $openingBalance + ($credits - $debits) }}
+    <div class="font-bold">
+        {{  $openingBalance + ($credits - $debits) }}
+    </div>
+
 </div>

@@ -52,7 +52,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Baptist BookRoom')
             ->favicon(asset('images/favicon.jpg'))
             ->darkMode(true)
-            ->defaultThemeMode(ThemeMode::Dark)
+            ->defaultThemeMode(ThemeMode::Light)
             ->maxContentWidth(MaxWidth::Full)
             // ->brandLogo(asset('/images/bcm-logo.svg'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

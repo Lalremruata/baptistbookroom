@@ -8,6 +8,7 @@ use App\Models\SupplierFinancials;
 use App\Tables\Columns\SupplierBalance;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
@@ -19,12 +20,16 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Enums\FiltersLayout;
+
 
 class SupplierResource extends Resource
 {
     protected static ?string $model = Supplier::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
+    protected ?string $heading = 'Custom Page Heading';
     public static function form(Form $form): Form
     {
         return $form
@@ -65,7 +70,6 @@ class SupplierResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->description('Manage your clients here.')
         ->header(view('tables.header.supplier-header'))
             ->columns([
                 TextColumn::make('*')
@@ -99,7 +103,7 @@ class SupplierResource extends Resource
             ])
             ->filters([
                 //
-            ])
+                ])
             ->actions([
                 Tables\Actions\EditAction::make()
                 ->iconButton(),
@@ -123,7 +127,7 @@ class SupplierResource extends Resource
     {
         return [
             'index' => Pages\ManageSuppliers::route('/'),
-            // 'edit' => Pages\ManageSuppliers::route('/{record}/edit'),
+            'edit' => Pages\ManageSuppliers::route('/{record}/edit'),
             'supplier-financial' => Pages\SupplierDetail::route('/{record}/supplier-details'),
 
         ];

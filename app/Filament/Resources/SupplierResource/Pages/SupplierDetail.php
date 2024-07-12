@@ -57,9 +57,9 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
     public function table(Table $table): Table
     {
         $balance = SupplierFinancials::query()
-        ->where('supplier_id', $this->record->id)
-        ->selectRaw('SUM(CASE WHEN type = "debit" THEN amount ELSE 0 END) - SUM(CASE WHEN type = "credit" THEN amount ELSE 0 END) AS balance')
-        ->value('balance');
+            ->where('supplier_id', $this->record->id)
+            ->selectRaw('SUM(CASE WHEN type = "debit" THEN amount ELSE 0 END) - SUM(CASE WHEN type = "credit" THEN amount ELSE 0 END) AS balance')
+            ->value('balance');
         $openingBalance = Supplier::where('id',$this->record->id)->pluck('opening_balance')->first();
 
         return $table
@@ -68,18 +68,18 @@ class SupplierDetail extends Page implements HasForms, HasTable,  HasActions
             ->columns([
                 TextColumn::make('voucher_no'),
                 TextColumn::make('amount')
-                ->summarize(Summarizer::make()
-                ->label('Balance')
-                ->using(fn (\Illuminate\Database\Query\Builder $query) => $openingBalance - $balance)),
+                    ->summarize(Summarizer::make()
+                    ->label('Balance')
+                    ->using(fn (\Illuminate\Database\Query\Builder $query) => $openingBalance - $balance)),
                 TextColumn::make('type')
-                ->sortable()
-                ->badge(),
+                    ->sortable()
+                    ->badge(),
                 TextColumn::make('payment_mode'),
                 TextColumn::make('transaction_number'),
                 TextColumn::make('remarks'),
                 TextColumn::make('created_at')
-                ->label('date')
-                ->date(),
+                    ->label('date')
+                    ->date(),
             ])
             ->contentFooter(view('filament.pages.supplier-financial'))
             ->actions([
