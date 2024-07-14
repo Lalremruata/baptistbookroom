@@ -3,7 +3,8 @@
 @config 'tailwind.config.js';
 
 .fi-simple-layout{
-    @apply bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500;
+    /* @apply bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500; */
+    background: url("/images/backgrounds/bg.jpg") !important;
 }
 
 .choices .choices__list .choices__item{

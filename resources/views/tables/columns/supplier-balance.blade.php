@@ -9,5 +9,4 @@
     <div class="font-bold">
         {{  $openingBalance + ($credits - $debits) }}
     </div>
-
 </div>

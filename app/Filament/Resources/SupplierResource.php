@@ -29,7 +29,7 @@ class SupplierResource extends Resource
     protected static ?string $model = Supplier::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
-    protected ?string $heading = 'Custom Page Heading';
+    protected ?string $title = 'Custom Page Heading';
     public static function form(Form $form): Form
     {
         return $form

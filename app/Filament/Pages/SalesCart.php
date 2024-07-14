@@ -95,7 +95,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             Select::make('branch_stock_id')
                 ->reactive()
                 ->label('Item Search')
-                ->options(function(){
+                ->getSearchResultsUsing(function(){
                      return BranchStock::with(['mainStock' => function ($query) {
                         $query->select('item_id', 'id');
                     }])
