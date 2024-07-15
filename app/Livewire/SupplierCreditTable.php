@@ -52,8 +52,7 @@ class SupplierCreditTable extends Component implements HasForms, HasTable, HasAc
                 ->badge(),
             TextColumn::make('payment_mode'),
             TextColumn::make('transaction_number'),
-            TextColumn::make('remarks'),
-            TextColumn::make('created_at')
+            TextColumn::make('remarks')
                 ->label('date')
                 ->date(),
         ])
@@ -61,8 +60,10 @@ class SupplierCreditTable extends Component implements HasForms, HasTable, HasAc
                 DeleteAction::make()
                 ->after(function (){
                     $this->dispatch('deleteRecord');
-                }),
+                })
+                ->iconButton(),
                 EditAction::make()
+                ->iconButton()
                 ->after(function (){
                     $this->dispatch('editRecord');
                 })

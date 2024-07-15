@@ -39,7 +39,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class SupplierDetail extends Page implements HasForms,  HasActions
 {
-    
+
     // use InteractsWithTable;
     use InteractsWithForms;
     use InteractsWithActions;
@@ -182,7 +182,7 @@ class SupplierDetail extends Page implements HasForms,  HasActions
     //             // })
     //         ]);
     // }
-    
+
     protected function getActions(): array
     {
         return [
@@ -206,7 +206,7 @@ class SupplierDetail extends Page implements HasForms,  HasActions
                     ])
                     ->required(),
                 TextInput::make('transaction_number'),
-                Textarea::make('remarks')
+                DatePicker::make('remarks')
                 ])->columns(2)
                 ])
 

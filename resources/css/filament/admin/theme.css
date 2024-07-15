@@ -4,7 +4,12 @@
 
 .fi-simple-layout{
     /* @apply bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500; */
-    background: url("/images/backgrounds/bg.jpg") !important;
+    background-image: url("/images/backgrounds/bg.jpg") !important;
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
 }
 
 .choices .choices__list .choices__item{
@@ -16,5 +21,5 @@
     @apply hover:bg-blue-200 dark:hover:bg-primary-600
 }
 .fi-simple-main-ctn .fi-simple-main{
-    @apply bg-opacity-100;
+    @apply bg-opacity-80;
 }
