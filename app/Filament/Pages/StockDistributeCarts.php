@@ -149,6 +149,8 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->query(StockDistributeCart::query())
             ->columns([
                 TextColumn::make('mainStock.item.item_name'),
+                TextColumn::make('mainStock.barcode')
+                ->label('barcode'),
                 TextColumn::make('quantity'),
                 TextColumn::make('cost_price')
                 ->label('Cost Price'),

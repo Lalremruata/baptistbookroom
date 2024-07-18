@@ -78,34 +78,32 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->autofocus()
                 ->afterStateUpdated(function(callable $set,Get $get){
                     $barcode = $get('barcode');
-                    if($barcode)
-                    {
                         $branchStock = BranchStock::with('mainStock')
-                        ->where('barcode', $barcode)
-                        ->first();
+                        ->where('barcode', $barcode)->where('branch_id', auth()->user()->branch_id)->first();
                         if($branchStock)
                         {
                             $set('branch_stock_id', $branchStock->id);
                         }
-                    }
-
                 })
                 ->reactive()
                 ->live(),
             Select::make('branch_stock_id')
                 ->reactive()
                 ->label('Item Search')
-                ->getSearchResultsUsing(function(){
-                     return BranchStock::with(['mainStock' => function ($query) {
-                        $query->select('item_id', 'id');
-                    }])
-                    ->whereHas('mainStock', function ($query) {
-                    $query->where('branch_id', auth()->user()->branch_id);
-                    })
-                    ->get()
-                    ->pluck('mainStock.item.item_name', 'id')
-                    ->toArray();
-                })
+                ->options(BranchStock::with('mainStock')->where('branch_id', auth()->user()->branch_id)
+                ->limit(5)
+                ->get()->pluck('mainStock.item.item_name', 'id')->toArray())
+                // ->getSearchResultsUsing(function(){
+                //      return BranchStock::with(['mainStock' => function ($query) {
+                //         $query->select('item_id', 'id');
+                //     }])
+                //     ->whereHas('mainStock', function ($query) {
+                //     $query->where('branch_id', auth()->user()->branch_id);
+                //     })
+                //     ->get()
+                //     ->pluck('mainStock.item.item_name', 'id')
+                //     ->toArray();
+                // })
                 ->afterStateUpdated(
                     function(callable $set,Get $get){
                         $branchStockId = $get('branch_stock_id');

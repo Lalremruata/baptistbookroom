@@ -8,6 +8,7 @@ use App\Models\MainStock;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 class EditItem extends EditRecord
 {
@@ -22,15 +23,18 @@ class EditItem extends EditRecord
     protected function afterSave(): void
     {
         try {
-            MainStock::findOrFail($this->data['id'])
+            MainStock::where('item_id',$this->data['id'])
                 ->update(['barcode' => $this->data['barcode']]);
             BranchStock::whereHas('mainStock', function ($query) {
                     $query->where('item_id', $this->data['id']);
                 })->update(['barcode' => $this->data['barcode']]);
 
         } catch (ModelNotFoundException $e) {
-            // Handle the case where the MainStock with the specified ID is not found
-            // You can log an error, redirect the user, or take other appropriate actions.
+        // Log error details
+        Log::error('MainStock not found: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            // Log any other exceptions
+            Log::error('Error updating barcode: ' . $e->getMessage());
         }
     }
 }
