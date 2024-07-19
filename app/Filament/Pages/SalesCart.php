@@ -94,7 +94,6 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->reactive()
                 ->label('Item Search')
                 ->options(BranchStock::with('mainStock')->where('branch_id', auth()->user()->branch_id)
-                ->limit(5)
                 ->get()->pluck('mainStock.item.item_name', 'id')->toArray())
                 // ->getSearchResultsUsing(function(){
                 //      return BranchStock::with(['mainStock' => function ($query) {
