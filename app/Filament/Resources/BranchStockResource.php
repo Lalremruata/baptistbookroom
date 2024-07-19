@@ -103,24 +103,24 @@ class BranchStockResource extends Resource
                     ->label('Bar code')
                     ->searchable()
                     ->sortable(),
-            ])
+            ])->searchDebounce('750ms')
             ->filters([
                 Filter::make('created_at')
-                ->form([
-                    DatePicker::make('from'),
-                    DatePicker::make('to'),
-                ])->columns(2)
-                ->query(function (Builder $query, array $data): Builder {
-                    return $query
-                        ->when(
-                            $data['from'],
-                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
-                        )
-                        ->when(
-                            $data['to'],
-                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
-                        );
-                    }),
+                    ->form([
+                        DatePicker::make('from'),
+                        DatePicker::make('to'),
+                    ])->columns(2)
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['to'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                        }),
                     SelectFilter::make('branch')
                         ->relationship('branch','branch_name')
                         ->hidden(! auth()->user()->user_type=='1')

@@ -24,6 +24,8 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\Page;
+use Filament\Resources\Pages\EditRecord;
 
 class MainStockResource extends Resource
 {
@@ -52,7 +54,7 @@ class MainStockResource extends Resource
                         })
                         ->autofocus()
                         ->live()
-                        ->disabled()
+                        ->disabled(fn (Page $livewire) => $livewire instanceof EditRecord)
                         ->dehydrated(false),
                     Forms\Components\Select::make('sub_category_id')
                         ->label('Sub Category')

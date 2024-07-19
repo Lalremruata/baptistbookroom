@@ -78,16 +78,19 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->autofocus()
                 ->afterStateUpdated(function(callable $set,Get $get){
                     $barcode = $get('barcode');
-                        $branchStock = BranchStock::with('mainStock')
+                    $branchStock = BranchStock::with('mainStock')
                         ->where('barcode', $barcode)->where('branch_id', auth()->user()->branch_id)->first();
                         if($branchStock)
                         {
                             $set('branch_stock_id', $branchStock->id);
+                            $set('item_id', $branchStock->mainStock->item->item_name);
                         }
+                        else
+                        $set('branch_stock_id', null);
                 })
                 ->reactive()
                 ->live(),
-            Select::make('branch_stock_id')
+            Select::make('item_id')
                 ->reactive()
                 ->label('Item Search')
                 ->options(BranchStock::with('mainStock')->where('branch_id', auth()->user()->branch_id)
@@ -106,17 +109,18 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 // })
                 ->afterStateUpdated(
                     function(callable $set,Get $get){
-                        $branchStockId = $get('branch_stock_id');
+                        $branchStockId = $get('item_id');
                         $branchStock = BranchStock::where('id', $branchStockId)
                             ->first();
                             if($branchStock)
                             {
                                 $set('barcode',$branchStock->barcode);
+                                $set('branch_stock_id', $branchStock->id);
                             }
                     }
                     )
                 ->searchable()
-                ->dehydrated()
+                ->dehydrated(false)
                 ->required()
                 ->live(),
                 TextInput::make('quantity')
@@ -168,6 +172,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     TextInput::make('discount')
                     ->numeric()
                     ->default(0),
+                Hidden::make('branch_stock_id'),
                 Hidden::make('branch_id')
                     ->default(auth()->user()->branch_id),
                 Hidden::make('user_id')
