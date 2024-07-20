@@ -77,7 +77,7 @@ class InvoicesController extends Controller
             ->delimiter('/')
             ->logo(public_path('/images/bcm-logo.svg'));
         
-        return $invoice->stream();
+        return $invoice->download();
     }
 
 }
