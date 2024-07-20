@@ -170,6 +170,24 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                     DeleteBulkAction::make(),
             ])
             ->headerActions([
+                \Filament\Tables\Actions\Action::make('print receipt')
+                ->form([
+                    TextInput::make('customer_name')
+                        ->autofocus()
+                        ->required(),
+                    TextInput::make('address')
+                        ->autofocus()
+                        ->required(),
+                ])
+                ->action(function (array $data) {
+                    return redirect()->route('stockdistribute.receipt.download', $data);
+                })
+                // ->url(function(StockDistributeCart $stockDistributeCart){
+                //     return route('stockdistribute.receipt.download', $stockDistributeCart);
+                // })
+                ->keyBindings(['command+p', 'shift+p'])
+                ->icon('heroicon-o-printer')
+                ->color('success'),
                 \Filament\Tables\Actions\Action::make('checkout cart')
                 ->form([
                     Select::make('branch_id')
