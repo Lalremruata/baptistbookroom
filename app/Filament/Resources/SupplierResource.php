@@ -127,7 +127,7 @@ class SupplierResource extends Resource
     {
         return [
             'index' => Pages\ManageSuppliers::route('/'),
-            'edit' => Pages\ManageSuppliers::route('/{record}/edit'),
+            // 'edit' => Pages\ManageSuppliers::route('/{record}/edit'),
             'supplier-financial' => Pages\SupplierDetail::route('/{record}/supplier-details'),
 
         ];
