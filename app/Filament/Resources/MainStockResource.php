@@ -55,7 +55,7 @@ class MainStockResource extends Resource
                         ->autofocus()
                         ->live()
                         ->disabled(fn (Page $livewire) => $livewire instanceof EditRecord)
-                        ->dehydrated(false),
+                        ->dehydrated(),
                     Forms\Components\Select::make('sub_category_id')
                         ->label('Sub Category')
                         ->options(SubCategory::query()->pluck('subcategory_name', 'id'))
