@@ -24,9 +24,6 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Enums\MaxWidth;
 use App\Filament\Pages\Auth\EditProfile;
-use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
-use Swis\Filament\Backgrounds\ImageProviders\MyImages;
-use Swis\Filament\Backgrounds\ImageProviders\Triangles;
 
 
 class AdminPanelProvider extends PanelProvider

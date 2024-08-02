@@ -11,7 +11,7 @@ use LaravelDaily\Invoices\Classes\InvoiceItem;
 use LaravelDaily\Invoices\Classes\Party;
 class InvoicesController extends Controller
 {
-   
+
     public function getInvoiceNumber()
    {
        $configPath = config_path('invoicenumber.php');
@@ -52,7 +52,7 @@ class InvoicesController extends Controller
             'in regards of delivery or something else',
         ];
         $notes = implode("<br>", $notes);
-        
+
         $items = $cartItems->map(function ($cartItem) {
             return Invoice::makeItem($cartItem->mainStock->item->item_name)
                 ->title($cartItem->mainStock->item->item_name)
@@ -67,16 +67,15 @@ class InvoicesController extends Controller
             ->dateFormat('d/m/Y')
             ->currencySymbol('₹')
             ->currencyCode('Rupees')
-            ->currencyFraction('paise') 
+            ->currencyFraction('paise')
             ->currencyFormat('{SYMBOL}{VALUE}')
             ->currencyThousandsSeparator(',')
             ->addItems($items)
-            ->status('paid')
             ->series($formattedYear)
             ->sequence($invoiceNumber)
             ->delimiter('/')
             ->logo(public_path('/images/bcm-logo.svg'));
-        
+
         return $invoice->download();
     }
 
