@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\InvoicesController;
+use App\Http\Controllers\SalesInvoicesController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,3 +18,5 @@ use Illuminate\Support\Facades\Route;
 // Route::redirect('/', '/login');
 Route::get('/receipt/download',[InvoicesController::class, 'downloadInvoice'])
 ->name('stockdistribute.receipt.download');
+Route::get('/sale/receipt/download',[SalesInvoicesController::class, 'downloadInvoice'])
+->name('sale.receipt.download');

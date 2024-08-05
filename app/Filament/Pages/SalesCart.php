@@ -209,8 +209,23 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             // ...
             ])
             ->headerActions([
+                \Filament\Tables\Actions\Action::make('print receipt')
+                ->form([
+                    TextInput::make('name')
+                        ->autofocus()
+                        ->required(),
+                    TextInput::make('address')
+                ])
+                ->action(function (array $data) {
+                    return redirect()->route('sale.receipt.download', $data);
+                })
+                // ->url(function(StockDistributeCart $stockDistributeCart){
+                //     return route('stockdistribute.receipt.download', $stockDistributeCart);
+                // })
+                ->keyBindings(['command+p', 'shift+p'])
+                ->icon('heroicon-o-printer')
+                ->color('success'),
                 \Filament\Tables\Actions\Action::make('checkout cart')
-
                 ->steps([
                     Step::make('Payment')
                     // ->description('Give the category a unique name')

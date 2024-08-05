@@ -172,10 +172,8 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->headerActions([
                 \Filament\Tables\Actions\Action::make('print receipt')
                 ->form([
-                    TextInput::make('customer_name')
-                        ->autofocus()
-                        ->required(),
-                    TextInput::make('address')
+                    Select::make('branch_name')
+                    ->options(Branch::query()->pluck('branch_name')->toArray())
                         ->autofocus()
                         ->required(),
                 ])

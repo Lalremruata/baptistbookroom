@@ -13,7 +13,6 @@ class SalesCartItem extends Model
         "branch_stock_id",
         "branch_id",
         "user_id",
-        "item_id",
         "quantity",
         "cost_price",
         "selling_price",

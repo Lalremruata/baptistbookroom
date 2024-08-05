@@ -53,8 +53,7 @@ class SupplierCreditTable extends Component implements HasForms, HasTable, HasAc
             TextColumn::make('payment_mode'),
             TextColumn::make('transaction_number'),
             TextColumn::make('remarks')
-                ->label('date')
-                ->date(),
+                ->label('date'),
         ])
         ->actions([
                 DeleteAction::make()

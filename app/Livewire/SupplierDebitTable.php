@@ -52,8 +52,7 @@ class SupplierDebitTable extends Component implements HasForms, HasTable, HasAct
             TextColumn::make('payment_mode'),
             TextColumn::make('transaction_number'),
             TextColumn::make('remarks')
-                ->label('date')
-                ->date(),
+                ->label('date'),
         ])
         ->actions([
             DeleteAction::make()

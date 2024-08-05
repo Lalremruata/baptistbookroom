@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\StockDistributeCart;
-use Carbon\Carbon;
+use App\Models\SalesCartItem;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use LaravelDaily\Invoices\Invoice;
 use LaravelDaily\Invoices\Classes\Buyer;
 use LaravelDaily\Invoices\Classes\InvoiceItem;
 use LaravelDaily\Invoices\Classes\Party;
-class InvoicesController extends Controller
-{
 
+class SalesInvoicesController extends Controller
+{
     public function getInvoiceNumber()
    {
-       $configPath = config_path('invoicenumber.php');
+       $configPath = config_path('saleinvoicenumbergenerator.php');
        $config = include($configPath);
 
        $invoiceNumber = $config['number'];
@@ -25,23 +26,22 @@ class InvoicesController extends Controller
 
        return $invoiceNumber;
    }
-
     public function downloadInvoice(Request $request)
     {
         $invoiceNumber = $this->getInvoiceNumber();
         $date = Carbon::now();
         $formattedYear = $date->format('y');
-        $cartItems = StockDistributeCart::with('mainStock')->get();
+        $cartItems = SalesCartItem::with('branchStock')->get();
         $client = new Party([
-            'name'          => 'Baptist Literature Service : Bookroom : Aizawl',
-            'phone'         => '0389-2345676',
-            'custom_fields' => [
-                'Address'        => 'Baptist Centre, MG Road, Khatla, Aizawl, Mizoram',
-            ],
+            'name'          => Auth()->user()->branch->branch_name,
+            // 'phone'         => '0389-2345676',
+            // 'custom_fields' => [
+            //     'Address'        => 'Baptist Centre, MG Road, Khatla, Aizawl, Mizoram',
+            // ],
         ]);
         $customer = new Party([
-            'name'          => $request['branch_name'],
-            // 'address'       => $request['address'],
+            'name'          => $request['name'],
+            'address'       => $request['address'],
             'custom_fields' => [
                 'Bill number' =>  $invoiceNumber.'/'.$formattedYear,
             ],
@@ -54,14 +54,14 @@ class InvoicesController extends Controller
         $notes = implode("<br>", $notes);
 
         $items = $cartItems->map(function ($cartItem) {
-            return Invoice::makeItem($cartItem->mainStock->item->item_name)
-                ->title($cartItem->mainStock->item->item_name)
-                ->pricePerUnit($cartItem->mrp)
+            return Invoice::makeItem($cartItem->branchStock->mainStock->item->item_name)
+                ->title($cartItem->branchStock->mainStock->item->item_name)
+                ->pricePerUnit($cartItem->selling_price)
                 ->quantity($cartItem->quantity);
         })->toArray();
 
         $invoice = Invoice::make('receipt')
-            ->template('distributor')
+        ->template('salesinvoice')
             ->seller($client)
             ->buyer($customer)
             ->serialNumberFormat('{SEQUENCE}/{SERIES}')
@@ -79,5 +79,4 @@ class InvoicesController extends Controller
 
         return $invoice->download();
     }
-
 }
