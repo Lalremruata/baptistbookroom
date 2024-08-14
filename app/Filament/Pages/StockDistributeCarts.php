@@ -146,7 +146,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     public function table(Table $table): Table
     {
         return $table
-            ->query(StockDistributeCart::query())
+            ->query(StockDistributeCart::query()->where('user_id',auth()->user()->id))
             ->columns([
                 TextColumn::make('mainStock.item.item_name'),
                 TextColumn::make('mainStock.barcode')

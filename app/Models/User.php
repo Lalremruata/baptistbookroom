@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'user_type',
         'branch_id',
         'address',
         'contact',
@@ -47,6 +48,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'user_type' => 'boolean',
     ];
     public function roles()
     {

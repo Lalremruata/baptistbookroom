@@ -9,13 +9,14 @@ use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
@@ -53,6 +54,12 @@ class UserResource extends Resource
                 ->required(fn(Page $livewire): bool => $livewire instanceof CreateRecord)
                 ->minLength(8)
                 ->dehydrated(false),
+                Toggle::make('user_type')
+                ->label("Is Admin")
+                ->onIcon('heroicon-m-check')
+                ->offIcon('heroicon-m-x-mark')
+                ->onColor('success')
+                ->offColor('danger'),
                 Select::make('branch_id')
                 ->label('branch')
                 ->relationship('branch','branch_name')

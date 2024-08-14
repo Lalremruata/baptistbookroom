@@ -9,6 +9,7 @@ use LaravelDaily\Invoices\Invoice;
 use LaravelDaily\Invoices\Classes\Buyer;
 use LaravelDaily\Invoices\Classes\InvoiceItem;
 use LaravelDaily\Invoices\Classes\Party;
+use Filament\Notifications\Notification;
 class InvoicesController extends Controller
 {
 
@@ -28,10 +29,18 @@ class InvoicesController extends Controller
 
     public function downloadInvoice(Request $request)
     {
+        $cartItems = StockDistributeCart::with('mainStock')->where('user_id',auth()->user()->id)->get();
+        if ($cartItems->isEmpty()) {
+            Notification::make()
+            ->danger()
+            ->title('Error')
+            ->body('No items found in the cart to generate an invoice.')
+            ->send();
+            return redirect()->back();
+        }
         $invoiceNumber = $this->getInvoiceNumber();
         $date = Carbon::now();
         $formattedYear = $date->format('y');
-        $cartItems = StockDistributeCart::with('mainStock')->get();
         $client = new Party([
             'name'          => 'Baptist Literature Service : Bookroom : Aizawl',
             'phone'         => '0389-2345676',
