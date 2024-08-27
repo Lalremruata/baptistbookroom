@@ -30,8 +30,21 @@
          <h5 class="text-xl">Balance: {{ $balance }}</h5>
 </x-filament::section>
 
-        <x-filament::section >
-            {{ $this->table }}
+        
+        <div class="lg:flex">
+        <x-filament::section class="w-full lg:w-1/2 p-4">
+            <div >
+                <h2 class="text-2xl font-semibold mb-4">Payment to Author/Submitter</h2>
+                <livewire:private-book-payment :privateBookId="$record->id" />
+            </div>
         </x-filament::section>
+        <x-filament::section class="w-full lg:w-1/2 p-4">
+        <div>
+                <h2 class="text-2xl font-semibold mb-4">Book Returned</h2>
+                <livewire:private-book-returns :privateBookId="$record->id" />
+            </div>
+        </x-filament::section>
+        </div>
+        
 <x-filament-actions::modals />
 </x-filament-panels::page>

@@ -18,7 +18,8 @@ class LatestSales extends BaseWidget
     {
         return $table
             ->query(
-                Sale::query()
+                Sale::query()->latest('created_at') // Sorts by created_at in descending order
+                ->limit(20)
             )
             ->columns([
                 TextColumn::make('')
@@ -31,6 +32,7 @@ class LatestSales extends BaseWidget
                     ->label('date')
                     ->date()
                     ->sortable(),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 }
