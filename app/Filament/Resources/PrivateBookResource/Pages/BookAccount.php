@@ -6,6 +6,7 @@ use App\Filament\Resources\PrivateBookResource;
 use App\Models\PrivateBook;
 use App\Models\PrivateBookAccount;
 
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Pages\Page;
 
 use Filament\Forms\Components\Section;
@@ -39,6 +40,7 @@ class BookAccount extends Page implements HasForms, HasTable,  HasActions
             ->query(PrivateBookAccount::query()->where('private_book_id', $this->record->id))
             ->columns([
                 TextColumn::make('return_amount')
+                ->label('Payment Amount')
                 ->width('5%')
                 ->numeric(),
                 TextColumn::make('created_at')
@@ -50,11 +52,15 @@ class BookAccount extends Page implements HasForms, HasTable,  HasActions
                 ->form([
                     Section::make([
                         TextInput::make('return_amount')
+                        ->label('Payment amount')
                         ->required(),
+                        DatePicker::make('return_date')
+                        ->label('Payment date')
+                        ->default(now())
                     ])->columns(2)
                     ])
 
-                ->label('add record')
+                ->label('Payment')
                 ->color('success')
                 ->extraAttributes([
                     'class' => 'margin',
@@ -63,7 +69,7 @@ class BookAccount extends Page implements HasForms, HasTable,  HasActions
                     $privateBookAccount = new PrivateBookAccount();
                     $privateBookAccount->private_book_id = $this->record->id;
                     $privateBookAccount->return_amount = $data['return_amount'];
-                    $privateBookAccount->return_date = now();
+                    $privateBookAccount->return_date = $data['return_date'];
                     $privateBookAccount->save();
                 })
             ]);
