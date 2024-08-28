@@ -41,12 +41,12 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
         ->where('private_book_id', $this->privateBookId))
         ->columns([
             TextColumn::make('return_amount')
-            ->label('Book returned')
+            ->label('Payment Amount')
             ->width('5%')
             ->numeric()
             ->summarize(Sum::make()->label('Total')),
             TextColumn::make('return_date')
-            ->label('Return date')
+            ->label('Payment date')
             ->date(),
         ])
         ->actions([
@@ -66,7 +66,7 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                     ->form([
                         Section::make([
                             TextInput::make('return_amount')
-                            ->label('Book returned amount')
+                            ->label('Payment')
                             ->required(),
                             DatePicker::make('return_date')
                             ->label('Return date')
