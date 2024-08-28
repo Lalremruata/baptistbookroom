@@ -45,7 +45,7 @@ class InvoicesController extends Controller
             'name'          => 'Baptist Literature Service : Bookroom : Aizawl',
             'phone'         => '0389-2345676',
             'custom_fields' => [
-                'Address'        => 'Baptist Centre, MG Road, Khatla, Aizawl, Mizoram',
+                'Address'        => 'Baptist House, MG Road, Khatla, Aizawl, Mizoram',
             ],
         ]);
         $customer = new Party([

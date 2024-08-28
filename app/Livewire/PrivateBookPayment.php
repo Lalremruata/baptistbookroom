@@ -69,11 +69,11 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                             ->label('Payment')
                             ->required(),
                             DatePicker::make('return_date')
-                            ->label('Return date')
+                            ->label('Payment date')
                             ->default(now())
                         ])->columns(2)
                         ])
-    
+
                     ->label('Add Payment to Author/Submitter')
                     ->color('success')
                     ->extraAttributes([

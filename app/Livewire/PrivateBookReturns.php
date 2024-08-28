@@ -44,7 +44,7 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
         ->where('private_book_id', $this->privateBookId))
         ->columns([
             TextColumn::make('return_amount')
-            ->label('Book returned')
+            ->label('Book returned Quantity')
             ->width('5%')
             ->numeric()
             ->summarize(Sum::make()->label('Total')),
@@ -82,14 +82,14 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                     ->form([
                         Section::make([
                             TextInput::make('return_amount')
-                            ->label('Book returned amount')
+                            ->label('Book returned quantity')
                             ->required(),
                             DatePicker::make('return_date')
                             ->label('Return date')
                             ->default(now())
                         ])->columns(2)
                         ])
-    
+
                     ->label('Add Book Returned')
                     ->color('success')
                     ->extraAttributes([
