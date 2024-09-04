@@ -94,18 +94,12 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->reactive()
                 ->label('Item Search')
                 ->options(BranchStock::with('mainStock')->where('branch_id', auth()->user()->branch_id)
-                ->get()->pluck('mainStock.item.item_name', 'id')->toArray())
-                // ->getSearchResultsUsing(function(){
-                //      return BranchStock::with(['mainStock' => function ($query) {
-                //         $query->select('item_id', 'id');
-                //     }])
-                //     ->whereHas('mainStock', function ($query) {
-                //     $query->where('branch_id', auth()->user()->branch_id);
-                //     })
-                //     ->get()
-                //     ->pluck('mainStock.item.item_name', 'id')
-                //     ->toArray();
-                // })
+                    ->get()->pluck('mainStock.item_info', 'id')->toArray())
+                // ->getSearchResultsUsing(fn (string $search): array =>
+                //     BranchStock::where('branch_id', auth()->user()->branch_id)
+                //     ->whereHas('')
+                //      ->get()->pluck('mainStock.item_info', 'id')->toArray()
+                // )
                 ->afterStateUpdated(
                     function(callable $set,Get $get){
                         $branchStockId = $get('item_id');
@@ -118,10 +112,37 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                             }
                     }
                     )
+                ->noSearchResultsMessage('No items found.')
+                ->searchingMessage('Searching items')
                 ->searchable()
                 ->dehydrated(false)
                 ->required()
-                ->live(),
+                ->live()
+                ->hint(function(Get $get){
+                    $branchStockId = $get('branch_stock_id');
+                    $barcode = $get('barcode');
+                    if ($branchStockId) {
+                            $result=BranchStock::where('id',$branchStockId)
+                            ->where('branch_id',auth()->user()->branch_id)
+                            ->pluck('mrp','id')->first();
+                            if($result)
+                                return 'mrp: '.$result;
+                            else
+                                return null;
+                    }
+                    elseif ($barcode) {
+                        $result=BranchStock::where('barcode', $barcode)
+                        ->where('branch_id',auth()->user()->branch_id)
+                        ->pluck('mrp','id')->first();
+                        if($result)
+                            return 'mrp: '.$result;
+                       else
+                           return null;
+                }
+                // elseif()
+                        return null;
+                })
+                    ->hintColor('success'),
                 TextInput::make('quantity')
                     ->reactive()
                     ->minValue(1)

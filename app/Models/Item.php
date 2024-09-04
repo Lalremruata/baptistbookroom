@@ -34,7 +34,7 @@ class Item extends Model
     }
 
     public function stockDistribute(): HasMany
-    { 
+    {
         return $this->hasMany(StockDistribute::class);
     }
     public function privateBook(): HasMany

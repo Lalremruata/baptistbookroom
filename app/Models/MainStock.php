@@ -39,4 +39,8 @@ class MainStock extends Model
     {
         return $this->hasManyThrough(Sale::class,BranchStock::class);
     }
+    public function getItemInfoAttribute()
+    {
+        return $this->item->item_name . ' - ' . $this->mrp;
+    }
 }

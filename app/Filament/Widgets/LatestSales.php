@@ -33,6 +33,7 @@ class LatestSales extends BaseWidget
                     ->date()
                     ->sortable(),
             ])
+            ->paginated(false)
             ->defaultSort('created_at', 'desc');
     }
 }
