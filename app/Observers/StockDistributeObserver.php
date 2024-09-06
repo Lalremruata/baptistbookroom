@@ -6,7 +6,7 @@ use App\Filament\Resources\BranchStockResource;
 use App\Models\StockDistribute;
 use App\Models\User;
 use Filament\Notifications\Notification;
-use Filament\Notifications\Actions\Action; 
+use Filament\Notifications\Actions\Action;
 
 class StockDistributeObserver
 {
@@ -24,7 +24,7 @@ class StockDistributeObserver
             Action::make('view')
                 ->button()
                 ->markAsRead()
-                ->url(BranchStockResource::getUrl('index'))
+                ->url(BranchStockResource::getUrl('/view'))
         ])
         ->sendToDatabase($users);
     }
@@ -43,7 +43,7 @@ class StockDistributeObserver
             Action::make('view')
                 ->button()
                 ->markAsRead()
-                ->url(BranchStockResource::getUrl('index'))
+                ->url(BranchStockResource::getUrl('/view'))
         ])
         ->sendToDatabase($users);
     }

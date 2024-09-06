@@ -4,7 +4,7 @@
         // Get the item name
         $itemName = $this->record->item->item_name;
 
-        // Calculate total amount, total sale, and return amount in a more efficient way
+        // Calculate total amount, total sale, and return amount
         $totalAmount = App\Models\Sale::whereHas('branchStock.mainStock.item', function ($query) use ($itemId) {
                 $query->where('items.id', $itemId);
             })->sum('total_amount');
@@ -28,9 +28,10 @@
         <h5 class="text-xl">Lehkhabu hralh zat: {{ $totalSale }}</h5>
          <h5 class="text-xl">Lehkhabu hralh man : {{ $totalAmount }}</h5>
          <h5 class="text-xl">Balance: {{ $balance }}</h5>
+         <h5 class="text-xl">Initial Quantity: {{ $this->totalQuantity }}</h5>
 </x-filament::section>
 
-        
+
         <div class="lg:flex">
         <x-filament::section class="w-full lg:w-1/2 p-4">
             <div >
@@ -45,6 +46,6 @@
             </div>
         </x-filament::section>
         </div>
-        
+
 <x-filament-actions::modals />
 </x-filament-panels::page>

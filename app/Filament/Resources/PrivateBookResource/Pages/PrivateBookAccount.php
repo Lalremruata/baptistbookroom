@@ -3,7 +3,11 @@
 namespace App\Filament\Resources\PrivateBookResource\Pages;
 
 use App\Filament\Resources\PrivateBookResource;
+use App\Models\BranchStock;
+use App\Models\MainStock;
 use App\Models\PrivateBook;
+use App\Models\PrivateBookReturn;
+use App\Models\Sale;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -24,6 +28,7 @@ class PrivateBookAccount extends Page implements HasForms, HasTable,  HasActions
     use InteractsWithActions;
     protected static string $resource = PrivateBookResource::class;
     public PrivateBook $record;
+    public $initialQuantity;
     public ?array $data = [];
     protected static string $view = 'filament.resources.private-book-resource.pages.private-book-account';
     public function mount(): void
@@ -77,5 +82,15 @@ class PrivateBookAccount extends Page implements HasForms, HasTable,  HasActions
                     $supplierFinancial->save();
                 })
             ]);
+    }
+    public function initialQuantity(){
+        $itemId = $this->record->item_id;
+        $mainStockQuantity = MainStock::where('id', $this->record->id)->pluck('quantity');
+        $branchStockQuantity = BranchStock::where('main_stock_id', $this->record->id)->pluck('quantity')->sum('quantity');
+        $totalSale = Sale::whereHas('branchStock.mainStock.item', function ($query) use ($itemId) {
+            $query->where('items.id', $itemId);
+        })->sum('quantity');
+        $totalReturns = PrivateBookReturn::where('private_book_id', $this->record->id)->pluck('return_amount');
+        $this->initialQuantity = $mainStockQuantity+$branchStockQuantity+$totalSale+$totalReturns;
     }
 }

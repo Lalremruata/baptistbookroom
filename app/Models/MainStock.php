@@ -41,6 +41,6 @@ class MainStock extends Model
     }
     public function getItemInfoAttribute()
     {
-        return $this->item->item_name . ' - ' . $this->mrp;
+        return $this->item->item_name . ' - mrp ' . $this->mrp;
     }
 }

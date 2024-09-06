@@ -150,6 +150,7 @@ class BranchStockResource extends Resource
         return [
             'index' => Pages\ListBranchStocks::route('/'),
             'create' => Pages\CreateBranchStock::route('/create'),
+            'view' => Pages\ViewBranchStock::route('/{record}'),
             // 'edit' => Pages\EditBranchStock::route('/{record}/edit'),
         ];
     }
