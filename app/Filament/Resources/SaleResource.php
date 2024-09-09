@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\SaleExporter;
 use App\Filament\Resources\SaleResource\Pages;
 use App\Models\BranchStock;
+use App\Models\Category;
 use App\Models\Sale;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -99,6 +100,11 @@ class SaleResource extends Resource
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->sortable(),
+                Tables\Columns\TextColumn::make('branchStock.mainStock.item.category.category_name')
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
@@ -157,7 +163,10 @@ class SaleResource extends Resource
                     }),
                     SelectFilter::make('branch')
                         ->relationship('branch','branch_name')
-                        ->hidden(! auth()->user()->user_type=='1')
+                        ->hidden(! auth()->user()->user_type=='1'),
+                    SelectFilter::make('category')
+                        ->options(Category::query()->pluck('category_name', 'id'))
+                        ->hidden(! auth()->user()->user_type=='1'),
                 ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
                 // Tables\Actions\EditAction::make(),
