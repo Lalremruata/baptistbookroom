@@ -14,6 +14,7 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
+use Filament\Resources\Concerns\HasTabs;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -37,6 +38,7 @@ use Filament\Forms\Components\Tabs;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\View\View;
+use Filament\Resources\Pages\ListRecords;
 
 
 class StockDistributeCarts extends Page implements HasForms, HasTable, HasActions
@@ -46,6 +48,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     use InteractsWithTable;
     use InteractsWithForms;
     use InteractsWithActions;
+    use HasTabs;
     public ?array $data = [];
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
     protected static ?string $navigationGroup = 'Stocks';
@@ -104,6 +107,8 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                             )
                         ->required()
                         ->dehydrated(),
+                    Select::make('branch_id')
+                        ->options(Branch::pluck('branch_name','id')->toArray()),
                     TextInput::make('quantity')
                     ->reactive()
                     ->required()
@@ -157,13 +162,15 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 TextColumn::make('quantity'),
                 TextColumn::make('cost_price')
                 ->label('Cost Price'),
+                TextColumn::make('branch.branch_name'),
                 TextColumn::make('mrp')
                 ->summarize(Summarizer::make()
                 ->label('Total')
                 ->using(function (Builder $query): string {
                     return $query->sum(DB::raw('mrp * quantity'));
-                })
-                )
+                }),
+
+            ),
             ])
 
             ->actions([
@@ -334,22 +341,21 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     }
     public function getTabs(): array
     {
-        if (auth()->user()->user_type == '1') {
+        if(auth()->user()->user_type=='1') {
             $branches = Branch::all();
-            $tabs = [
-                'All' => Tabs\Tab::make('All')
-                    ->query(fn ($query) => $query), // Show all records
-            ];
-
+            $tabs=[null => ListRecords\Tab::make('All'),];
             foreach ($branches as $branch) {
-                $tabs[$branch->branch_name] = Tabs\Tab::make($branch->branch_name)
-                    ->query(fn ($query) => $query->where('branch_id', $branch->id));
+                $tabs[$branch->branch_name] = ListRecords\Tab::make()
+            ->query(fn ($query) => $query->where('branch_id', $branch->id));
             }
-
             return $tabs;
         }
+        else {
+        return [
+            //return nothing
+        ];
+        }
 
-        return [];
     }
 
 }

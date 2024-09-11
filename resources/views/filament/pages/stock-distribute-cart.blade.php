@@ -15,6 +15,7 @@
             {{ $this->deleteAction }}
             <x-filament-actions::modals />
         </div> --}}
+        <x-filament-panels::resources.tabs />
             <div class="w-full lg:w-1/2 p-4">{{ $this->table }}</div>
     </div>
 </x-filament-panels::page>

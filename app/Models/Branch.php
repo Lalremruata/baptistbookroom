@@ -16,9 +16,9 @@ class Branch extends Model
     {
         return $this->HasMany(BranchStock::class);
     }
-    public function stockDistribute(): HasMany
+    public function stockDistributeCart(): HasMany
     {
-        return $this->hasMany(StockDistribute::class);
+        return $this->hasMany(StockDistributeCart::class);
     }
     public function users(): HasMany
     {
