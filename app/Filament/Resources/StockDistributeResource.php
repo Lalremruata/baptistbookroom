@@ -8,6 +8,7 @@ use App\Models\StockDistribute;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -54,17 +55,20 @@ class StockDistributeResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('quantity')
+                    ->summarize(Sum::make()->label('Total'))
                     ->weight(FontWeight::Bold)
                     ->label('quantities')
                     ->sortable(),
                 TextColumn::make('cost_price')
                     ->weight(FontWeight::Bold)
                     ->numeric()
-                    ->money('inr'),
+                    ->money('inr')
+                    ->summarize(Sum::make()->label('Total')),
                 TextColumn::make('mrp')
                     ->weight(FontWeight::Bold)
                     ->numeric()
-                    ->money('inr'),
+                    ->money('inr')
+                    ->summarize(Sum::make()->label('Total')),
                 TextColumn::make('batch')
                     ->weight(FontWeight::Bold),
                 TextColumn::make('mainStock.barcode')

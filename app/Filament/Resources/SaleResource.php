@@ -7,6 +7,7 @@ use App\Filament\Resources\SaleResource\Pages;
 use App\Models\BranchStock;
 use App\Models\Category;
 use App\Models\Sale;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
@@ -96,14 +97,19 @@ class SaleResource extends Resource
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('branchStock.mainStock.item.item_name')
+                Tables\Columns\TextColumn::make('item.item_name')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('branchStock.mainStock.item.category.category_name')
+                Tables\Columns\TextColumn::make('item.category.category_name')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('item.barcode')
+                ->label('barcode')
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->size(TextColumn\TextColumnSize::Medium)
@@ -165,7 +171,7 @@ class SaleResource extends Resource
                         ->relationship('branch','branch_name')
                         ->hidden(! auth()->user()->user_type=='1'),
                     SelectFilter::make('category')
-                        ->options(Category::query()->pluck('category_name', 'id'))
+                        ->relationship('item.category','category_name')
                         ->hidden(! auth()->user()->user_type=='1'),
                 ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
@@ -188,6 +194,11 @@ class SaleResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->exporter(SaleExporter::class)
+                    ->formats([
+                            ExportFormat::Xlsx,
+                        ])
+                        ->icon('heroicon-m-arrow-down-tray')
+                        ->color('success')
             ], position: HeaderActionsPosition::Bottom);;
     }
 

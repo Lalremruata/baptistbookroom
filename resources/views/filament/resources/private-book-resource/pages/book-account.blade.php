@@ -9,10 +9,6 @@
                 $query->where('items.id', $itemId);
             })->sum('total_amount');
 
-        $totalSale = App\Models\Sale::whereHas('branchStock.mainStock.item', function ($query) use ($itemId) {
-                $query->where('items.id', $itemId);
-            })->sum('quantity');
-
         $returnAmount = $this->record->privateBookAccounts()->sum('return_amount');
 
         // Calculate balance
@@ -25,7 +21,7 @@
     <x-slot name="heading">
         <h1 class="text-xl">Lehkhabu hming : {{ $itemName}}</h1>
     </x-slot>
-        <h5 class="text-xl">Lehkhabu hralh zat: {{ $totalSale }}</h5>
+        <h5 class="text-xl">Lehkhabu hralh zat: {{ $this->totalSale }}</h5>
          <h5 class="text-xl">Lehkhabu hralh man : {{ $totalAmount }}</h5>
          <h5 class="text-xl">Balance: {{ $balance }}</h5>
          <h5 class="text-xl">Initial Quantity: {{ $this->totalQuantity }}</h5>

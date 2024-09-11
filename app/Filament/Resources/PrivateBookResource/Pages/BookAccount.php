@@ -26,9 +26,10 @@ class BookAccount extends Page implements HasForms,  HasActions
     use InteractsWithForms;
     use InteractsWithActions;
      protected static string $resource = PrivateBookResource::class;
-
+    
      public PrivateBook $record;
      public $totalQuantity;
+     public $totalSale;
      public ?array $data = [];
     protected static string $view = 'filament.resources.private-book-resource.pages.book-account';
     public function mount(): void
@@ -44,7 +45,7 @@ class BookAccount extends Page implements HasForms,  HasActions
         $branchStockQuantity = BranchStock::where('main_stock_id', $this->record->id)->sum('quantity');
 
         // Total sale quantity based on item_id
-        $totalSale = Sale::whereHas('branchStock.mainStock.item', function ($query) use ($itemId) {
+        $this->totalSale = Sale::whereHas('branchStock.mainStock.item', function ($query) use ($itemId) {
             $query->where('items.id', $itemId);
         })->sum('quantity');
 
@@ -54,7 +55,7 @@ class BookAccount extends Page implements HasForms,  HasActions
         // Calculate total quantity using null coalescing to handle potential null values
         $this->totalQuantity = ($mainStock->quantity ?? 0)
             + $branchStockQuantity
-            + $totalSale
+            + $this->totalSale
             + $totalReturns;
 
 

@@ -18,6 +18,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Actions\HeaderActionsPosition;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -136,6 +137,7 @@ class MainStockResource extends Resource
                         }
                     }),
                 TextInputColumn::make('cost_price')
+                    ->summarize(Sum::make()->label('Total'))
                     ->rules(['required', 'numeric'])
                     ->sortable()
                     ->afterStateUpdated(function ($record, $state) {
@@ -145,6 +147,7 @@ class MainStockResource extends Resource
                         }
                     }),
                 TextInputColumn::make('mrp')
+                    ->summarize(Sum::make()->label('Total'))
                     ->rules(['required', 'numeric'])
                     ->sortable()
                     ->afterStateUpdated(function ($record, $state) {

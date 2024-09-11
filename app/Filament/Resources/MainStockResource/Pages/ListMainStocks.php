@@ -34,4 +34,10 @@ class ListMainStocks extends ListRecords
             ->modalAlignment(Alignment::Center)
         ];
     }
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            MainStockResource\Widgets\MainStockValueOverview::class,
+        ];
+    }
 }

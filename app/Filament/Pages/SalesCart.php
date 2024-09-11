@@ -189,6 +189,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                 return 0;
                             else return 1;
                         }),
+                    TextInput::make('mrp')
+                    ->numeric(),
                     TextInput::make('discount')
                     ->numeric()
                     ->default(0),
@@ -386,8 +388,10 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             $cartItem = SalesCartItem::where('branch_stock_id', $data['branch_stock_id'])->first();
             if (!$cartItem) {
                 $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
-                $totalCostPrice = $branchStock->mrp * $data['quantity'];
-                $sellingPrice = $totalCostPrice - ($totalCostPrice * ($data['discount']/100));
+                $mrp = $data['mrp'] ?? $branchStock->mrp;
+                $totalMrp= $mrp * $data['quantity'];
+                $totalCostPrice = $branchStock->cost_price * $data['quantity'];
+                $sellingPrice = $totalMrp - ($totalMrp * ($data['discount']/100));
                 $newData = [
                     'cost_price'=> $totalCostPrice,
                     'selling_price'=> $sellingPrice,
@@ -398,7 +402,9 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             else {
                 $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
                 $totalCostPrice = $branchStock->cost_price * $data['quantity'];
-                $sellingPrice = $totalCostPrice - ($totalCostPrice * ($data['discount']/100));
+                $mrp = $data['mrp'] ?? $branchStock->mrp;
+                $totalMrp= $mrp * $data['quantity'];
+                $sellingPrice = $totalMrp - ($totalMrp * ($data['discount']/100));
                 $cartItem->quantity += $data['quantity'];
                 $cartItem->cost_price += $totalCostPrice;
                 $cartItem->selling_price += $sellingPrice;

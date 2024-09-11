@@ -11,6 +11,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -92,10 +93,12 @@ class BranchStockResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->sortable(),
                 TextColumn::make('cost_price')
+                    ->summarize(Sum::make()->label('Total'))
                     ->weight(FontWeight::Bold)
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('mrp')
+                    ->summarize(Sum::make()->label('Total'))
                     ->weight(FontWeight::Bold)
                     ->numeric()
                     ->sortable(),
