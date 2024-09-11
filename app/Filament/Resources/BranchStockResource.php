@@ -65,9 +65,9 @@ class BranchStockResource extends Resource
                 Forms\Components\TextInput::make('cost_price')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('discount')
-                    ->required()
-                    ->numeric(),
+                // Forms\Components\TextInput::make('discount')
+                //     ->required()
+                //     ->numeric(),
                     ])->compact()
                     ->columns(2)
 
@@ -154,7 +154,7 @@ class BranchStockResource extends Resource
             'index' => Pages\ListBranchStocks::route('/'),
             'create' => Pages\CreateBranchStock::route('/create'),
             'view' => Pages\ViewBranchStock::route('/{record}'),
-            // 'edit' => Pages\EditBranchStock::route('/{record}/edit'),
+            'edit' => Pages\EditBranchStock::route('/{record}/edit'),
         ];
     }
 }

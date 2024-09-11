@@ -5,11 +5,13 @@ namespace App\Filament\Resources\MainStockResource\Pages;
 use App\Filament\Resources\MainStockResource;
 use App\Models\BranchStock;
 use App\Models\Item;
+use App\Models\MainStock;
 use App\Models\PrivateBook;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Contracts\Support\Htmlable;
 
 class EditMainStock extends EditRecord
 {
@@ -44,5 +46,12 @@ class EditMainStock extends EditRecord
             // Handle the case where the MainStock with the specified ID is not found
             // You can log an error, redirect the user, or take other appropriate actions.
         }
+    }
+    public function getTitle(): string | Htmlable
+    {
+        /** @var MainStock */
+        $record = $this->getRecord();
+
+        return $record->item->item_name;
     }
 }

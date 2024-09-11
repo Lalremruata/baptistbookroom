@@ -2,7 +2,6 @@
     <div class="lg:flex flex flex-row">
         <div class="px-3 lg:w-1/2">
             <x-filament::section>
-                <h2 class="mb-2 leading-normal font-bold">{{$this->record->supplier_name}}</h2><hr>
                 <div class="flex">
                     <span class="m-2 leading-tight text-sm block">A/C No.: <span class="font-semibold text-slate-700 dark:text-white sm:ml-2">{{$this->record->account_number}}</span></span><hr>
                     <span class="m-2 leading-tight text-sm block">Bank: <span class="font-semibold text-slate-700 dark:text-white sm:ml-2">{{$this->record->bank_name}}</span></span><hr>

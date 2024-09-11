@@ -24,7 +24,7 @@ class StockDistributeObserver
             Action::make('view')
                 ->button()
                 ->markAsRead()
-                ->url(BranchStockResource::getUrl('/view'))
+                ->url(BranchStockResource::getUrl('index'))
         ])
         ->sendToDatabase($users);
     }
@@ -43,7 +43,7 @@ class StockDistributeObserver
             Action::make('view')
                 ->button()
                 ->markAsRead()
-                ->url(BranchStockResource::getUrl('/view'))
+                ->url(BranchStockResource::getUrl('index'))
         ])
         ->sendToDatabase($users);
     }

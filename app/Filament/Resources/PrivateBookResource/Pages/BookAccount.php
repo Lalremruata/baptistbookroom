@@ -21,12 +21,13 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Table;
 use Filament\Support\Enums\MaxWidth;
+use Illuminate\Contracts\Support\Htmlable;
 class BookAccount extends Page implements HasForms,  HasActions
 {
     use InteractsWithForms;
     use InteractsWithActions;
      protected static string $resource = PrivateBookResource::class;
-    
+
      public PrivateBook $record;
      public $totalQuantity;
      public $totalSale;
@@ -60,46 +61,14 @@ class BookAccount extends Page implements HasForms,  HasActions
 
 
     }
-    // public function table(Table $table): Table
-    // {
-    //     return $table
-    //         ->query(PrivateBookAccount::query()->where('private_book_id', $this->record->id))
-    //         ->columns([
-    //             TextColumn::make('return_amount')
-    //             ->label('Payment Amount')
-    //             ->width('5%')
-    //             ->numeric(),
-    //             TextColumn::make('date')
-    //             ->label('date')
-    //             ->date(),
-    //         ])
-    //         ->headerActions([
-    //             \Filament\Tables\Actions\CreateAction::make('add record')
-    //             ->form([
-    //                 Section::make([
-    //                     TextInput::make('return_amount')
-    //                     ->label('Payment amount')
-    //                     ->required(),
-    //                     DatePicker::make('return_date')
-    //                     ->label('Payment date')
-    //                     ->default(now())
-    //                 ])->columns(2)
-    //                 ])
+    public function getTitle(): string | Htmlable
+    {
+        /** @var PrivateBook */
+        $record = $this->record;
 
-    //             ->label('Payment')
-    //             ->color('success')
-    //             ->extraAttributes([
-    //                 'class' => 'margin',
-    //             ])
-    //             ->action(function (array $data, $record) {
-    //                 $privateBookAccount = new PrivateBookAccount();
-    //                 $privateBookAccount->private_book_id = $this->record->id;
-    //                 $privateBookAccount->return_amount = $data['return_amount'];
-    //                 $privateBookAccount->return_date = $data['return_date'];
-    //                 $privateBookAccount->save();
-    //             })
-    //         ]);
-    // }
+        return $record->item->item_name;
+    }
+
     public function getMaxContentWidth(): MaxWidth
     {
         return MaxWidth::FiveExtraLarge;

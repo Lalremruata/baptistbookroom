@@ -251,6 +251,7 @@ class MainStockResource extends Resource
             ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 // Tables\Actions\BulkActionGroup::make([
@@ -286,6 +287,14 @@ class MainStockResource extends Resource
             'index' => Pages\ListMainStocks::route('/'),
             'create' => Pages\CreateMainStock::route('/create'),
             'edit' => Pages\EditMainStock::route('/{record}/edit'),
+            'view' => Pages\ViewMainStock::route('/{record}'),
         ];
+    }
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            // ...
+            Pages\ViewMainStock::class,
+        ]);
     }
 }

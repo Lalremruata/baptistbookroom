@@ -18,6 +18,7 @@ class StockDistributeCart extends Model
         'cost_price',
         'mrp',
         'batch',
+        'branch_id'
     ];
     public function item(): BelongsTo{
         return $this->belongsTo(Item::class);
@@ -29,5 +30,8 @@ class StockDistributeCart extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
+    }
+    public function branch(): BelongsTo{
+        return $this->belongsTo(Branch::class);
     }
 }

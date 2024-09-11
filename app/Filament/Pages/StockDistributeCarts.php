@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\BranchStock;
 use App\Models\Item;
 use App\Models\MainStock;
+use App\Models\PrivateBook;
 use App\Models\StockDistribute;
 use App\Models\StockDistributeCart;
 use Filament\Actions\Action;
@@ -32,6 +33,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Filament\Actions\StaticAction;
+use Filament\Forms\Components\Tabs;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\View\View;
@@ -49,6 +51,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     protected static ?string $navigationGroup = 'Stocks';
     protected static ?string $navigationLabel = 'Main Stock Distribute';
     protected static ?int $navigationSort = 2;
+    public $branches;
     protected static string $view = 'filament.pages.stock-distribute-cart';
     public static function shouldRegisterNavigation(): bool
     {
@@ -57,7 +60,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     public function mount(): void
     {
         $this->form->fill();
-        // $this->form->fill(auth()->user()->cartitem->attributesToArray());
+        $this->branches = Branch::all();
     }
 
     public function form(Form $form): Form
@@ -86,7 +89,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         ->reactive()
                         ->searchable()
                         ->label('Item')
-                        ->options(MainStock::with('item')->get()->pluck('item.item_name', 'item_id')->toArray())
+                        ->options(MainStock::with('item')->get()->pluck('item_info', 'item_id')->toArray())
                         ->afterStateUpdated(
                             function(callable $set,Get $get){
                                 $itemId = $get('item_id');
@@ -180,9 +183,6 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 ->action(function (array $data) {
                     return redirect()->route('stockdistribute.receipt.download', $data);
                 })
-                // ->url(function(StockDistributeCart $stockDistributeCart){
-                //     return route('stockdistribute.receipt.download', $stockDistributeCart);
-                // })
                 ->keyBindings(['command+p', 'shift+p'])
                 ->icon('heroicon-o-printer')
                 ->color('success'),
@@ -203,18 +203,29 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
 
                 ->requiresConfirmation()
                 ->action(function (array $data) {
-                    $cartItems = StockDistributeCart::all();
+                    $cartItems = StockDistributeCart::where('user_id',auth()->user()->id)->get();
                     foreach ($cartItems as $item) {
+                         // Deduct mainstock quantity
                         $mainstock = MainStock::where('id', $item->main_stock_id)->first();
-                        $mainstock->quantity -= $item->quantity;
-                        $mainstock->update();
+                        if ($mainstock) {
+                            $mainstock->quantity -= $item->quantity;
+                            $mainstock->save();
+                        }
 
+                        // Deduct privatebook quantity
+                        $privatebook = PrivateBook::where('main_stock_id', $item->main_stock_id)->first();
+                        if ($privatebook) {
+                            $privatebook->quantity -= $item->quantity;
+                            $privatebook->save();
+                        }
+
+                        //Update branch stock
                         $branchstock = BranchStock::where('branch_id', $data['branch_id'])
                         ->where('main_stock_id', $item->main_stock_id)
                         ->first();
                         if ($branchstock) {
                             $branchstock->quantity += $item->quantity;
-                            $branchstock->update();
+                            $branchstock->save();
                         }
                         else{
                             BranchStock::create([
@@ -226,26 +237,18 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                                 'batch' => $mainstock->batch,
                                 'mrp' => $mainstock->mrp,
                             ]);
-
-                            // $branchstock = new Branchstock();
-                            // $branchstock->main_stock_id = $item->main_stock_id;
-                            // $branchstock->quantity = $item->quantity;
-                            // $branchstock->cost_price = $mainstock->cost_price;
-                            // $branchstock->barcode = $mainstock->barcode;
-                            // $branchstock->branch_id = $data['branch_id'];
-                            // $branchstock->batch = $mainstock->batch;
-                            // $branchstock->mrp = $mainstock->mrp;
-                            // $branchstock->save();
                         }
-                        $stockdistribute = new StockDistribute();
-                        $stockdistribute->main_stock_id = $item->main_stock_id;
-                        $stockdistribute->quantity = $item->quantity;
-                        $stockdistribute->cost_price = $item->cost_price;
-                        $stockdistribute->mrp = $item->mrp;
-                        $stockdistribute->batch = $item->batch;
-                        $stockdistribute->branch_id = $data['branch_id'];
-                        $stockdistribute->save();
+                        // Create StockDistribute entry
+                        StockDistribute::create([
+                            'main_stock_id' => $item->main_stock_id,
+                            'quantity' => $item->quantity,
+                            'cost_price' => $item->cost_price,
+                            'mrp' => $item->mrp,
+                            'batch' => $item->batch,
+                            'branch_id' => $data['branch_id'],
+                        ]);
 
+                        // Delete the cart item
                         $item->delete();
                     }
                     Notification::make()
@@ -329,4 +332,24 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->modalAlignment(Alignment::Center)
         ];
     }
+    public function getTabs(): array
+    {
+        if (auth()->user()->user_type == '1') {
+            $branches = Branch::all();
+            $tabs = [
+                'All' => Tabs\Tab::make('All')
+                    ->query(fn ($query) => $query), // Show all records
+            ];
+
+            foreach ($branches as $branch) {
+                $tabs[$branch->branch_name] = Tabs\Tab::make($branch->branch_name)
+                    ->query(fn ($query) => $query->where('branch_id', $branch->id));
+            }
+
+            return $tabs;
+        }
+
+        return [];
+    }
+
 }

@@ -90,9 +90,9 @@ class SaleResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('')
-                ->size(TextColumn\TextColumnSize::Medium)
-                ->weight(FontWeight::Bold)
-                ->rowIndex(),
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
+                    ->rowIndex(),
                 Tables\Columns\TextColumn::make('branch.branch_name')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
@@ -100,6 +100,7 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('item.item_name')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('item.category.category_name')
                     ->size(TextColumn\TextColumnSize::Medium)
@@ -107,9 +108,10 @@ class SaleResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('item.barcode')
-                ->label('barcode')
+                    ->label('barcode')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->size(TextColumn\TextColumnSize::Medium)

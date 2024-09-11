@@ -81,7 +81,7 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                     ])
                     ->action(function (array $data, $record) {
                         $privateBookAccount = new PrivateBookAccount();
-                        $privateBookAccount->private_book_id = $this->record->id;
+                        $privateBookAccount->private_book_id = $this->privateBookId;
                         $privateBookAccount->return_amount = $data['return_amount'];
                         $privateBookAccount->return_date = $data['return_date'];
                         $privateBookAccount->save();
