@@ -39,6 +39,7 @@ use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\View\View;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Log;
 
 
 class StockDistributeCarts extends Page implements HasForms, HasTable, HasActions
@@ -210,60 +211,77 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
 
                 ->requiresConfirmation()
                 ->action(function (array $data) {
-                    $cartItems = StockDistributeCart::where('user_id',auth()->user()->id)->get();
-                    foreach ($cartItems as $item) {
-                         // Deduct mainstock quantity
-                        $mainstock = MainStock::where('id', $item->main_stock_id)->first();
-                        if ($mainstock) {
-                            $mainstock->quantity -= $item->quantity;
-                            $mainstock->save();
-                        }
+                    try {
+                        DB::transaction(function() use ($data) {
+                            $cartItems = StockDistributeCart::where('user_id', auth()->user()->id)->get();
+                            foreach ($cartItems as $item) {
+                                // Deduct mainstock quantity
+                                $mainstock = MainStock::where('id', $item->main_stock_id)->first();
+                                if ($mainstock) {
+                                    $mainstock->quantity -= $item->quantity;
+                                    $mainstock->save();
+                                }
 
-                        // Deduct privatebook quantity
-                        $privatebook = PrivateBook::where('main_stock_id', $item->main_stock_id)->first();
-                        if ($privatebook) {
-                            $privatebook->quantity -= $item->quantity;
-                            $privatebook->save();
-                        }
+                                // Deduct privatebook quantity
+                                $privatebook = PrivateBook::where('main_stock_id', $item->main_stock_id)->first();
+                                if ($privatebook) {
+                                    $privatebook->quantity -= $item->quantity;
+                                    $privatebook->save();
+                                }
 
-                        //Update branch stock
-                        $branchstock = BranchStock::where('branch_id', $data['branch_id'])
-                        ->where('main_stock_id', $item->main_stock_id)
-                        ->first();
-                        if ($branchstock) {
-                            $branchstock->quantity += $item->quantity;
-                            $branchstock->save();
-                        }
-                        else{
-                            BranchStock::create([
-                                'main_stock_id' => $item->main_stock_id,
-                                'quantity' => $item->quantity,
-                                'cost_price' => $mainstock->cost_price,
-                                'barcode' => $mainstock->barcode,
-                                'branch_id' => $data['branch_id'],
-                                'batch' => $mainstock->batch,
-                                'mrp' => $mainstock->mrp,
-                            ]);
-                        }
-                        // Create StockDistribute entry
-                        StockDistribute::create([
-                            'main_stock_id' => $item->main_stock_id,
-                            'quantity' => $item->quantity,
-                            'cost_price' => $item->cost_price,
-                            'mrp' => $item->mrp,
-                            'batch' => $item->batch,
-                            'branch_id' => $data['branch_id'],
-                        ]);
+                                // Update branch stock
+                                $branchstock = BranchStock::where('branch_id', $data['branch_id'])
+                                    ->where('main_stock_id', $item->main_stock_id)
+                                    ->first();
+                                if ($branchstock) {
+                                    $branchstock->quantity += $item->quantity;
+                                    $branchstock->save();
+                                } else {
+                                    BranchStock::create([
+                                        'main_stock_id' => $item->main_stock_id,
+                                        'quantity' => $item->quantity,
+                                        'cost_price' => $mainstock->cost_price,
+                                        'barcode' => $mainstock->barcode,
+                                        'branch_id' => $data['branch_id'],
+                                        'batch' => $mainstock->batch,
+                                        'mrp' => $mainstock->mrp,
+                                    ]);
+                                }
 
-                        // Delete the cart item
-                        $item->delete();
+                                // Create StockDistribute entry
+                                StockDistribute::create([
+                                    'main_stock_id' => $item->main_stock_id,
+                                    'quantity' => $item->quantity,
+                                    'cost_price' => $item->cost_price,
+                                    'mrp' => $item->mrp,
+                                    'batch' => $item->batch,
+                                    'branch_id' => $data['branch_id'],
+                                ]);
+
+                                // Delete the cart item
+                                $item->delete();
+                            }
+                        });
+
+                        // Success Notification
+                        Notification::make()
+                            ->success()
+                            ->title('Items distributed successfully!')
+                            ->color('success')
+                            ->send();
+
+                    } catch (\Exception $e) {
+                        // Log the error for debugging
+                        Log::error('Stock distribution failed: ' . $e->getMessage());
+
+                        // Failure Notification
+                        Notification::make()
+                            ->danger()
+                            ->title('Failed to distribute items!')
+                            ->body('An error occurred during the stock distribution process.')
+                            ->color('danger')
+                            ->send();
                     }
-                    Notification::make()
-                    ->success()
-                    ->title('Item distributed')
-                    ->color('success')
-                    ->send();
-
                 })
                 ->modalIcon('heroicon-o-check-circle')
                 ->modalDescription('Select Branch Name')
