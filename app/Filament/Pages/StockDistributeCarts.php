@@ -223,11 +223,11 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                                 }
 
                                 // Deduct privatebook quantity
-                                $privatebook = PrivateBook::where('main_stock_id', $item->main_stock_id)->first();
-                                if ($privatebook) {
-                                    $privatebook->quantity -= $item->quantity;
-                                    $privatebook->save();
-                                }
+                                // $privatebook = PrivateBook::where('main_stock_id', $item->main_stock_id)->first();
+                                // if ($privatebook) {
+                                //     $privatebook->quantity -= $item->quantity;
+                                //     $privatebook->save();
+                                // }
 
                                 // Update branch stock
                                 $branchstock = BranchStock::where('branch_id', $data['branch_id'])

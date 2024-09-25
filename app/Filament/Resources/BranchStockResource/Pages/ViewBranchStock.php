@@ -6,6 +6,8 @@ use App\Filament\Resources\BranchstockResource;
 use App\Models\BranchStock;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Illuminate\Contracts\Support\Htmlable;
 
 class ViewBranchStock extends ViewRecord
@@ -21,5 +23,14 @@ class ViewBranchStock extends ViewRecord
     protected function getActions(): array
     {
         return [];
+    }
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\TextEntry::make('quantity'),
+                Infolists\Components\TextEntry::make('updated_at')
+                ->label('Recieved date'),
+            ])->columns(2);
     }
 }
