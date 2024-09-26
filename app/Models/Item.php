@@ -33,10 +33,10 @@ class Item extends Model
         return $this->hasManyThrough(BranchStock::class, MainStock::class );
     }
 
-    public function stockDistribute(): HasMany
-    {
-        return $this->hasMany(StockDistribute::class);
-    }
+    // public function stockDistribute(): HasManyThrough
+    // {
+    //     return $this->hasManyThrough(BranchStock::class, MainStock::class );
+    // }
     public function privateBook(): HasMany
     {
         return $this->hasMany(PrivateBook::class);

@@ -17,7 +17,7 @@ class BranchStockExporter extends Exporter
             // ExportColumn::make('id')
             //     ->label('ID'),
             ExportColumn::make('branch.branch_name'),
-            ExportColumn::make('mainStock.item.item_name'),
+            ExportColumn::make('item.item_name'),
             ExportColumn::make('quantity'),
             ExportColumn::make('cost_price'),
             ExportColumn::make('mrp'),

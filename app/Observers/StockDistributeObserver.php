@@ -44,7 +44,7 @@ class StockDistributeObserver
             Action::make('view')
                 ->button()
                 ->markAsRead()
-                ->url(BranchStockResource::getUrl('view'))
+                ->url(StockDistributeResource::getUrl('view', ['record' => $stockDistribute->id]))
         ])
         ->sendToDatabase($users);
     }

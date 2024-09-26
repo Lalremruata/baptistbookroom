@@ -16,7 +16,9 @@ class StockDistributeExporter extends Exporter
         return [
             // ExportColumn::make('id')
             //     ->label('ID'),
-            ExportColumn::make('mainStock.item.item_name'),
+            ExportColumn::make('item.item_name'),
+            ExportColumn::make('item.barcode')
+            ->label('barcode'),
             ExportColumn::make('branch.branch_name'),
             ExportColumn::make('quantity'),
             ExportColumn::make('cost_price'),

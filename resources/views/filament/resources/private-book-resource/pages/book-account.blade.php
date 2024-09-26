@@ -24,7 +24,8 @@
         <h5 class="text-xl">Lehkhabu hralh zat: {{ $this->totalSale }}</h5>
          <h5 class="text-xl">Lehkhabu hralh man : {{ $totalAmount }}</h5>
          <h5 class="text-xl">Balance: {{ $balance }}</h5>
-         <h5 class="text-xl">Initial Quantity: {{ $this->totalQuantity }}</h5>
+         <h5 class="text-xl">Initial Quantity(A tir a lak zat): {{ $this->initialQuantity }}</h5>
+         <h5 class="text-xl">All Quantity(main stock + branch stock): {{ $this->totalQuantity }}</h5>
 </x-filament::section>
 
 

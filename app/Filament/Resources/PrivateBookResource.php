@@ -118,9 +118,9 @@ class PrivateBookResource extends Resource
                 TextColumn::make('file_no')
                     ->weight(FontWeight::Bold)
                     ->searchable(),
-                TextColumn::make('quantity')
-                    ->weight(FontWeight::Bold)
-                    ->sortable(),
+                // TextColumn::make('quantity')
+                //     ->weight(FontWeight::Bold)
+                //     ->sortable(),
                 TextColumn::make('mainStock.mrp')
                     ->label('mrp')
                     ->weight(FontWeight::Bold),

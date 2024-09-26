@@ -6,15 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+
 class StockDistribute extends Model
 {
     use HasFactory;
+    use \Znck\Eloquent\Traits\BelongsToThrough;
     protected $fillable = [
         'main_stock_id','branch_id', 'quantity','cost_price','mrp','batch',
     ];
     public function item()
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsToThrough(Item::class,MainStock::class);
     }
     public function mainStock()
     {

@@ -18,6 +18,8 @@ class PrivateBookExporter extends Exporter
             //     ->label('ID'),
             // ExportColumn::make('mainStock.id'),
             ExportColumn::make('item.item_name'),
+            ExportColumn::make('item.barcode')
+            ->label('barcode'),
             ExportColumn::make('receive_from'),
             ExportColumn::make('author'),
             ExportColumn::make('file_no'),

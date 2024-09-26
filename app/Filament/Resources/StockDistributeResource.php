@@ -33,9 +33,19 @@ class StockDistributeResource extends Resource
         return 0;
     }
 
-    public static function shouldRegisterNavigation(): bool
+    // public static function shouldRegisterNavigation(): bool
+    // {
+    //     return auth()->user()->user_type=='1';
+    // }
+    public static function getEloquentQuery(): Builder
     {
-        return auth()->user()->user_type=='1';
+        if(auth()->user()->user_type == '1') {
+            return parent::getEloquentQuery()->withoutGlobalScopes();
+        }
+        else {
+            return parent::getEloquentQuery()->where('branch_id', auth()->user()->branch_id);
+
+        }
     }
 
     public static function table(Table $table): Table
@@ -127,6 +137,7 @@ class StockDistributeResource extends Resource
     {
         return [
             'index' => Pages\ListStockDistribute::route('/'),
+            'view' => Pages\ViewStockDistribute::route('/{record}'),
             // 'create' => Pages\CreateStockDistribute::route('/create'),
             // 'edit' => Pages\EditStockDistribute::route('/{record}/edit'),
         ];

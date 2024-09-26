@@ -42,8 +42,8 @@ class BookAccount extends Page implements HasForms,  HasActions
         $itemId = $this->record->item_id;
 
         // Fetch main stock, branch stock, and total sales in a single query
-        $mainStock = MainStock::where('id', $this->record->id)->first(['quantity']);
-        $branchStockQuantity = BranchStock::where('main_stock_id', $this->record->id)->sum('quantity');
+        $mainStock = MainStock::where('id', $this->record->main_stock_id)->first(['quantity']);
+        $branchStockQuantity = BranchStock::where('main_stock_id', $this->record->main_stock_id)->sum('quantity');
 
         // Total sale quantity based on item_id
         $this->totalSale = Sale::whereHas('branchStock.mainStock.item', function ($query) use ($itemId) {
@@ -54,10 +54,13 @@ class BookAccount extends Page implements HasForms,  HasActions
         $totalReturns = PrivateBookReturn::where('private_book_id', $this->record->id)->sum('return_amount');
 
         // Calculate total quantity using null coalescing to handle potential null values
-        $this->totalQuantity = ($mainStock->quantity ?? 0)
+        // dd($this->totalSale);
+        $this->initialQuantity = ($mainStock->quantity ?? 0)
             + $branchStockQuantity
             + $this->totalSale
             + $totalReturns;
+        $this->totalQuantity = ($mainStock->quantity ?? 0)
+            + $branchStockQuantity;
 
 
     }
