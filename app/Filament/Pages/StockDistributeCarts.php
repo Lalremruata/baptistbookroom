@@ -34,7 +34,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Filament\Actions\StaticAction;
-use Filament\Forms\Components\Tabs;
+use Filament\Resources\Components\Tab;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\View\View;
@@ -56,10 +56,21 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     protected static ?string $navigationLabel = 'Main Stock Distribute';
     protected static ?int $navigationSort = 2;
     public $branches;
+    public $selectedTab = 'all';
     protected static string $view = 'filament.pages.stock-distribute-cart';
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->user()->user_type;
+    }
+    public static function getEloquentQuery(): Builder
+    {
+        if(auth()->user()->user_type == '1') {
+            return parent::getEloquentQuery()->withoutGlobalScopes();
+        }
+        else {
+            return parent::getEloquentQuery()->where('branch_id', auth()->user()->branch_id);
+
+        }
     }
     public function mount(): void
     {
@@ -152,10 +163,67 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ])
             ->statePath('data');
     }
+
+    // public function getTabs(): array
+    // {
+    //     if(auth()->user()->user_type=='1') {
+    //         $branches = Branch::all();
+    //         $tabs=[null => ListRecords\Tab::make('All'),];
+    //         foreach ($branches as $branch) {
+    //             $tabs[$branch->branch_name] = ListRecords\Tab::make()
+    //         ->query(fn ($query) => $query->where('branch_id', $branch->id));
+    //         }
+    //         return $tabs;
+    //     }
+    //     else {
+    //     return [
+    //         //return nothing
+    //     ];
+    //     }
+
+    // }
+    public function setActiveTab($tabName)
+    {
+        $this->selectedTab = $tabName;
+    }
+
+    public function getTabs(): array
+    {
+        $tabs = [
+            'all' => Tab::make('All')->badge(StockDistributeCart::count()),
+        ];
+
+        $branches = Branch::whereHas('stockDistributeCart')
+                      ->withCount('stockDistributeCart')
+                      ->distinct()
+                      ->get();
+        foreach ($branches as $branch) {
+            $branchName = $branch->branch_name;
+            $tabs[$branchName] = Tab::make($branchName)
+                ->badge($branch->stockDistributeCart_count)
+                ->modifyQueryUsing(function ($query) use ($branch) {
+                    return $query->where('branch_id', $branch->id);
+                });
+        }
+
+        return $tabs;
+    }
+
     public function table(Table $table): Table
     {
         return $table
-            ->query(StockDistributeCart::query()->where('user_id',auth()->user()->id))
+        ->query(function () {
+            $query = StockDistributeCart::query()->where('user_id', auth()->user()->id);
+
+            if ($this->selectedTab !== 'all') {
+                $branch = Branch::where('branch_name', $this->selectedTab)->first();
+                if ($branch) {
+                    $query->where('branch_id', $branch->id);
+                }
+            }
+
+            return $query;
+        })
             ->columns([
                 TextColumn::make('mainStock.item.item_name'),
                 TextColumn::make('mainStock.barcode')
@@ -357,23 +425,6 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->modalAlignment(Alignment::Center)
         ];
     }
-    public function getTabs(): array
-    {
-        if(auth()->user()->user_type=='1') {
-            $branches = Branch::all();
-            $tabs=[null => ListRecords\Tab::make('All'),];
-            foreach ($branches as $branch) {
-                $tabs[$branch->branch_name] = ListRecords\Tab::make()
-            ->query(fn ($query) => $query->where('branch_id', $branch->id));
-            }
-            return $tabs;
-        }
-        else {
-        return [
-            //return nothing
-        ];
-        }
 
-    }
 
 }
