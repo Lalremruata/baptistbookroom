@@ -78,7 +78,15 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                 ->iconButton()
                 ->after(function (){
                     $this->dispatch('editRecord');
-                })
+                }),
+                \Filament\Tables\Actions\Action::make('download receipt')
+                ->button()
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->url(function(PrivateBookReturn $privateBookReturn)
+                {
+                    return route('private-book-return.receipt.download', $privateBookReturn);
+                }),
         ])
                 ->headerActions([
                     \Filament\Tables\Actions\CreateAction::make('add record')

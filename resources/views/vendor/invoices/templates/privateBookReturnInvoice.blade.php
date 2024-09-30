@@ -83,11 +83,11 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>Payment Amount</td>
-                    <td>Rs {{ $returnAmount }} /-</td>
+                    <td>Return Amount</td>
+                    <td>{{ $returnAmount }}</td>
                 </tr>
                 <tr>
-                    <td>Payment Date</td>
+                    <td>Return Date</td>
                     <td>{{ $returnDate }}</td>
                 </tr>
             </tbody>

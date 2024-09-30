@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\PrivateBookPaymentsController;
+use App\Http\Controllers\PrivateBookReturnsController;
 use App\Http\Controllers\SalesInvoicesController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,3 +24,5 @@ Route::get('/sale/receipt/download',[SalesInvoicesController::class, 'downloadIn
 ->name('sale.receipt.download');
 Route::get('{privateBookAccount}/private-book-payment/receipt/download',[PrivateBookPaymentsController::class, 'downloadInvoice'])
 ->name('private-book-payment.receipt.download');
+Route::get('{privateBookReturn}/private-book-return/receipt/download',[PrivateBookReturnsController::class, 'downloadInvoice'])
+->name('private-book-return.receipt.download');
