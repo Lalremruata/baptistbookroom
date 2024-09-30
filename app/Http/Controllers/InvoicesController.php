@@ -29,7 +29,9 @@ class InvoicesController extends Controller
 
     public function downloadInvoice(Request $request)
     {
-        $cartItems = StockDistributeCart::with('mainStock')->where('user_id',auth()->user()->id)->get();
+
+        $cartItems = StockDistributeCart::with(['mainStock', 'branch'])->where('user_id',auth()->user()->id)
+                                        ->where('branch_id',$request['branch_id'])->get();
         if ($cartItems->isEmpty()) {
             Notification::make()
             ->danger()
@@ -49,7 +51,7 @@ class InvoicesController extends Controller
             ],
         ]);
         $customer = new Party([
-            'name'          => $request['branch_name'],
+            'name'          => $cartItems->first()->branch->branch_name,
             // 'address'       => $request['address'],
             'custom_fields' => [
                 'Bill number' =>  $invoiceNumber.'/'.$formattedYear,

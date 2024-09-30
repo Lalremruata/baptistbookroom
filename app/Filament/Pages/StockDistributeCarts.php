@@ -4,9 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Branch;
 use App\Models\BranchStock;
-use App\Models\Item;
 use App\Models\MainStock;
-use App\Models\PrivateBook;
 use App\Models\StockDistribute;
 use App\Models\StockDistributeCart;
 use Filament\Actions\Action;
@@ -38,7 +36,6 @@ use Filament\Resources\Components\Tab;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\View\View;
-use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Log;
 
 
@@ -120,28 +117,38 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         ->required()
                         ->dehydrated(),
                     Select::make('branch_id')
+                        ->label('Branch')
+                        ->searchable()
+                        ->required()
                         ->options(Branch::pluck('branch_name','id')->toArray()),
                     TextInput::make('quantity')
                     ->reactive()
                     ->required()
                     ->minValue(1)
                     ->maxValue(function (Get $get) {
-                        $itemId = $get('item_id');
-                        if ($itemId) {
-                            $result=MainStock::where('item_id',$itemId)
+                        $main_stock_id = $get('main_stock_id');
+                        if ($main_stock_id) {
+                            $mainStockQuantity=MainStock::where('id',$main_stock_id)
                             ->pluck('quantity','id')->first();
+                            $stockDistributeQuantity=StockDistributeCart::where('main_stock_id',$main_stock_id)
+                            ->sum('quantity');
+                            $result = $mainStockQuantity-$stockDistributeQuantity;
                              return $result;
                         }
                     })
                     ->required()
                     ->integer()
                     ->hint(function(Get $get){
-                        $itemId = $get('item_id');
-                        if ($itemId) {
-                            $result=MainStock::where('item_id',$itemId)
+                        $main_stock_id = $get('main_stock_id');
+                        if ($main_stock_id) {
+                            $mainStockQuantity=MainStock::where('id',$main_stock_id)
                             ->pluck('quantity','id')->first();
+                            $stockDistributeQuantity=StockDistributeCart::where('main_stock_id',$main_stock_id)
+                            ->where('user_id',auth()->user()->id)
+                            ->sum('quantity');
+                            $result = $mainStockQuantity-$stockDistributeQuantity;
                             if($result)
-                            return 'quantity available: '.$result;
+                            return 'qty. available: '.$result;
                         else
                             return 'stock unavailable';
                         }
@@ -164,24 +171,6 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->statePath('data');
     }
 
-    // public function getTabs(): array
-    // {
-    //     if(auth()->user()->user_type=='1') {
-    //         $branches = Branch::all();
-    //         $tabs=[null => ListRecords\Tab::make('All'),];
-    //         foreach ($branches as $branch) {
-    //             $tabs[$branch->branch_name] = ListRecords\Tab::make()
-    //         ->query(fn ($query) => $query->where('branch_id', $branch->id));
-    //         }
-    //         return $tabs;
-    //     }
-    //     else {
-    //     return [
-    //         //return nothing
-    //     ];
-    //     }
-
-    // }
     public function setActiveTab($tabName)
     {
         $this->selectedTab = $tabName;
@@ -190,19 +179,28 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     public function getTabs(): array
     {
         $tabs = [
-            'all' => Tab::make('All')->badge(StockDistributeCart::count()),
+            'all' => Tab::make('All')
+                    ->badge(StockDistributeCart::where('user_id', auth()->user()->id)->count())
+                    ->badgeColor('success'),
         ];
 
-        $branches = Branch::whereHas('stockDistributeCart')
-                      ->withCount('stockDistributeCart')
-                      ->distinct()
-                      ->get();
+        // Get branches that have StockDistributeCart records for the logged-in user
+        $branches = Branch::whereHas('stockDistributeCart', function ($query) {
+            $query->where('user_id', auth()->user()->id); // Filter by logged-in user
+        })
+        ->withCount(['stockDistributeCart' => function ($query) {
+            $query->where('user_id', auth()->user()->id); // Count for logged-in user
+        }])
+        ->distinct()
+        ->get();
         foreach ($branches as $branch) {
             $branchName = $branch->branch_name;
             $tabs[$branchName] = Tab::make($branchName)
-                ->badge($branch->stockDistributeCart_count)
+                ->badge($branch->stock_distribute_cart_count)
+                ->badgeColor('primary')
                 ->modifyQueryUsing(function ($query) use ($branch) {
-                    return $query->where('branch_id', $branch->id);
+                    return $query->where('branch_id', $branch->id)
+                                 ->where('user_id', auth()->user()->id); // Filter by user_id and branch
                 });
         }
 
@@ -241,7 +239,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
 
             ),
             ])
-
+            ->defaultSort('created_at', 'desc')
             ->actions([
                 DeleteAction::make()
             ])
@@ -251,8 +249,8 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->headerActions([
                 \Filament\Tables\Actions\Action::make('print receipt')
                 ->form([
-                    Select::make('branch_name')
-                    ->options(Branch::query()->pluck('branch_name','branch_name'))
+                    Select::make('branch_id')
+                    ->options(Branch::query()->pluck('branch_name','id'))
                         ->autofocus()
                         ->required(),
                 ])
@@ -269,6 +267,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         ->options(Branch::query()->pluck('branch_name', 'id'))
                         ->searchable()
                         ->required(),
+                        // ->default($this->selectedTab),
                 ])
                 ->label('checkout cart')
                 ->color('warning')
@@ -281,7 +280,8 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 ->action(function (array $data) {
                     try {
                         DB::transaction(function() use ($data) {
-                            $cartItems = StockDistributeCart::where('user_id', auth()->user()->id)->get();
+                            $cartItems = StockDistributeCart::where('user_id', auth()->user()->id)
+                                        ->where('branch_id', $data['branch_id'])->get();
                             foreach ($cartItems as $item) {
                                 // Deduct mainstock quantity
                                 $mainstock = MainStock::where('id', $item->main_stock_id)->first();
@@ -369,36 +369,60 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     public function save(): void
     {
         try {
-            $data = $this->form->getState();
-            $cartItem=StockDistributeCart::where('main_stock_id',$data['main_stock_id'])
-           ->first();
-            if($cartItem){
-                $cartItem->quantity += $data['quantity'];
-                $cartItem->update();
-            }
-            else{
-                $mainStock = MainStock::where('item_id', $data['item_id'])->first();
-                $newData = [
-                    'cost_price'=> $mainStock->cost_price,
-                    'mrp'=> $mainStock->mrp,
-                    'batch'=> $mainStock->batch,
-                    'main_stock_id' => $mainStock->id,
-                ];
-                $data += $newData;
-                StockDistributeCart::create($data);
-            }
+            DB::transaction(function() {
+                // Retrieve form state (the data submitted via the form)
+                $data = $this->form->getState();
+
+    
+                // Check if the item is already in the cart
+                $cartItem = StockDistributeCart::where('main_stock_id', $data['main_stock_id'])
+                ->where('user_id',auth()->user()->id)
+                ->where('branch_id',$data['branch_id'])
+                ->first();
+                
+                if ($cartItem) {
+                    // If the item exists in the cart, increment the quantity
+                    $cartItem->quantity += $data['quantity'];
+                    $cartItem->update();
+                } else {
+                    // Otherwise, create a new cart item with additional data from MainStock
+                    $mainStock = MainStock::where('id', $data['main_stock_id'])->first();
+                    $newData = [
+                        'cost_price' => $mainStock->cost_price,
+                        'mrp' => $mainStock->mrp,
+                        'batch' => $mainStock->batch,
+                    ];
+                    // Merge the new data with the form data
+                    $data += $newData;
+                    // Create a new cart entry
+                    StockDistributeCart::create($data);
+                }
+            });
+    
+            // Success notification
             Notification::make()
-            ->success()
-            ->title('Item added')
-            ->body('The item has been added to cart successfully.')
-            ->color('success')
-            ->send();
+                ->success()
+                ->title('Item added')
+                ->body('The item has been added to cart successfully.')
+                ->color('success')
+                ->send();
+    
+            // Clear the form after submission
             $this->form->fill();
-            // auth()->cartitem->save($data);
-        } catch (Halt $exception) {
-            return;
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Stock distribution failed: ' . $e->getMessage());
+    
+            // Failure notification
+            Notification::make()
+                ->danger()
+                ->title('Failed to add items!')
+                ->body('An error occurred during the process.')
+                ->color('danger')
+                ->send();
         }
     }
+    
     public function deleteAction(): Action
     {
         return Action::make('delete')

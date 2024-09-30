@@ -7,7 +7,7 @@
     />
     </div>
     <div>
-        <span class="text-lg font-semibold text-primary p-2">Baptist Bookroom</span>
+        <span class="text-lg font-semibold text-primary p-2">BLS</span>
     </div>
 
 </div>

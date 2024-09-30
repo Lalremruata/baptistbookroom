@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\PrivateBookAccount;
+use Filament\Actions\Action;
+use Filament\Actions;
 use Filament\Forms\Components\DatePicker;
 use Livewire\Component;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -48,6 +50,9 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
             TextColumn::make('return_date')
             ->label('Payment date')
             ->date(),
+            TextColumn::make('receiver_name'),
+            TextColumn::make('address'),
+            TextColumn::make('phone_number'),
         ])
         ->actions([
                 DeleteAction::make()
@@ -59,14 +64,28 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                 ->iconButton()
                 ->after(function (){
                     $this->dispatch('editRecord');
-                })
+                }),
+                \Filament\Tables\Actions\Action::make('print receipt')
+                ->icon('heroicon-o-printer')
+                ->color('danger')
+                ->url(function(PrivateBookAccount $privateBookAccount)
+                {
+                    return route('private-book-payment.receipt.download', $privateBookAccount);
+                }),
         ])
                 ->headerActions([
                     \Filament\Tables\Actions\CreateAction::make('add record')
                     ->form([
                         Section::make([
                             TextInput::make('return_amount')
-                            ->label('Payment')
+                            ->label('Payment amount')
+                            ->required(),
+                            TextInput::make('receiver_name')
+                            ->required(),
+                            TextInput::make('address')
+                            ->required(),
+                            TextInput::make('phone_number')
+                            ->numeric()
                             ->required(),
                             DatePicker::make('return_date')
                             ->label('Payment date')
@@ -84,6 +103,9 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                         $privateBookAccount->private_book_id = $this->privateBookId;
                         $privateBookAccount->return_amount = $data['return_amount'];
                         $privateBookAccount->return_date = $data['return_date'];
+                        $privateBookAccount->receiver_name = $data['receiver_name'];
+                        $privateBookAccount->address = $data['address'];
+                        $privateBookAccount->phone_number = $data['phone_number'];
                         $privateBookAccount->save();
                     })
                 ]);

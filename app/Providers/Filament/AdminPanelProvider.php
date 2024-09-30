@@ -13,7 +13,9 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Facades\FilamentView;
 use Filament\Widgets;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -24,6 +26,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Enums\MaxWidth;
 use App\Filament\Pages\Auth\EditProfile;
+use Filament\View\PanelsRenderHook;
 
 
 class AdminPanelProvider extends PanelProvider
@@ -46,7 +49,7 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
             ])
             ->font('Poppins')
-            ->brandName('Baptist BookRoom')
+            ->brandName('BLS')
             ->favicon(asset('images/favicon.jpg'))
             ->darkMode(true)
             ->defaultThemeMode(ThemeMode::Light)
@@ -103,6 +106,12 @@ class AdminPanelProvider extends PanelProvider
                 'profile' => MenuItem::make()->label('Edit profile'),
                 // ...
             ])
+            ->renderHook(
+                // This line tells us where to render it
+                PanelsRenderHook::FOOTER,
+                // This is the view that will be rendered
+                fn () => view('customFooter'),
+            )
             ;
     }
 }

@@ -107,6 +107,7 @@ class BranchStockResource extends Resource
                     ->searchable()
                     ->sortable(),
             ])->searchDebounce('750ms')
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 Filter::make('created_at')
                     ->form([

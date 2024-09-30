@@ -21,7 +21,7 @@
                         class="px-4 py-2 focus:outline-none {{ $selectedTab === $tabName ? 'border-b-2 border-blue-500' : '' }}"
                         wire:click.prevent="setActiveTab('{{ $tabName }}')">
                         {{ $tab->getLabel() }}
-                        <span class="ml-2 bg-gray-200 text-xs rounded-full px-2 py-1">{{ $tab->getBadge() }}</span>
+                        <span class="ml-2 text-xs rounded-full px-2 py-1">{{ $tab->getBadge() }}</span>
                     </button>
                 @endforeach
             </div>

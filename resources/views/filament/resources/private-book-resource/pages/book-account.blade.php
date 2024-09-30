@@ -28,21 +28,49 @@
          <h5 class="text-xl">All Quantity(main stock + branch stock): {{ $this->totalQuantity }}</h5>
 </x-filament::section>
 
+<div x-data="{ tab: 'payment' }">
+    <!-- Tab navigation -->
+    <div class="border-b border-gray-200">
+        <nav class="flex space-x-4" aria-label="Tabs">
+            <!-- Payment Tab -->
+            <a href="#" 
+                @click.prevent="tab = 'payment'"
+                :class="{ 'border-indigo-500 text-indigo-600': tab === 'payment', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'payment' }"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+            >
+                Payment to Author/Submitter
+            </a>
 
-        <div class="lg:flex">
-        <x-filament::section class="w-full lg:w-1/2 p-4">
-            <div >
-                <h2 class="text-lg font-semibold mb-4">Payment to Author/Submitter</h2>
+            <!-- Returns Tab -->
+            <a href="#" 
+                @click.prevent="tab = 'returns'"
+                :class="{ 'border-indigo-500 text-indigo-600': tab === 'returns', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'returns' }"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+            >
+                Book Returned to Author/Submitter
+            </a>
+        </nav>
+    </div>
+
+    <!-- Tab content -->
+    <div class="mt-4">
+        <!-- Payment Tab Content -->
+        <div x-show="tab === 'payment'">
+            <x-filament::section>
                 <livewire:private-book-payment :privateBookId="$record->id" />
-            </div>
-        </x-filament::section>
-        <x-filament::section class="w-full lg:w-1/2 p-4">
-        <div>
-                <h2 class="text-lg font-semibold mb-4">Book Returned to Author/Submitter</h2>
-                <livewire:private-book-returns :privateBookId="$record->id" />
-            </div>
-        </x-filament::section>
+            </x-filament::section>
         </div>
+
+        <!-- Returns Tab Content -->
+        <div x-show="tab === 'returns'">
+            <x-filament::section>
+                <livewire:private-book-returns :privateBookId="$record->id" />
+            </x-filament::section>
+        </div>
+    </div>
+</div>
+
+
 
 <x-filament-actions::modals />
 </x-filament-panels::page>

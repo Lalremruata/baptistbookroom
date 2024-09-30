@@ -34,6 +34,9 @@ use Illuminate\Database\Query\Builder;
 use Filament\Actions\StaticAction;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Log;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 
 class SalesCart extends Page implements HasForms, HasTable, HasActions
 {
@@ -83,7 +86,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         if($branchStock)
                         {
                             $set('branch_stock_id', $branchStock->id);
-                            $set('item_id', $branchStock->mainStock->item->item_name);
+                            $set('item_id', $branchStock->item->item_name);
                         }
                         else
                         $set('branch_stock_id', null);
@@ -95,11 +98,6 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->label('Item Search')
                 ->options(BranchStock::with('mainStock')->where('branch_id', auth()->user()->branch_id)
                     ->get()->pluck('mainStock.item_info', 'id')->toArray())
-                // ->getSearchResultsUsing(fn (string $search): array =>
-                //     BranchStock::where('branch_id', auth()->user()->branch_id)
-                //     ->whereHas('')
-                //      ->get()->pluck('mainStock.item_info', 'id')->toArray()
-                // )
                 ->afterStateUpdated(
                     function(callable $set,Get $get){
                         $branchStockId = $get('item_id');
@@ -149,9 +147,14 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     ->maxValue(function (Get $get) {
                         $branchStockId = $get('branch_stock_id');
                         if ($branchStockId) {
-                            $result=BranchStock::where('id',$branchStockId)
+                            $branchStockQuantity=BranchStock::where('id',$branchStockId)
                             ->where('branch_id',auth()->user()->branch_id)
+                            ->pluck('quantity','id')->first();
+                            $salesCartQuantity=SalesCartItem::where('branch_stock_id',$branchStockId)
+                            ->where('branch_id', auth()->user()->branch_id)
+                            ->where('user_id', auth()->user()->id)
                             ->pluck('quantity')->first();
+                            $result = $branchStockQuantity-$salesCartQuantity;
                                 return $result;
 
                         }
@@ -162,9 +165,14 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         $branchStockId = $get('branch_stock_id');
                         $barcode = $get('barcode');
                         if ($branchStockId) {
-                                $result=BranchStock::where('id',$branchStockId)
+                                $branchStockQuantity=BranchStock::where('id',$branchStockId)
                                 ->where('branch_id',auth()->user()->branch_id)
                                 ->pluck('quantity','id')->first();
+                                $salesCartQuantity=SalesCartItem::where('branch_stock_id',$branchStockId)
+                                ->where('branch_id', auth()->user()->branch_id)
+                                ->where('user_id', auth()->user()->id)
+                                ->pluck('quantity')->first();
+                                $result = $branchStockQuantity-$salesCartQuantity;
                                 if($result)
                                     return 'qty. available: '.$result;
                                 else
@@ -208,7 +216,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
         return $table
             ->query(SalesCartItem::query()->where('branch_id', auth()->user()->branch_id))
             ->columns([
-                TextColumn::make('branchStock.mainStock.item.item_name')
+                TextColumn::make('branchStock.item.item_name')
                     ->wrapHeader()
                     ->verticalAlignment(VerticalAlignment::Start),
                 TextColumn::make('quantity')
@@ -261,7 +269,10 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                             ->required()
                             ->hint(function(Get $get){
                                 $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)->sum('selling_price');
-                                return 'Total Amount : ' . $totalAmount;
+                                return 'Amount : ' . $totalAmount;
+                            })
+                            ->default(function(){
+                                return SalesCartItem::where('user_id', auth()->user()->id)->sum('selling_price');
                             })
                             ->hintColor('danger'),
                             Select::make('payment_mode')
@@ -311,57 +322,81 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ])
                 ->requiresConfirmation()
                 ->action(function (array $data) {
-                    $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)->sum('selling_price');
+                    try{
+                        DB::transaction(function() use ($data) {
+                        $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)
+                        ->where('user_id', auth()->user()->id)
+                        ->sum('selling_price');
 
-                    if($data['customer_name'] && $data['received_amount'] < $totalAmount)
-                    {
-                        $customer = new Customer;
-                        $customer->customer_name = $data['customer_name'];
-                        $customer->phone = $data['phone'];
-                        $customer->address = $data['address'];
-                        $customer->save();
-                        $customer_id = Customer::latest()->pluck('id')->first();
+                        if($data['customer_name'] && $data['received_amount'] < $totalAmount)
+                        {
+                            $customer = new Customer;
+                            $customer->customer_name = $data['customer_name'];
+                            $customer->phone = $data['phone'];
+                            $customer->address = $data['address'];
+                            $customer->save();
+                            $customer_id = Customer::latest()->pluck('id')->first();
+                        }
+                        else{
+                            $customer_id = null;
+                        }
+
+
+                        if($data['received_amount'] < $totalAmount){
+                            $creditTransaction = new CreditTransaction;
+                            $creditTransaction->customer_id = $customer_id;
+                            $creditTransaction->received_amount = $data['received_amount'];
+                            $creditTransaction->total_amount = $totalAmount;
+                            $creditTransaction->recovered_amount = 0;
+                            $creditTransaction->save();
+                        }
+
+                        $memo = Memo::latest()->first();
+                        $cartItems = SalesCartItem::where('branch_id',auth()->user()->branch_id)
+                        ->where('user_id',auth()->user()->id)->get();
+                        foreach ($cartItems as $item) {
+                            $branchStock = BranchStock::where('branch_id', $item->branch_id)
+                            ->where('id', $item->branch_stock_id)
+                            ->first();
+                            $branchStock->quantity -= $item->quantity;
+                            $branchStock->update();
+                            Sale::create([
+                                'branch_stock_id' => $item->branch_stock_id,
+                                'branch_id' => auth()->user()->branch_id,
+                                'user_id' => auth()->user()->id,
+                                'customer_id' => $customer_id,
+                                'discount' => $item->discount,
+                                'total_amount' => $item->selling_price,
+                                'quantity' => $item->quantity,
+                                'payment_mode' => $data['payment_mode'],
+                                'transaction_number' => $data['transaction_number'],
+                                'memo' => ($memo->memo + 1) . auth()->user()->branch_id,
+
+                            ]);
+                            $item->delete();
+                        }
+                        $memo->memo = $memo->memo + 1;
+                        $memo->update();
+                    });
+                    // Success Notification
+                    Notification::make()
+                    ->success()
+                    ->title('Items sold successfully!')
+                    ->color('success')
+                    ->send();
                     }
-                    else{
-                        $customer_id = null;
+                    catch (\Exception $e) {
+                        // Log the error for debugging
+                        Log::error('Stock distribution failed: ' . $e->getMessage());
+
+                        // Failure Notification
+                        Notification::make()
+                            ->danger()
+                            ->title('Failed to checkout cart!')
+                            ->body('An error occurred during checking out process.')
+                            ->color('danger')
+                            ->send();
                     }
-
-
-                    if($data['received_amount'] < $totalAmount){
-                        $creditTransaction = new CreditTransaction;
-                        $creditTransaction->customer_id = $customer_id;
-                        $creditTransaction->received_amount = $data['received_amount'];
-                        $creditTransaction->total_amount = $totalAmount;
-                        $creditTransaction->recovered_amount = 0;
-                        $creditTransaction->save();
-                    }
-
-                    $memo = Memo::latest()->first();
-                    $cartItems = SalesCartItem::where('branch_id',auth()->user()->branch_id)
-                    ->where('user_id',auth()->user()->id)->get();
-                    foreach ($cartItems as $item) {
-                        $branchStock = BranchStock::where('branch_id', $item->branch_id)
-                        ->where('id', $item->branch_stock_id)
-                        ->first();
-                        $branchStock->quantity -= $item->quantity;
-                        $branchStock->update();
-                        Sale::create([
-                            'branch_stock_id' => $item->branch_stock_id,
-                            'branch_id' => auth()->user()->branch_id,
-                            'user_id' => auth()->user()->id,
-                            'customer_id' => $customer_id,
-                            'discount' => $item->discount,
-                            'total_amount' => $item->selling_price,
-                            'quantity' => $item->quantity,
-                            'payment_mode' => $data['payment_mode'],
-                            'transaction_number' => $data['transaction_number'],
-                            'memo' => ($memo->memo + 1) . auth()->user()->branch_id,
-
-                        ]);
-                        $item->delete();
-                    }
-                    $memo->memo = $memo->memo + 1;
-                    $memo->update();
                 })
                 ->slideOver()
                 ->modalIcon('heroicon-o-check-circle')
@@ -384,6 +419,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
     public function save(): void
     {
         try {
+            DB::transaction(function() {
             $data = $this->form->getState();
             $cartItem = SalesCartItem::where('branch_stock_id', $data['branch_stock_id'])->first();
             if (!$cartItem) {
@@ -413,10 +449,31 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             $this->form->fill();
             // auth()->cartitem->save($data);
                     // Dispatch the browser event to focus the input
-                    $this->dispatch('focusBarcodeInput');
-        } catch (Halt $exception) {
-            return;
-        }
+           
+            // Success notification
+            Notification::make()
+                ->success()
+                ->title('Item added')
+                ->body('The item has been added to cart successfully.')
+                ->color('success')
+                ->send();
+    
+            // Clear the form after submission
+            $this->form->fill();
+        });
+
+    }   catch (\Exception $e) {
+        // Log the error for debugging
+        Log::error('Stock distribution failed: ' . $e->getMessage());
+
+        // Failure notification
+        Notification::make()
+            ->danger()
+            ->title('Failed to add items!')
+            ->body('An error occurred during the process.')
+            ->color('danger')
+            ->send();
+    }
     }
     protected function getHeaderActions(): array
     {
