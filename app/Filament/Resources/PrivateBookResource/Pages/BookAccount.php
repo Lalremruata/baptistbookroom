@@ -31,6 +31,7 @@ class BookAccount extends Page implements HasForms,  HasActions
      public PrivateBook $record;
      public $totalQuantity;
      public $totalSale;
+     public $initialQuantity;
      public ?array $data = [];
     protected static string $view = 'filament.resources.private-book-resource.pages.book-account';
     public function mount(): void

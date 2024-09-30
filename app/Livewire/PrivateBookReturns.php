@@ -76,6 +76,48 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                 ->iconButton(),
                 EditAction::make()
                 ->iconButton()
+                ->form([
+                    TextInput::make('return_amount')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('receiver_name')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('address')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('phone_number')
+                        ->required()
+                        ->maxLength(255),
+                    DatePicker::make('return_date')
+                ])
+                ->before(function (array $data, $record){
+                    // Retrieve the current return amount from the record
+                    $currentReturnAmount = $record->return_amount;
+
+                    // Deduct/Adjust PrivateBook Stock Quantity
+                    $privateBook = PrivateBook::where('id', $this->privateBookId)->first();
+
+                    // Deduct/Adjust MainStock Quantity
+                    $mainStock = MainStock::where('id', $privateBook->main_stock_id)->first();
+
+                    // Check if the new return amount is greater than the current one
+                    if ($data['return_amount'] > $currentReturnAmount) {
+                        // New return amount is greater, so deduct the difference from stock
+                        $difference = $data['return_amount'] - $currentReturnAmount;
+                        $privateBook->quantity -= $difference;
+                        $mainStock->quantity -= $difference;
+                    } elseif ($data['return_amount'] < $currentReturnAmount) {
+                        // New return amount is smaller, so add the difference back to stock
+                        $difference = $currentReturnAmount - $data['return_amount'];
+                        $privateBook->quantity += $difference;
+                        $mainStock->quantity += $difference;
+                    }
+
+                    // Save the updates
+                    $privateBook->update();
+                    $mainStock->update();
+                })
                 ->after(function (){
                     $this->dispatch('editRecord');
                 }),
@@ -130,9 +172,9 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                         $privateBookAccount->private_book_id = $this->privateBookId;
                         $privateBookAccount->return_amount = $data['return_amount'];
                         $privateBookAccount->return_date = $data['return_date'];
-                        $privateBookAccount->return_date = $data['receiver_name'];
-                        $privateBookAccount->return_date = $data['address'];
-                        $privateBookAccount->return_date = $data['phone_number'];
+                        $privateBookAccount->receiver_name = $data['receiver_name'];
+                        $privateBookAccount->address = $data['address'];
+                        $privateBookAccount->phone_number = $data['phone_number'];
                         $privateBookAccount->save();
                     })
                 ]);

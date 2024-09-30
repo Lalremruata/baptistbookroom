@@ -62,6 +62,21 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                 ->iconButton(),
                 EditAction::make()
                 ->iconButton()
+                ->form([
+                    TextInput::make('return_amount')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('receiver_name')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('address')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('phone_number')
+                        ->required()
+                        ->maxLength(255),
+                    DatePicker::make('return_date')
+                ])
                 ->after(function (){
                     $this->dispatch('editRecord');
                 }),
