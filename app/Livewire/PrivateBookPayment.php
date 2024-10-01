@@ -45,8 +45,7 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
             TextColumn::make('return_amount')
             ->label('Payment Amount')
             ->width('5%')
-            ->numeric()
-            ->summarize(Sum::make()->label('Total')),
+            ->summarize(Sum::make()),
             TextColumn::make('return_date')
             ->label('Payment date')
             ->date(),
@@ -78,7 +77,7 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                     DatePicker::make('return_date')
                 ])
                 ->after(function (){
-                    $this->emit('paymentUpdated');
+                    $this->dispatch('paymentUpdated');
                 }),
                 \Filament\Tables\Actions\Action::make('download receipt')
                 ->button()

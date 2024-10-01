@@ -32,6 +32,7 @@ class BookAccount extends Page implements HasForms,  HasActions
      public $totalQuantity;
      public $totalSale;
      public $initialQuantity;
+    public $totalReturns;
      public ?array $data = [];
     protected static string $view = 'filament.resources.private-book-resource.pages.book-account';
     public function mount(): void
@@ -52,14 +53,14 @@ class BookAccount extends Page implements HasForms,  HasActions
         })->sum('quantity');
 
         // Total returns for the book
-        $totalReturns = PrivateBookReturn::where('private_book_id', $this->record->id)->sum('return_amount');
+        $this->totalReturns = PrivateBookReturn::where('private_book_id', $this->record->id)->sum('return_amount');
 
         // Calculate total quantity using null coalescing to handle potential null values
         // dd($this->totalSale);
         $this->initialQuantity = ($mainStock->quantity ?? 0)
             + $branchStockQuantity
             + $this->totalSale
-            + $totalReturns;
+            + $this->totalReturns;
         $this->totalQuantity = ($mainStock->quantity ?? 0)
             + $branchStockQuantity;
 
@@ -76,6 +77,7 @@ class BookAccount extends Page implements HasForms,  HasActions
     {
         return [
             'paymentUpdated' => 'refreshQuantities',
+            'returnUpdated' => 'refreshQuantities',
         ];
     }
     public function getTitle(): string | Htmlable

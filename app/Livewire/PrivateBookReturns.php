@@ -71,7 +71,7 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                     $mainStock->update();
                 })
                 ->after(function (){
-                    $this->dispatch('deleteRecord');
+                    $this->dispatch('returnUpdated');
                 })
                 ->iconButton(),
                 EditAction::make()
@@ -119,7 +119,7 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                     $mainStock->update();
                 })
                 ->after(function (){
-                    $this->dispatch('editRecord');
+                    $this->dispatch('returnUpdated');
                 }),
                 \Filament\Tables\Actions\Action::make('download receipt')
                 ->button()
@@ -176,6 +176,9 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                         $privateBookAccount->address = $data['address'];
                         $privateBookAccount->phone_number = $data['phone_number'];
                         $privateBookAccount->save();
+                    })
+                    ->after(function (){
+                        $this->dispatch('returnUpdated');
                     })
                 ]);
     }

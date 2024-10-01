@@ -43,48 +43,56 @@ class MainStockResource extends Resource
                 Section::make()
                 ->schema([
                     Forms\Components\TextInput::make('barcode')
-                        ->afterStateUpdated(function(callable $set,Get $get){
-                            $barcode = $get('barcode');
-                            $item = Item::where('barcode', $barcode)
-                            ->first();
-                            if($item)
-                            {
-                                $set('item_id', $item->id);
-                            }
+                    ->afterStateUpdated(function(callable $set, Get $get){
+                        $barcode = $get('barcode');
+                        $items = Item::where('barcode', $barcode)->get();
 
-                        })
-                        ->autofocus()
-                        ->live()
-                        ->disabled(fn (Page $livewire) => $livewire instanceof EditRecord)
-                        ->dehydrated(),
-                    Forms\Components\Select::make('sub_category_id')
-                        ->label('Sub Category')
-                        ->options(SubCategory::query()->pluck('subcategory_name', 'id'))
-                        ->afterStateUpdated(fn(callable $set)=>$set('item_id', null))
-                        ->reactive()
-                        ->searchable(),
-                    Forms\Components\Select::make('item_id')
-                        ->label('Item')
-                            ->options(function(callable $get){
-                                $subCategory= SubCategory::find($get('sub_category_id'));
-                                $item= Item::find($get('barcode'));
-                                if(!$subCategory && $get('barcode')){
-                                    return (Item::query()->pluck('item_name', 'id'));
-                                    // return null;
-                                }
-                                elseif(!$subCategory && !$item){
-                                    // return (Item::query()->pluck('item_name', 'id'));
-                                    return null;
-                                }
-                                return $subCategory->items->pluck('item_name','id');
-                            })
-                            ->afterStateUpdated(fn(callable $set,Get $get)=>$set('barcode',Item::query()
-                                ->where('id', $get('item_id'))->pluck('barcode')->first()))
-                            ->reactive()
-                            ->searchable()
-                            ->required(),
-                    ])->compact()
-                    ->columns(3),
+                        if($items->count() === 1) {
+                            $set('item_id', $items->first()->id);
+                        } elseif ($items->count() > 1) {
+                            // Clear item_id to force user selection if multiple items found
+                            $set('item_id', null);
+                        }
+                    })
+                    ->autofocus()
+                    ->live()
+                    ->dehydrated(),
+                
+                Forms\Components\Select::make('sub_category_id')
+                    ->label('Sub Category')
+                    ->options(SubCategory::query()->pluck('subcategory_name', 'id'))
+                    ->afterStateUpdated(fn(callable $set) => $set('item_id', null))
+                    ->reactive()
+                    ->searchable(),
+
+                Forms\Components\Select::make('item_id')
+                    ->label('Item')
+                    ->options(function (callable $get) {
+                        $subCategory = SubCategory::find($get('sub_category_id'));
+                        $barcode = $get('barcode');
+                        $items = Item::where('barcode', $barcode)->get();
+
+                        if ($barcode && $items->isNotEmpty()) {
+                            return $items->pluck('item_name', 'id');
+                        } elseif ($subCategory) {
+                            return $subCategory->items->pluck('item_name', 'id');
+                        }
+                        
+                        return Item::query()->pluck('item_name', 'id');
+                    })
+                    ->afterStateUpdated(function(callable $set, Get $get) {
+                        // Populate the barcode field when item is selected
+                        $selectedItem = Item::find($get('item_id'));
+                        if($selectedItem) {
+                            $set('barcode', $selectedItem->barcode);
+                        }
+                    })
+                    ->reactive()
+                    ->searchable()
+                    ->required(),
+            ])
+            ->compact()
+            ->columns(3),
                 Section::make()
                 ->schema([
                     Forms\Components\TextInput::make('quantity')

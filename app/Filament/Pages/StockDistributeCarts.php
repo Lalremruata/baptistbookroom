@@ -81,41 +81,62 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
             ->schema([
                 Section::make()
                 ->schema([
-                    TextInput::make('barcode')
+                // Barcode Search Field
+                TextInput::make('barcode')
                     ->label('Barcode Search')
                     ->autofocus()
-                    ->afterStateUpdated(function(callable $set,Get $get){
+                    ->afterStateUpdated(function(callable $set, Get $get) {
                         $barcode = $get('barcode');
-                        $mainStock = MainStock::where('barcode', $barcode)
-                        ->first();
-                        if($mainStock)
-                        {
-                            $set('item_id', $mainStock->item_id);
-                            $set('main_stock_id',$mainStock->id);
-                        }
+                        $mainStocks = MainStock::where('barcode', $barcode)->get();
 
+                        if ($mainStocks->count() === 1) {
+                            // If only one item matches the barcode
+                            $mainStock = $mainStocks->first();
+                            $set('item_id', $mainStock->item_id);
+                            $set('main_stock_id', $mainStock->id);
+                        } elseif ($mainStocks->count() > 1) {
+                            // If multiple items have the same barcode, allow selection
+                            $set('item_id', null);
+                        } else {
+                            // If no match is found, clear the selection
+                            $set('item_id', null);
+                            $set('main_stock_id', null);
+                        }
                     })
                     ->reactive()
                     ->live(),
-                    Select::make('item_id')
-                        ->reactive()
-                        ->searchable()
-                        ->label('Item')
-                        ->options(MainStock::with('item')->get()->pluck('item_info', 'item_id')->toArray())
-                        ->afterStateUpdated(
-                            function(callable $set,Get $get){
-                                $itemId = $get('item_id');
-                                $mainStock = MainStock::where('item_id', $itemId)
-                                    ->first();
-                                    if($mainStock)
-                                    {
-                                        $set('barcode',$mainStock->barcode);
-                                        $set('main_stock_id',$mainStock->id);
-                                    }
+
+                // Item Selection Field
+                Select::make('item_id')
+                    ->reactive()
+                    ->searchable()
+                    ->label('Item')
+                    ->options(function(callable $get) {
+                        $barcode = $get('barcode');
+                        $mainStocks = MainStock::where('barcode', $barcode)->get();
+
+                        if ($mainStocks->isNotEmpty()) {
+                            // If barcode is set, return items with item_info
+                            return $mainStocks->pluck('item_info', 'item_id')->toArray();
+                        }
+                        // Return all items if no barcode is set
+                        return MainStock::with('item')->get()->pluck('item_info', 'item_id')->toArray();
+                    })
+                    ->afterStateUpdated(function(callable $set, Get $get) {
+                        $itemId = $get('item_id');
+                        if ($itemId) {
+                            $mainStock = MainStock::where('item_id', $itemId)->first();
+                            if ($mainStock) {
+                                $set('barcode', $mainStock->barcode);
+                                $set('main_stock_id', $mainStock->id);
                             }
-                            )
-                        ->required()
-                        ->dehydrated(),
+                        } else {
+                            // Clear the barcode field if item_id is cleared
+                            $set('barcode', null);
+                        }
+                    })
+                    ->required()
+                    ->dehydrated(),
                     Select::make('branch_id')
                         ->label('Branch')
                         ->searchable()
@@ -264,9 +285,17 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 ->form([
                     Select::make('branch_id')
                         ->label('Branch')
-                        ->options(Branch::query()->pluck('branch_name', 'id'))
+                        ->options(function(){
+                            // Get branch IDs from StockDistributeCart
+                            $branchIds = StockDistributeCart::where('user_id',auth()->user()->id)
+                            ->pluck('branch_id')->unique();
+                            
+                            // Fetch branches that are in StockDistributeCart
+                            return Branch::whereIn('id', $branchIds)
+                                ->pluck('branch_name', 'id');
+                        })
                         ->searchable()
-                        ->required(),
+                        ->required()
                         // ->default($this->selectedTab),
                 ])
                 ->label('checkout cart')
