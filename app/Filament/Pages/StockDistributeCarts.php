@@ -278,79 +278,116 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
 
                 ->requiresConfirmation()
                 ->action(function (array $data) {
-                    try {
-                        DB::transaction(function() use ($data) {
-                            $cartItems = StockDistributeCart::where('user_id', auth()->user()->id)
-                                        ->where('branch_id', $data['branch_id'])->get();
-                            foreach ($cartItems as $item) {
-                                // Deduct mainstock quantity
-                                $mainstock = MainStock::where('id', $item->main_stock_id)->first();
-                                if ($mainstock) {
-                                    $mainstock->quantity -= $item->quantity;
-                                    $mainstock->save();
+                    $maxRetries = 5;
+                    $retryCount = 0;
+                    $delay = 100; // Initial delay for retries
+                
+                    while ($retryCount < $maxRetries) {
+                        try {
+                            DB::transaction(function () use ($data) {
+                                // Retrieve all items from the user's stock distribute cart
+                                $cartItems = StockDistributeCart::where('user_id', auth()->user()->id)
+                                    ->where('branch_id', $data['branch_id'])
+                                    ->get();
+                
+                                foreach ($cartItems as $item) {
+                                    // Lock the main stock row to avoid concurrent updates
+                                    $mainstock = MainStock::where('id', $item->main_stock_id)
+                                        ->lockForUpdate()
+                                        ->first();
+                
+                                    // Ensure the main stock exists before processing
+                                    if ($mainstock) {
+                                        // Deduct the quantity from main stock
+                                        if ($mainstock->quantity >= $item->quantity) {
+                                            $mainstock->quantity -= $item->quantity;
+                                            $mainstock->save();
+                                        } else {
+                                            throw new \Exception('Insufficient main stock quantity.');
+                                        }
+                
+                                        // Update or create branch stock with lock to prevent concurrent updates
+                                        $branchstock = BranchStock::where('branch_id', $data['branch_id'])
+                                            ->where('main_stock_id', $item->main_stock_id)
+                                            ->lockForUpdate()
+                                            ->first();
+                
+                                        if ($branchstock) {
+                                            // Update the existing branch stock quantity
+                                            $branchstock->quantity += $item->quantity;
+                                            $branchstock->save();
+                                        } else {
+                                            // Create new branch stock if it doesn't exist
+                                            BranchStock::create([
+                                                'main_stock_id' => $item->main_stock_id,
+                                                'quantity' => $item->quantity,
+                                                'cost_price' => $mainstock->cost_price,
+                                                'barcode' => $mainstock->barcode,
+                                                'branch_id' => $data['branch_id'],
+                                                'batch' => $mainstock->batch,
+                                                'mrp' => $mainstock->mrp,
+                                            ]);
+                                        }
+                
+                                        // Create a stock distribute record
+                                        StockDistribute::create([
+                                            'main_stock_id' => $item->main_stock_id,
+                                            'quantity' => $item->quantity,
+                                            'cost_price' => $item->cost_price,
+                                            'mrp' => $item->mrp,
+                                            'batch' => $item->batch,
+                                            'branch_id' => $data['branch_id'],
+                                        ]);
+                
+                                        // Delete the cart item after distribution is done
+                                        $item->delete();
+                                    }
                                 }
-
-                                // Deduct privatebook quantity
-                                // $privatebook = PrivateBook::where('main_stock_id', $item->main_stock_id)->first();
-                                // if ($privatebook) {
-                                //     $privatebook->quantity -= $item->quantity;
-                                //     $privatebook->save();
-                                // }
-
-                                // Update branch stock
-                                $branchstock = BranchStock::where('branch_id', $data['branch_id'])
-                                    ->where('main_stock_id', $item->main_stock_id)
-                                    ->first();
-                                if ($branchstock) {
-                                    $branchstock->quantity += $item->quantity;
-                                    $branchstock->save();
-                                } else {
-                                    BranchStock::create([
-                                        'main_stock_id' => $item->main_stock_id,
-                                        'quantity' => $item->quantity,
-                                        'cost_price' => $mainstock->cost_price,
-                                        'barcode' => $mainstock->barcode,
-                                        'branch_id' => $data['branch_id'],
-                                        'batch' => $mainstock->batch,
-                                        'mrp' => $mainstock->mrp,
-                                    ]);
+                            });
+                
+                            // Success Notification
+                            Notification::make()
+                                ->success()
+                                ->title('Items distributed successfully!')
+                                ->color('success')
+                                ->send();
+                
+                            break; // Exit loop if successful
+                
+                        } catch (\Illuminate\Database\QueryException $e) {
+                            if ($e->getCode() === '40001') { // Deadlock error code
+                                $retryCount++;
+                                Log::warning("Deadlock encountered. Retry attempt {$retryCount} of {$maxRetries}");
+                
+                                if ($retryCount >= $maxRetries) {
+                                    throw $e; // After max retries, propagate the error
                                 }
-
-                                // Create StockDistribute entry
-                                StockDistribute::create([
-                                    'main_stock_id' => $item->main_stock_id,
-                                    'quantity' => $item->quantity,
-                                    'cost_price' => $item->cost_price,
-                                    'mrp' => $item->mrp,
-                                    'batch' => $item->batch,
-                                    'branch_id' => $data['branch_id'],
-                                ]);
-
-                                // Delete the cart item
-                                $item->delete();
+                
+                                usleep($delay * 1000); // Wait before retrying
+                                $delay *= 2; // Exponential backoff
+                
+                            } else {
+                                // Handle other database exceptions
+                                throw $e;
                             }
-                        });
-
-                        // Success Notification
-                        Notification::make()
-                            ->success()
-                            ->title('Items distributed successfully!')
-                            ->color('success')
-                            ->send();
-
-                    } catch (\Exception $e) {
-                        // Log the error for debugging
-                        Log::error('Stock distribution failed: ' . $e->getMessage());
-
-                        // Failure Notification
-                        Notification::make()
-                            ->danger()
-                            ->title('Failed to distribute items!')
-                            ->body('An error occurred during the stock distribution process.')
-                            ->color('danger')
-                            ->send();
+                
+                        } catch (\Exception $e) {
+                            // Log the error for debugging
+                            Log::error('Stock distribution failed: ' . $e->getMessage());
+                
+                            // Failure Notification
+                            Notification::make()
+                                ->danger()
+                                ->title('Failed to distribute items!')
+                                ->body('An error occurred during the stock distribution process.')
+                                ->color('danger')
+                                ->send();
+                
+                            break; // Break out of retry loop for non-deadlock exceptions
+                        }
                     }
                 })
+                
                 ->modalIcon('heroicon-o-check-circle')
                 ->modalDescription('Select Branch Name')
                 ->modalIconColor('danger')

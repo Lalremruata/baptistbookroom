@@ -26,6 +26,7 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\Summarizers\Summarizer;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Contracts\Support\Htmlable;
 
 class CustomerCreditTransactions extends Page implements HasForms, HasTable, HasActions
 {
@@ -135,5 +136,12 @@ class CustomerCreditTransactions extends Page implements HasForms, HasTable, Has
     public function getMaxContentWidth(): MaxWidth
     {
         return MaxWidth::FiveExtraLarge;
+    }
+    public function getTitle(): string | Htmlable
+    {
+        /** @var Customer */
+        $record = $this->record;
+
+        return $record->customer_name.' Credit Transaction';
     }
 }

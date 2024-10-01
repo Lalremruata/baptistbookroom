@@ -65,6 +65,19 @@ class BookAccount extends Page implements HasForms,  HasActions
 
 
     }
+    public function refreshQuantities()
+    {
+        // Recalculate the quantities and balance
+        $this->initialQuantity();
+
+        // Optionally, you can calculate the balance here if it depends on the new data.
+    }
+    protected function getListeners()
+    {
+        return [
+            'paymentUpdated' => 'refreshQuantities',
+        ];
+    }
     public function getTitle(): string | Htmlable
     {
         /** @var PrivateBook */

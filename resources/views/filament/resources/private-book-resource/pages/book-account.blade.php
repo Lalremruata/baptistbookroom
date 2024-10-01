@@ -57,7 +57,10 @@
         <!-- Payment Tab Content -->
         <div x-show="tab === 'payment'">
             <x-filament::section>
-                <livewire:private-book-payment :privateBookId="$record->id" />
+                <livewire:private-book-payment :privateBookId="$record->id" 
+                wire:on="paymentUpdated"  {{-- Listen for the event here --}}
+                wire:dispatch="refreshQuantities"  {{-- Trigger refresh when the event occurs --}}
+                />
             </x-filament::section>
         </div>
 

@@ -57,7 +57,7 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
         ->actions([
                 DeleteAction::make()
                 ->after(function (){
-                    $this->dispatch('deleteRecord');
+                    $this->dispatch('paymentUpdated');
                 })
                 ->iconButton(),
                 EditAction::make()
@@ -78,7 +78,7 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                     DatePicker::make('return_date')
                 ])
                 ->after(function (){
-                    $this->dispatch('editRecord');
+                    $this->emit('paymentUpdated');
                 }),
                 \Filament\Tables\Actions\Action::make('download receipt')
                 ->button()
@@ -115,21 +115,30 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                         'class' => 'margin',
                     ])
                     ->action(function (array $data, $record) {
-                        $privateBookAccount = new PrivateBookAccount();
-                        $privateBookAccount->private_book_id = $this->privateBookId;
-                        $privateBookAccount->return_amount = $data['return_amount'];
-                        $privateBookAccount->return_date = $data['return_date'];
-                        $privateBookAccount->receiver_name = $data['receiver_name'];
-                        $privateBookAccount->address = $data['address'];
-                        $privateBookAccount->phone_number = $data['phone_number'];
-                        $privateBookAccount->save();
+                        // Call the addPayment function
+                        $this->addPayment($data);
                     })
+                    // ->after(fn()=>$this->dispatch('paymentUpdated'))
                 ]);
     }
 
     public function mount($privateBookId)
     {
         $this->privateBookId = $privateBookId;
+    }
+    public function addPayment(array $data)
+    {
+        $privateBookAccount = new PrivateBookAccount();
+        $privateBookAccount->private_book_id = $this->privateBookId;
+        $privateBookAccount->return_amount = $data['return_amount'];
+        $privateBookAccount->return_date = $data['return_date'];
+        $privateBookAccount->receiver_name = $data['receiver_name'];
+        $privateBookAccount->address = $data['address'];
+        $privateBookAccount->phone_number = $data['phone_number'];
+        $privateBookAccount->save();
+
+        // Emit an event after adding the payment
+        $this->dispatch('paymentUpdated');
     }
     public function render()
     {

@@ -1,7 +1,7 @@
 @php
         $value=App\Models\CreditTransaction::where('customer_id', $this->record->id)->first();
         $sum=App\Models\CreditTransaction::where('customer_id', $this->record->id)->sum('recovered_amount');
-        $remainingCredit = $value->total_amount - $sum;
+        $remainingCredit = $value->total_amount - ($sum+$value->received_amount);
     @endphp
 <x-filament-panels::page>
 <x-filament::section collapsible icon="heroicon-o-user"

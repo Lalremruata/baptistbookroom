@@ -322,82 +322,111 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ])
                 ->requiresConfirmation()
                 ->action(function (array $data) {
-                    try{
-                        DB::transaction(function() use ($data) {
-                        $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)
-                        ->where('user_id', auth()->user()->id)
-                        ->sum('selling_price');
-
-                        if($data['customer_name'] && $data['received_amount'] < $totalAmount)
-                        {
-                            $customer = new Customer;
-                            $customer->customer_name = $data['customer_name'];
-                            $customer->phone = $data['phone'];
-                            $customer->address = $data['address'];
-                            $customer->save();
-                            $customer_id = Customer::latest()->pluck('id')->first();
+                    $maxRetries = 5;
+                    $retryCount = 0;
+                    $delay = 100; // Initial delay for retries
+                
+                    while ($retryCount < $maxRetries) {
+                        try {
+                            DB::transaction(function () use ($data) {
+                                $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)
+                                    ->where('user_id', auth()->user()->id)
+                                    ->sum('selling_price');
+                
+                                if ($data['customer_name'] && $data['received_amount'] < $totalAmount) {
+                                    // Handle customer creation within the transaction
+                                    $customer = Customer::create([
+                                        'customer_name' => $data['customer_name'],
+                                        'phone' => $data['phone'],
+                                        'address' => $data['address'],
+                                    ]);
+                                    $customer_id = $customer->id;
+                                } else {
+                                    $customer_id = null;
+                                }
+                
+                                if ($data['received_amount'] < $totalAmount) {
+                                    CreditTransaction::create([
+                                        'customer_id' => $customer_id,
+                                        'received_amount' => $data['received_amount'],
+                                        'total_amount' => $totalAmount,
+                                        'recovered_amount' => 0,
+                                    ]);
+                                }
+                
+                                // Memo safe update
+                                $memo = Memo::lockForUpdate()->latest()->first();
+                                $newMemo = $memo->memo + 1;
+                                $memo->memo = $newMemo;
+                                $memo->update();
+                
+                                $cartItems = SalesCartItem::where('branch_id', auth()->user()->branch_id)
+                                    ->where('user_id', auth()->user()->id)
+                                    ->get();
+                
+                                foreach ($cartItems as $item) {
+                                    // Lock stock row to prevent concurrent updates
+                                    $branchStock = BranchStock::where('branch_id', $item->branch_id)
+                                        ->where('id', $item->branch_stock_id)
+                                        ->lockForUpdate()
+                                        ->first();
+                                    $branchStock->quantity -= $item->quantity;
+                                    $branchStock->update();
+                
+                                    // Create sale entry
+                                    Sale::create([
+                                        'branch_stock_id' => $item->branch_stock_id,
+                                        'branch_id' => auth()->user()->branch_id,
+                                        'user_id' => auth()->user()->id,
+                                        'customer_id' => $customer_id,
+                                        'discount' => $item->discount,
+                                        'total_amount' => $item->selling_price,
+                                        'quantity' => $item->quantity,
+                                        'payment_mode' => $data['payment_mode'],
+                                        'transaction_number' => $data['transaction_number'],
+                                        'memo' => $newMemo . auth()->user()->branch_id,
+                                    ]);
+                
+                                    // Delete cart item
+                                    $item->delete();
+                                }
+                            });
+                
+                            // Success Notification
+                            Notification::make()
+                                ->success()
+                                ->title('Items sold successfully!')
+                                ->color('success')
+                                ->send();
+                
+                            break; // Break out of the retry loop if transaction is successful
+                        } catch (\Illuminate\Database\QueryException $e) {
+                            if ($e->getCode() === '40001') {
+                                $retryCount++;
+                                Log::warning("Deadlock encountered. Retry attempt {$retryCount} of {$maxRetries}");
+                                if ($retryCount >= $maxRetries) {
+                                    throw $e; // After max retries, propagate the error
+                                }
+                                usleep($delay * 1000); // Backoff delay
+                                $delay *= 2; // Exponential backoff
+                            } else {
+                                throw $e; // Handle other exceptions
+                            }
+                        } catch (\Exception $e) {
+                            // Log the error for debugging
+                            Log::error('Sales checkout failed: ' . $e->getMessage());
+                
+                            // Failure Notification
+                            Notification::make()
+                                ->danger()
+                                ->title('Failed to checkout cart!')
+                                ->body('An error occurred during the checkout process.')
+                                ->send();
+                            break; // Break if it's a general exception
                         }
-                        else{
-                            $customer_id = null;
-                        }
-
-
-                        if($data['received_amount'] < $totalAmount){
-                            $creditTransaction = new CreditTransaction;
-                            $creditTransaction->customer_id = $customer_id;
-                            $creditTransaction->received_amount = $data['received_amount'];
-                            $creditTransaction->total_amount = $totalAmount;
-                            $creditTransaction->recovered_amount = 0;
-                            $creditTransaction->save();
-                        }
-
-                        $memo = Memo::latest()->first();
-                        $cartItems = SalesCartItem::where('branch_id',auth()->user()->branch_id)
-                        ->where('user_id',auth()->user()->id)->get();
-                        foreach ($cartItems as $item) {
-                            $branchStock = BranchStock::where('branch_id', $item->branch_id)
-                            ->where('id', $item->branch_stock_id)
-                            ->first();
-                            $branchStock->quantity -= $item->quantity;
-                            $branchStock->update();
-                            Sale::create([
-                                'branch_stock_id' => $item->branch_stock_id,
-                                'branch_id' => auth()->user()->branch_id,
-                                'user_id' => auth()->user()->id,
-                                'customer_id' => $customer_id,
-                                'discount' => $item->discount,
-                                'total_amount' => $item->selling_price,
-                                'quantity' => $item->quantity,
-                                'payment_mode' => $data['payment_mode'],
-                                'transaction_number' => $data['transaction_number'],
-                                'memo' => ($memo->memo + 1) . auth()->user()->branch_id,
-
-                            ]);
-                            $item->delete();
-                        }
-                        $memo->memo = $memo->memo + 1;
-                        $memo->update();
-                    });
-                    // Success Notification
-                    Notification::make()
-                    ->success()
-                    ->title('Items sold successfully!')
-                    ->color('success')
-                    ->send();
-                    }
-                    catch (\Exception $e) {
-                        // Log the error for debugging
-                        Log::error('Stock distribution failed: ' . $e->getMessage());
-
-                        // Failure Notification
-                        Notification::make()
-                            ->danger()
-                            ->title('Failed to checkout cart!')
-                            ->body('An error occurred during checking out process.')
-                            ->color('danger')
-                            ->send();
                     }
                 })
+                
                 ->slideOver()
                 ->modalIcon('heroicon-o-check-circle')
                 ->modalIconColor('danger')
