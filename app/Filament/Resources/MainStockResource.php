@@ -76,7 +76,7 @@ class MainStockResource extends Resource
                                     // return (Item::query()->pluck('item_name', 'id'));
                                     return null;
                                 }
-                                return $subCategory->items->pluck('item_name','id');
+                                return $subCategory->item->pluck('item_name','id');
                             })
                             ->afterStateUpdated(fn(callable $set,Get $get)=>$set('barcode',Item::query()
                                 ->where('id', $get('item_id'))->pluck('barcode')->first()))

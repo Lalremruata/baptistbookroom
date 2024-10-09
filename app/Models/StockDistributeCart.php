@@ -18,7 +18,7 @@ class StockDistributeCart extends Model
         'cost_price',
         'mrp',
         'batch',
-        'branch_id'
+        'branch_id',
     ];
     public function item(): BelongsTo{
         return $this->belongsTo(Item::class);
