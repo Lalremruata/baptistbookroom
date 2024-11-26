@@ -22,7 +22,7 @@ class Sale extends Model
         'transaction_number',
         'memo',
     ];
-    
+
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);
     }
