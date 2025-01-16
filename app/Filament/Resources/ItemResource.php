@@ -67,6 +67,14 @@ class ItemResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('description')
                     ->maxLength(255),
+                Forms\Components\TextInput::make('gst_rate')
+                    ->label('GST Rate')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\TextInput::make('hsn_number')
+                    ->label('HSN Number')
+                    ->required()
+                    ->numeric(),
                 ])->columns(2)
 
             ]);
