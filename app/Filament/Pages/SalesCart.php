@@ -79,37 +79,60 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 TextInput::make('barcode')
                 ->label('Barcode Search')
                 ->autofocus()
-                ->afterStateUpdated(function(callable $set,Get $get){
+                ->afterStateUpdated(function(callable $set, Get $get) {
                     $barcode = $get('barcode');
-                    $branchStock = BranchStock::with('mainStock')
-                        ->where('barcode', $barcode)->where('branch_id', auth()->user()->branch_id)->first();
-                        if($branchStock)
-                        {
-                            $set('branch_stock_id', $branchStock->id);
-                            $set('item_id', $branchStock->item->item_name);
-                        }
-                        else
+                    
+                    // Fetch all branch stock records with the same barcode and belonging to the current branch
+                    $branchStocks = BranchStock::with('mainStock')
+                        ->where('barcode', $barcode)
+                        ->where('branch_id', auth()->user()->branch_id)
+                        ->get();
+            
+                    if ($branchStocks->count() === 1) {
+                        // If only one item matches the barcode
+                        $branchStock = $branchStocks->first();
+                        $set('branch_stock_id', $branchStock->id);
+                        $set('item_id', $branchStock->mainStock->item->item_name); // Assuming item is linked via MainStock
+                    } elseif ($branchStocks->count() > 1) {
+                        // If multiple items have the same barcode, clear and allow item selection
                         $set('branch_stock_id', null);
+                        $set('item_id', null);
+                    } else {
+                        // If no match is found, clear the selection
+                        $set('branch_stock_id', null);
+                        $set('item_id', null);
+                    }
                 })
                 ->reactive()
                 ->live(),
+            
             Select::make('item_id')
                 ->reactive()
                 ->label('Item Search')
-                ->options(BranchStock::with('mainStock')->where('branch_id', auth()->user()->branch_id)
-                    ->get()->pluck('mainStock.item_info', 'id')->toArray())
-                ->afterStateUpdated(
-                    function(callable $set,Get $get){
-                        $branchStockId = $get('item_id');
-                        $branchStock = BranchStock::where('id', $branchStockId)
-                            ->first();
-                            if($branchStock)
-                            {
-                                $set('barcode',$branchStock->barcode);
-                                $set('branch_stock_id', $branchStock->id);
-                            }
+                ->options(function (callable $get) {
+                    $barcode = $get('barcode');
+                    $branchStocks = BranchStock::with('mainStock.item')
+                        ->where('branch_id', auth()->user()->branch_id)
+                        ->when($barcode, function($query) use ($barcode) {
+                            return $query->where('barcode', $barcode);
+                        })
+                        ->get();
+            
+                    // Display items with item_info or other details
+                    return $branchStocks->pluck('mainStock.item_info', 'id')->toArray();
+                })
+                ->afterStateUpdated(function (callable $set, Get $get) {
+                    $branchStockId = $get('item_id');
+                    $branchStock = BranchStock::with('mainStock')->find($branchStockId);
+            
+                    if ($branchStock) {
+                        $set('barcode', $branchStock->barcode);
+                        $set('branch_stock_id', $branchStock->id);
+                    } else {
+                        // Clear the barcode if no item is selected
+                        $set('barcode', null);
                     }
-                    )
+                })
                 ->noSearchResultsMessage('No items found.')
                 ->searchingMessage('Searching items')
                 ->searchable()
@@ -292,23 +315,14 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         // $customer = new Customer;
                         // dd($data);
                     })
-                    // ->description('Give the category a unique name')
                     ->schema([
-                        // Toggle::make('is_fully_paid')
-                        // ->label("Paid Full?")
-                        // ->default(1)
-                        // ->live(),
                         Section::make([
                             TextInput::make('customer_name')
                             ->autofocus()
-                            ->label('customer name')
-                            // ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
-                            ,
+                            ->label('customer name'),
                         TextInput::make('phone')
                             ->label('Contact')
-                            ->numeric()
-                            // ->hidden(fn (Get $get): bool => ! $get('is_fully_paid'))
-                            ,
+                            ->numeric(),
                         TextInput::make('address')
                             ->label('address')
                         ])->columns(2),
