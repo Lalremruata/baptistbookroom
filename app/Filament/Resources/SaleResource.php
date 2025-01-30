@@ -97,7 +97,7 @@ class SaleResource extends Resource
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('item.item_name')
+                Tables\Columns\TextColumn::make('mainStock.item.item_name')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->searchable()
@@ -107,7 +107,7 @@ class SaleResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('item.barcode')
+                Tables\Columns\TextColumn::make('mainStock.item.barcode')
                     ->label('barcode')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)

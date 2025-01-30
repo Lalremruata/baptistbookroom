@@ -13,10 +13,10 @@ use Illuminate\Contracts\View\View;
 class ListStockDistribute extends ListRecords
 {
     protected static string $resource = StockDistributeResource::class;
-    public function mount(): void
-    {
-        abort_unless(auth()->user()->user_type=='1', 403);
-    }
+    // public function mount(): void
+    // {
+    //     abort_unless(auth()->user()->user_type=='1', 403);
+    // }
     protected function getHeaderActions(): array
     {
         return [
@@ -27,7 +27,7 @@ class ListStockDistribute extends ListRecords
                 return view('filament.pages.help', [
                     'record' => $record,
                 ]);
-            } 
+            }
             )
             ->icon('heroicon-m-question-mark-circle')
             // ->iconButton()

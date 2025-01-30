@@ -33,10 +33,12 @@ class StockDistributeResource extends Resource
         return 0;
     }
 
-    // public static function shouldRegisterNavigation(): bool
-    // {
-    //     return auth()->user()->user_type=='1';
-    // }
+    public static function shouldRegisterNavigation(): bool
+    {
+        // return auth()->user()->user_type=='1';
+        return true;
+    }
+
     public static function getEloquentQuery(): Builder
     {
         if(auth()->user()->user_type == '1') {
@@ -44,7 +46,6 @@ class StockDistributeResource extends Resource
         }
         else {
             return parent::getEloquentQuery()->where('branch_id', auth()->user()->branch_id);
-
         }
     }
 
@@ -114,6 +115,7 @@ class StockDistributeResource extends Resource
                 }),
                 SelectFilter::make('branch')
                     ->relationship('branch','branch_name')
+                    ->hidden(! auth()->user()->user_type=='1')
                     ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
                 ->headerActions([
                     ExportAction::make()
@@ -139,8 +141,8 @@ class StockDistributeResource extends Resource
         return [
             'index' => Pages\ListStockDistribute::route('/'),
             'view' => Pages\ViewStockDistribute::route('/{record}'),
-            // 'create' => Pages\CreateStockDistribute::route('/create'),
-            // 'edit' => Pages\EditStockDistribute::route('/{record}/edit'),
+            'create' => Pages\CreateStockDistribute::route('/create'),
+            'edit' => Pages\EditStockDistribute::route('/{record}/edit'),
         ];
     }
 }

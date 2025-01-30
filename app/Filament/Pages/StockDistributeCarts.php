@@ -310,7 +310,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                     $maxRetries = 5;
                     $retryCount = 0;
                     $delay = 100; // Initial delay for retries
-                
+
                     while ($retryCount < $maxRetries) {
                         try {
                             DB::transaction(function () use ($data) {
@@ -318,13 +318,13 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                                 $cartItems = StockDistributeCart::where('user_id', auth()->user()->id)
                                     ->where('branch_id', $data['branch_id'])
                                     ->get();
-                
+
                                 foreach ($cartItems as $item) {
                                     // Lock the main stock row to avoid concurrent updates
                                     $mainstock = MainStock::where('id', $item->main_stock_id)
                                         ->lockForUpdate()
                                         ->first();
-                
+
                                     // Ensure the main stock exists before processing
                                     if ($mainstock) {
                                         // Deduct the quantity from main stock
@@ -334,13 +334,13 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                                         } else {
                                             throw new \Exception('Insufficient main stock quantity.');
                                         }
-                
+
                                         // Update or create branch stock with lock to prevent concurrent updates
                                         $branchstock = BranchStock::where('branch_id', $data['branch_id'])
                                             ->where('main_stock_id', $item->main_stock_id)
                                             ->lockForUpdate()
                                             ->first();
-                
+
                                         if ($branchstock) {
                                             // Update the existing branch stock quantity
                                             $branchstock->quantity += $item->quantity;
@@ -357,7 +357,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                                                 'mrp' => $mainstock->mrp,
                                             ]);
                                         }
-                
+
                                         // Create a stock distribute record
                                         StockDistribute::create([
                                             'main_stock_id' => $item->main_stock_id,
@@ -367,43 +367,44 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                                             'batch' => $item->batch,
                                             'branch_id' => $data['branch_id'],
                                         ]);
-                
+
                                         // Delete the cart item after distribution is done
                                         $item->delete();
                                     }
                                 }
+                                $this->form->fill();
                             });
-                
+
                             // Success Notification
                             Notification::make()
                                 ->success()
                                 ->title('Items distributed successfully!')
                                 ->color('success')
                                 ->send();
-                
+
                             break; // Exit loop if successful
-                
+
                         } catch (\Illuminate\Database\QueryException $e) {
                             if ($e->getCode() === '40001') { // Deadlock error code
                                 $retryCount++;
                                 Log::warning("Deadlock encountered. Retry attempt {$retryCount} of {$maxRetries}");
-                
+
                                 if ($retryCount >= $maxRetries) {
                                     throw $e; // After max retries, propagate the error
                                 }
-                
+
                                 usleep($delay * 1000); // Wait before retrying
                                 $delay *= 2; // Exponential backoff
-                
+
                             } else {
                                 // Handle other database exceptions
                                 throw $e;
                             }
-                
+
                         } catch (\Exception $e) {
                             // Log the error for debugging
                             Log::error('Stock distribution failed: ' . $e->getMessage());
-                
+
                             // Failure Notification
                             Notification::make()
                                 ->danger()
@@ -411,12 +412,12 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                                 ->body('An error occurred during the stock distribution process.')
                                 ->color('danger')
                                 ->send();
-                
+
                             break; // Break out of retry loop for non-deadlock exceptions
                         }
                     }
                 })
-                
+
                 ->modalIcon('heroicon-o-check-circle')
                 ->modalDescription('Select Branch Name')
                 ->modalIconColor('danger')
@@ -439,13 +440,13 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 // Retrieve form state (the data submitted via the form)
                 $data = $this->form->getState();
 
-    
+
                 // Check if the item is already in the cart
                 $cartItem = StockDistributeCart::where('main_stock_id', $data['main_stock_id'])
                 ->where('user_id',auth()->user()->id)
                 ->where('branch_id',$data['branch_id'])
                 ->first();
-                
+
                 if ($cartItem) {
                     // If the item exists in the cart, increment the quantity
                     $cartItem->quantity += $data['quantity'];
@@ -457,14 +458,16 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         'cost_price' => $mainStock->cost_price,
                         'mrp' => $mainStock->mrp,
                         'batch' => $mainStock->batch,
+                        'user_id' => auth()->user()->id,
                     ];
                     // Merge the new data with the form data
-                    $data += $newData;
-                    // Create a new cart entry
-                    StockDistributeCart::create($data);
+                    $mergedData = array_merge($data, $newData);
+
+                    // Create a new cart entry with merged data
+                    StockDistributeCart::create($mergedData);
                 }
             });
-    
+
             // Success notification
             Notification::make()
                 ->success()
@@ -472,13 +475,27 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 ->body('The item has been added to cart successfully.')
                 ->color('success')
                 ->send();
-    
-            // Clear the form after submission
-            $this->form->fill();
+
+             // Preserve the branch_id value
+            $branchId = $this->form->getState()['branch_id'];
+
+            // Clear the form
+            $this->form->fill([
+                'barcode' => null,
+                'item_id' =>null,
+                'quantity' => null,
+                'main_stock_id' => null,
+                // Add other fields you want to reset to null, but exclude 'branch_id'
+            ]);
+
+            // Restore the branch_id value
+            $this->form->fill([
+                'branch_id' => $branchId,
+            ]);
         } catch (\Exception $e) {
             // Log the error for debugging
             Log::error('Stock distribution failed: ' . $e->getMessage());
-    
+
             // Failure notification
             Notification::make()
                 ->danger()
@@ -488,7 +505,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 ->send();
         }
     }
-    
+
     public function deleteAction(): Action
     {
         return Action::make('delete')

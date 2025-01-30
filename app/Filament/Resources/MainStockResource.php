@@ -46,7 +46,6 @@ class MainStockResource extends Resource
                     ->afterStateUpdated(function(callable $set, Get $get){
                         $barcode = $get('barcode');
                         $items = Item::where('barcode', $barcode)->get();
-
                         if($items->count() === 1) {
                             $set('item_id', $items->first()->id);
                         } elseif ($items->count() > 1) {
