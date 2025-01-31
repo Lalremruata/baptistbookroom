@@ -13,9 +13,7 @@ return new class extends Migration
     {
         Schema::create('credit_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->references('id')
-                ->on('customer')
-                ->onDelete('cascade');
+            $table->foreignId('customer_id')->constrained()->onDelete('cascade');
             $table->decimal('received_amount')->nullable();
             $table->decimal('total_amount')->nullable();
             $table->decimal('recovered_amount')->nullable();

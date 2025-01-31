@@ -18,6 +18,8 @@ class Item extends Model
         'item_name',
         'barcode',
         'description',
+        'gst_rate',
+        'hsn_number',
     ];
 
     public function mainStock(): HasMany

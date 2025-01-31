@@ -28,11 +28,19 @@ class ItemsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('item_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('description')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('barcode')
+                    Forms\Components\TextInput::make('barcode')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('description')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('gst_rate')
+                    ->label('GST Rate')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\TextInput::make('hsn_number')
+                    ->label('HSN Number')
+                    ->required()
+                    ->numeric(),
             ]);
     }
 

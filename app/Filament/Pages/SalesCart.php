@@ -111,6 +111,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->label('Item Search')
                 ->options(function (callable $get) {
                     $barcode = $get('barcode');
+                    // Fetch all branch stock records with the same barcode and belonging to the current branch
                     $branchStocks = BranchStock::with('mainStock.item')
                         ->where('branch_id', auth()->user()->branch_id)
                         ->when($barcode, function($query) use ($barcode) {
@@ -125,6 +126,26 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     $branchStockId = $get('item_id');
                     $branchStock = BranchStock::with('mainStock')->find($branchStockId);
             
+                     // Set GST rate and calculate GST amount
+                     // If GST rate is not set, default to 0
+                    $gstRate = $branchStock->mainStock->item->gst_rate ?? 0;
+                    $mrp = $branchStock->mrp ?? 0;
+
+                    $set('mrp', $mrp);
+                    $set('gst_rate', $gstRate);
+
+                    $price = $get('price');
+                    $quantity = $get('quantity') ?? 1; // Default to 1 if quantity is not set
+                    if ($price) {
+                        $totalPrice = $price * $quantity;
+                        $gstAmount = ($price * $gstRate) / 100;
+                        $set('gst_amount', $gstAmount);
+                    }
+                    else {
+                        $totalPrice = $mrp * $quantity;
+                        $gstAmount = ($totalPrice * $gstRate) / 100;
+                        $set('gst_amount', $gstAmount);
+                    }
                     if ($branchStock) {
                         $set('barcode', $branchStock->barcode);
                         $set('branch_stock_id', $branchStock->id);
@@ -165,6 +186,16 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 })
                     ->hintColor('success'),
                 TextInput::make('quantity')
+                ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                    $price = $get('mrp');
+                    $gstRate = $get('gst_rate');
+                    $quantity = $state ?? 1; // Default to 1 if quantity is not set
+                    if ($price && $gstRate) {
+                        $totalPrice = $price * $quantity;
+                        $gstAmount = ($totalPrice * $gstRate) / 100;
+                        $set('gst_amount', $gstAmount);
+                    }
+                })
                     ->reactive()
                     ->minValue(1)
                     ->maxValue(function (Get $get) {
@@ -220,11 +251,37 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                 return 0;
                             else return 1;
                         }),
-                    TextInput::make('mrp')
-                    ->numeric(),
+                TextInput::make('mrp')
+                    ->label('Price')
+                    ->live()
+                    ->numeric()
+                    ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                        $price = $state;
+                        $gstRate = $get('gst_rate');
+                        $quantity = $get('quantity') ?? 1; // Default to 1 if quantity is not set
+                        if ($price && $gstRate) {
+                            $totalPrice = $price * $quantity;
+                            $gstAmount = ($totalPrice * $gstRate) / 100;
+                            $set('gst_amount', $gstAmount);
+                        }
+                    }),
                     TextInput::make('discount')
                     ->numeric()
                     ->default(0),
+                TextInput::make('gst_amount')
+                    ->label('GST Amount')
+                    ->required()
+                    ->reactive()
+                    ->numeric()
+                    ->disabled()
+                    ->dehydrated(),
+                TextInput::make('gst_rate')
+                    ->label('GST Rate')
+                    ->required()
+                    ->reactive()
+                    ->numeric()
+                    ->disabled()
+                    ->dehydrated(),
                 Hidden::make('branch_stock_id'),
                 Hidden::make('branch_id')
                     ->default(auth()->user()->branch_id),
@@ -471,9 +528,14 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 $totalMrp= $mrp * $data['quantity'];
                 $totalCostPrice = $branchStock->cost_price * $data['quantity'];
                 $sellingPrice = $totalMrp - ($totalMrp * ($data['discount']/100));
+                $gstRate = $data['gst_rate'];
+                $gstAmount = ($sellingPrice * $gstRate) / 100;
+                $totalAmountWithGst = $sellingPrice + $data['gst_amount'];
                 $newData = [
                     'cost_price'=> $totalCostPrice,
                     'selling_price'=> $sellingPrice,
+                    'gst_amount'=> $gstAmount,
+                    'total_amount_with_gst'=> $totalAmountWithGst
                 ];
                 $data += $newData;
                 SalesCartItem::create($data);
@@ -487,6 +549,9 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 $cartItem->quantity += $data['quantity'];
                 $cartItem->cost_price += $totalCostPrice;
                 $cartItem->selling_price += $sellingPrice;
+                $cartItem->gst_amount += $data['gst_amount'];
+                $totalAmountWithGst = $sellingPrice + $data['gst_amount'];
+                $cartItem->total_amount_with_gst += $totalAmountWithGst;
                 $cartItem->update();
             }
             $this->form->fill();
@@ -507,7 +572,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
 
     }   catch (\Exception $e) {
         // Log the error for debugging
-        Log::error('Stock distribution failed: ' . $e->getMessage());
+        Log::error('Item added to cart failed: ' . $e->getMessage());
 
         // Failure notification
         Notification::make()
