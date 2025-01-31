@@ -63,10 +63,17 @@ class SalesInvoicesController extends Controller
         $notes = implode("<br>", $notes);
 
         $items = $cartItems->map(function ($cartItem) {
+    
+            // Add GST details to the item description
+            $description = "GST Rate: {$cartItem->gst_rate}% | GST Amount: ₹{$cartItem->gst_amount}";
+            // $gstRate = $cartItem->gst_rate;
             return Invoice::makeItem($cartItem->branchStock->mainStock->item->item_name)
                 ->title($cartItem->branchStock->mainStock->item->item_name)
+                ->description($description)
                 ->pricePerUnit($cartItem->selling_price)
-                ->quantity($cartItem->quantity);
+                ->quantity($cartItem->quantity)
+                ->tax($cartItem->gst_amount)
+                ->subTotalPrice($cartItem->total_amount_with_gst);
         })->toArray();
 
         $invoice = Invoice::make('receipt')
@@ -84,6 +91,9 @@ class SalesInvoicesController extends Controller
             ->series($formattedYear)
             ->sequence($invoiceNumber)
             ->delimiter('/')
+            // ->taxRate($cartItems->sum('gst_rate'))
+            // ->totalTaxes($cartItems->sum('gst_amount'))
+            // ->taxableAmount($cartItems->sum('total_amount_with_gst'))
             ->logo(public_path('/images/bcm-logo.svg'));
 
         return $invoice->download();

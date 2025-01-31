@@ -17,6 +17,7 @@ class SaleExporter extends Exporter
             // ExportColumn::make('id')
             //     ->label('ID'),
             ExportColumn::make('item.item_name'),
+            ExportColumn::make('item.category.category_name'),
             ExportColumn::make('item.subCategory.subcategory_name'),
             ExportColumn::make('item.barcode')
             ->label('barcode'),
@@ -27,6 +28,9 @@ class SaleExporter extends Exporter
             ExportColumn::make('payment_mode'),
             ExportColumn::make('transaction_number'),
             ExportColumn::make('memo'),
+            ExportColumn::make('gst_rate'),
+            ExportColumn::make('gst_amount'),
+            ExportColumn::make('total_amount_with_gst'),
             ExportColumn::make('created_at')
                 ->label('date'),
             // ExportColumn::make('updated_at'),

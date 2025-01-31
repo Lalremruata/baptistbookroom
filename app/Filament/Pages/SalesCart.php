@@ -308,10 +308,26 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                  ->using(function (Builder $query): string {
                     return $query->sum('selling_price');
                     //  return $query->sum(DB::raw('selling_price * quantity'));
-                 }))
-                ,
+                 })),
                 TextColumn::make('discount')
                     ->suffix('%'),
+                TextColumn::make('gst_rate')
+                    ->suffix('%'),
+                TextColumn::make('gst_amount')
+                    ->suffix('/-')
+                    ->summarize(Summarizer::make()
+                    ->label('Total')
+                    ->using(function (Builder $query): string {
+                        return $query->sum('gst_amount');
+                    })),
+                TextColumn::make('total_amount_with_gst')
+                    ->suffix('/-')
+                    ->summarize(Summarizer::make()
+                    ->label('Total')
+                    ->using(function (Builder $query): string {
+                        return $query->sum('total_amount_with_gst');
+                    })),
+
             ])
             ->actions([
                 DeleteAction::make()
@@ -450,9 +466,12 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                         'branch_id' => auth()->user()->branch_id,
                                         'user_id' => auth()->user()->id,
                                         'customer_id' => $customer_id,
+                                        'quantity' => $item->quantity,
                                         'discount' => $item->discount,
                                         'total_amount' => $item->selling_price,
-                                        'quantity' => $item->quantity,
+                                        'gst_rate' => $item->gst_rate,
+                                        'gst_amount' => $item->gst_amount,
+                                        'total_amount_with_gst' => $item->total_amount_with_gst,
                                         'payment_mode' => $data['payment_mode'],
                                         'transaction_number' => $data['transaction_number'],
                                         'memo' => $newMemo . auth()->user()->branch_id,

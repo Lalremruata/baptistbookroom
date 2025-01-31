@@ -20,6 +20,7 @@ class SalesCartItem extends Model
         "gst_rate",
         "gst_amount",
         "total_amount",
+        "total_amount_with_gst",
     ];
     public function branchStock(): BelongsTo{
         return $this->belongsTo(BranchStock::class);

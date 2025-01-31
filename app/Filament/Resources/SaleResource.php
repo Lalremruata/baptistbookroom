@@ -107,6 +107,11 @@ class SaleResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
+                    // ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('item.subCategory.subcategory_name')
+                    ->sortable()
+                    ->searchable(),
+                    // ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('mainStock.item.barcode')
                     ->label('barcode')
                     ->size(TextColumn\TextColumnSize::Medium)
@@ -143,6 +148,20 @@ class SaleResource extends Resource
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->sortable(),
+                Tables\Columns\TextColumn::make('gst_rate')
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('gst_amount')
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total')),
+                Tables\Columns\TextColumn::make('total_amount_with_gst')
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total')),
                 Tables\Columns\TextColumn::make('created_at')
                 ->label('date')
                     ->date()
@@ -174,8 +193,9 @@ class SaleResource extends Resource
                         ->relationship('branch','branch_name')
                         ->hidden(! auth()->user()->user_type=='1'),
                     SelectFilter::make('category')
-                        ->relationship('item.category','category_name')
-                        ->hidden(! auth()->user()->user_type=='1'),
+                        ->relationship('item.category','category_name'),
+                    SelectFilter::make('subCategory')
+                        ->relationship('item.subCategory','subcategory_name'),
                 ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
                 // Tables\Actions\EditAction::make(),

@@ -151,8 +151,9 @@
 
                                 <!-- <strong>{{ $invoice->name }}</strong> -->
                                  {{-- <strong>BILL</strong><br> --}}
-                                 <strong>BAPTIST LITERATURE SERVICE : BOOKROOM : {{Auth()->user()->branch->branch_name}}</strong>
+                                 <strong>BAPTIST LITERATURE SERVICE : BOOKROOM : {{Auth()->user()->branch->branch_name}}</strong><br>
                             </h4>
+                            <b>GST NUMBER : {{Auth()->user()->branch->branch_name}}</b>
                         </div>
                     </td>
                     <td class="border-0 pl-0">
@@ -276,7 +277,8 @@
                         <th scope="col" class="text-right border-0">{{ __('invoices::invoice.discount') }}</th>
                     @endif
                     @if($invoice->hasItemTax)
-                        <th scope="col" class="text-right border-0">{{ __('invoices::invoice.tax') }}</th>
+                        <th scope="col" class="text-right border-0">{{ __('GST Amount') }}</th>
+                        {{-- <th scope="col" class="text-right border-0">{{ __('invoices::invoice.tax') }}</th> --}}
                     @endif
                     <th scope="col" class="text-right border-0 pr-0">{{ __('invoices::invoice.sub_total') }}</th>
                 </tr>
@@ -328,7 +330,8 @@
                 @if($invoice->taxable_amount)
                     <tr>
                         <td colspan="{{ $invoice->table_columns - 2 }}" class="border-0"></td>
-                        <td class="text-right pl-0">{{ __('invoices::invoice.taxable_amount') }}</td>
+                        <td class="text-right pl-0">{{ __('GST amount') }}</td>
+                        {{-- <td class="text-right pl-0">{{ __('invoices::invoice.taxable_amount') }}</td> --}}
                         <td class="text-right pr-0">
                             {{ $invoice->formatCurrency($invoice->taxable_amount) }}
                         </td>
@@ -346,7 +349,8 @@
                 @if($invoice->hasItemOrInvoiceTax())
                     <tr>
                         <td colspan="{{ $invoice->table_columns - 2 }}" class="border-0"></td>
-                        <td class="text-right pl-0">{{ __('invoices::invoice.total_taxes') }}</td>
+                        <td class="text-right pl-0">{{ __('Total GST') }}</td>
+                        {{-- <td class="text-right pl-0">{{ __('invoices::invoice.total_taxes') }}</td> --}}
                         <td class="text-right pr-0">
                             {{ $invoice->formatCurrency($invoice->total_taxes) }}
                         </td>
