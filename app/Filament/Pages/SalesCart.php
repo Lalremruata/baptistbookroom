@@ -341,7 +341,9 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     TextInput::make('name')
                         ->autofocus()
                         ->required(),
-                    TextInput::make('address')
+                    TextInput::make('address'),
+                    TextInput::make('gst_number')
+                        ->label('GST Numbers')
                 ])
                 ->action(function (array $data) {
                     return redirect()->route('sale.receipt.download', $data);

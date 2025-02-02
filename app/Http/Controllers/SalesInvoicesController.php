@@ -52,7 +52,7 @@ class SalesInvoicesController extends Controller
             'name'          => $request['name'],
             'address'       => $request['address'],
             'custom_fields' => [
-                'Bill number' =>  $invoiceNumber.'/'.$formattedYear,
+                'GST' =>  $request['gst_number'],
             ],
         ]);
         $notes = [

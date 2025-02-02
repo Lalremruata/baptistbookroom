@@ -23,6 +23,10 @@ class BranchStockExporter extends Exporter
             ExportColumn::make('mrp'),
             ExportColumn::make('batch'),
             ExportColumn::make('barcode'),
+            ExportColumn::make('item.gst_rate')
+            ->label('GST Rate'),
+            ExportColumn::make('item.hsn_number')
+            ->label('HSN Number'),
             ExportColumn::make('created_at')
             ->label('date'),
             // ExportColumn::make('updated_at'),

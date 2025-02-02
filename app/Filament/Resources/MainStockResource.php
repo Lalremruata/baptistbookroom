@@ -27,6 +27,7 @@ use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Tables\Filters\SelectFilter;
 
 class MainStockResource extends Resource
 {
@@ -134,6 +135,7 @@ class MainStockResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextInputColumn::make('quantity')
+                    ->summarize(Sum::make()->label('Total'))
                     ->rules(['required', 'numeric'])
                     ->sortable()
                     ->afterStateUpdated(function ($record, $state) {
@@ -176,6 +178,14 @@ class MainStockResource extends Resource
                     //     }
                     // })
                     ,
+                TextColumn::make('item.gst_rate')
+                    ->label('GST Rate')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('item.hsn_number')
+                    ->label('HSN Number')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -186,8 +196,12 @@ class MainStockResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('category')
+                ->relationship('item.category','category_name'),
+                SelectFilter::make('subCategory')
+                ->relationship('item.subCategory','subcategory_name'),
 
-            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
+            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(4)
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
@@ -238,10 +252,20 @@ class MainStockResource extends Resource
                 TextColumn::make('quantity')
                     ->sortable(),
                 TextColumn::make('cost_price')
+                    ->summarize(Sum::make()->label('Total'))
                     ->sortable(),
                 TextColumn::make('mrp')
+                    ->summarize(Sum::make()->label('Total'))
                     ->sortable(),
                 TextColumn::make('barcode')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('item.gst_rate')
+                    ->label('GST Rate')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('item.hsn_number')
+                    ->label('HSN Number')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('created_at')
@@ -254,8 +278,12 @@ class MainStockResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('category')
+                ->relationship('item.category','category_name'),
+                SelectFilter::make('subCategory')
+                ->relationship('item.subCategory','subcategory_name'),
 
-            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
+            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(4)
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),

@@ -176,6 +176,7 @@ class SaleResource extends Resource
                 Filter::make('created_at')
                 ->form([
                     DatePicker::make('from'),
+                    // ->native(false),
                     DatePicker::make('to'),
                 ])->columns(2)
                 ->query(function (Builder $query, array $data): Builder {
@@ -196,7 +197,7 @@ class SaleResource extends Resource
                         ->relationship('item.category','category_name'),
                     SelectFilter::make('subCategory')
                         ->relationship('item.subCategory','subcategory_name'),
-                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
+                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(4)
             ->actions([
                 // Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()

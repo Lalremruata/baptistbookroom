@@ -90,6 +90,7 @@ class BranchStockResource extends Resource
                     ->searchable(isIndividual: true)
                     ->sortable(),
                 TextColumn::make('quantity')
+                    ->summarize(Sum::make()->label('Total'))
                     ->weight(FontWeight::Bold)
                     ->sortable(),
                 TextColumn::make('cost_price')
@@ -104,6 +105,14 @@ class BranchStockResource extends Resource
                     ->sortable(),
                 TextColumn::make('mainStock.barcode')
                     ->label('Bar code')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('item.gst_rate')
+                    ->label('GST Rate')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('item.hsn_number')
+                    ->label('HSN Number')
                     ->searchable()
                     ->sortable(),
             ])->searchDebounce('750ms')
@@ -127,8 +136,12 @@ class BranchStockResource extends Resource
                         }),
                     SelectFilter::make('branch')
                         ->relationship('branch','branch_name')
-                        ->hidden(! auth()->user()->user_type=='1')
-                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(3)
+                        ->hidden(! auth()->user()->user_type=='1'),
+                    SelectFilter::make('category')
+                        ->relationship('item.category','category_name'),
+                    SelectFilter::make('subCategory')
+                        ->relationship('item.subCategory','subcategory_name'),
+                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(4)
             ->headerActions([
                 ExportAction::make()
                     ->exporter(BranchStockExporter::class)

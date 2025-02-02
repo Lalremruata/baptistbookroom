@@ -153,7 +153,7 @@
                                  {{-- <strong>BILL</strong><br> --}}
                                  <strong>BAPTIST LITERATURE SERVICE : BOOKROOM : {{Auth()->user()->branch->branch_name}}</strong><br>
                             </h4>
-                            <b>GST NUMBER : {{Auth()->user()->branch->branch_name}}</b>
+                            <b>GST NUMBER : </b>
                         </div>
                     </td>
                     <td class="border-0 pl-0">
