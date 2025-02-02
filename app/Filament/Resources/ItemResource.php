@@ -17,6 +17,7 @@ use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Actions\Exports\Enums\ExportFormat;
+use Filament\Tables\Columns\TextInputColumn;
 
 class ItemResource extends Resource
 {
@@ -99,8 +100,13 @@ class ItemResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->size(TextColumn\TextColumnSize::Large)
                     ->sortable(),
-                TextColumn::make('barcode')
-                    ->weight(FontWeight::Bold)
+                TextInputColumn::make('barcode')
+                    ->searchable()
+                    ->sortable(),
+                TextInputColumn::make('gst_rate')
+                    ->searchable()
+                    ->sortable(),
+                TextInputColumn::make('hsn_number')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('description')

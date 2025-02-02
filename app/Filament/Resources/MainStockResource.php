@@ -150,7 +150,7 @@ class MainStockResource extends Resource
                     ->rules(['required', 'numeric'])
                     ->sortable()
                     ->afterStateUpdated(function ($record, $state) {
-                        $branchStock = BranchStock::where('main_stock_id', $record['id']);
+                        $branchStock = BranchStock::find($record['id']);
                         if ($branchStock) {
                             $branchStock->update(['cost_price' => $state]);
                         }
@@ -160,7 +160,7 @@ class MainStockResource extends Resource
                     ->rules(['required', 'numeric'])
                     ->sortable()
                     ->afterStateUpdated(function ($record, $state) {
-                        $branchStock = BranchStock::where('main_stock_id', $record['id']);
+                        $branchStock = BranchStock::find($record['id']);
                         if ($branchStock) {
                             $branchStock->update(['mrp' => $state]);
                         }
@@ -178,14 +178,26 @@ class MainStockResource extends Resource
                     //     }
                     // })
                     ,
-                TextColumn::make('item.gst_rate')
+                TextInputColumn::make('item.gst_rate')
                     ->label('GST Rate')
                     ->searchable()
-                    ->sortable(),
-                TextColumn::make('item.hsn_number')
+                    ->sortable()
+                    ->afterStateUpdated(function ($record, $state) {
+                        $item = Item::find($record['item_id']);
+                        if ($item) {
+                            $item->update(['gst_rate' => $state]);
+                        }
+                    }),
+                TextInputColumn::make('item.hsn_number')
                     ->label('HSN Number')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->afterStateUpdated(function ($record, $state) {
+                        $item = Item::find($record['item_id']);
+                        if ($item) {
+                            $item->update(['hsn_number' => $state]);
+                        }
+                    }),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
