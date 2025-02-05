@@ -4,13 +4,16 @@ namespace App\Filament\Resources;
 
 use App\Filament\Exports\SaleExporter;
 use App\Filament\Resources\SaleResource\Pages;
+use App\Http\Controllers\SalesInvoicesController;
 use App\Models\BranchStock;
 use App\Models\Category;
+use App\Models\Customer;
 use App\Models\Sale;
 use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
@@ -25,6 +28,11 @@ use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Illuminate\Database\Eloquent\Collection;
 
 class SaleResource extends Resource
 {
@@ -88,6 +96,19 @@ class SaleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultGroup('memo')
+            ->groupRecordsTriggerAction(
+                fn (Action $action) => $action
+                    ->button()
+                    ->label('Group records')
+                    ->action(function (array $records) {
+                        // Handle the grouped records action here
+                        // For example, you can loop through the records and perform some action
+                        foreach ($records as $record) {
+                            // Perform action on each record
+                        }
+                    })
+            )
             ->columns([
                 TextColumn::make('')
                     ->size(TextColumn\TextColumnSize::Medium)
@@ -107,11 +128,9 @@ class SaleResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
-                    // ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('item.subCategory.subcategory_name')
                     ->sortable()
                     ->searchable(),
-                    // ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('mainStock.item.barcode')
                     ->label('barcode')
                     ->size(TextColumn\TextColumnSize::Medium)
@@ -163,8 +182,8 @@ class SaleResource extends Resource
                     ->sortable()
                     ->summarize(Sum::make()->label('Total')),
                 Tables\Columns\TextColumn::make('created_at')
-                ->label('date')
-                    ->date()
+                    ->label('date')
+                    ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
@@ -174,47 +193,79 @@ class SaleResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Filter::make('created_at')
-                ->form([
-                    DatePicker::make('from'),
-                    // ->native(false),
-                    DatePicker::make('to'),
-                ])->columns(2)
-                ->query(function (Builder $query, array $data): Builder {
-                    return $query
-                        ->when(
-                            $data['from'],
-                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
-                        )
-                        ->when(
-                            $data['to'],
-                            fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
-                        );
+                    ->form([
+                        DatePicker::make('from'),
+                        DatePicker::make('to'),
+                    ])->columns(2)
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['to'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
                     }),
-                    SelectFilter::make('branch')
-                        ->relationship('branch','branch_name')
-                        ->hidden(! auth()->user()->user_type=='1'),
-                    SelectFilter::make('category')
-                        ->relationship('item.category','category_name'),
-                    SelectFilter::make('subCategory')
-                        ->relationship('item.subCategory','subcategory_name'),
-                ], layout: FiltersLayout::AboveContent)->filtersFormColumns(4)
+                SelectFilter::make('branch')
+                    ->relationship('branch', 'branch_name')
+                    ->hidden(!auth()->user()->user_type == '1'),
+                SelectFilter::make('category')
+                    ->relationship('item.category', 'category_name'),
+                SelectFilter::make('subCategory')
+                    ->relationship('item.subCategory', 'subcategory_name'),
+            ], layout: FiltersLayout::AboveContent)->filtersFormColumns(4)
             ->actions([
-                // Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
-                ->iconButton()
-                ->before(function (Model $record) {
-                    $branchStock = BranchStock::where('branch_id', $record->branch_id)
-                    ->where('id', $record->branch_stock_id)
-                    ->first();
-                    $branchStock->quantity += $record->quantity;
-                    $branchStock->update();
-                })
+                DeleteAction::make()
+                    ->iconButton()
+                    ->before(function (Model $record) {
+                        $branchStock = BranchStock::where('branch_id', $record->branch_id)
+                            ->where('id', $record->branch_stock_id)
+                            ->first();
+                        $branchStock->quantity += $record->quantity;
+                        $branchStock->update();
+                    })
             ])
+    
             ->bulkActions([
-                // Tables\Actions\BulkActionGroup::make([
-                //     Tables\Actions\DeleteBulkAction::make(),
-                // ]),
-            ])
+                BulkAction::make('print invoice')
+                ->button()
+                ->icon('heroicon-o-printer')
+                ->form([
+                    TextInput::make('name')
+                        ->autofocus()
+                        ->required(),
+                    TextInput::make('address'),
+                    TextInput::make('phone'),
+                    TextInput::make('gst_number')
+                        ->label('GST Numbers'),
+                ])
+                ->fillForm(function (Collection $records) {
+                    if ($records->isEmpty()) {
+                        return [];
+                    }
+                    // Fetch customer data based on the first record's customer_id
+                    $customerId = $records[0]->customer_id;
+                    $customer = Customer::find($customerId);
+        
+                    if (!$customer) {
+                        return [];
+                    }
+
+                    // Return default values for the form fields
+                    return [
+                        'name' => $customer->customer_name,
+                        'address' => $customer->address,
+                        'phone' => $customer->phone,
+                        'gst_number' => $customer->gst_number,
+                    ];
+                })
+                ->action(function (Collection $records, array $data) {
+                    $saleController = new SalesInvoicesController();
+                    return $saleController->generatePdf($records, $data);
+                }),     
+        ])
             ->headerActions([
                 ExportAction::make()
                     ->exporter(SaleExporter::class)

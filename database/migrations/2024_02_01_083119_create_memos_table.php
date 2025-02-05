@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('memos', function (Blueprint $table) {
             $table->id();
-            $table->integer('memo')->default(1000); //number+branch_id
+            $table->integer('memo');
             $table->timestamps();
         });
     }

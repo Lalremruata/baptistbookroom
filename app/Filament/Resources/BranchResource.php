@@ -6,6 +6,7 @@ use App\Filament\Resources\BranchResource\Pages;
 use App\Filament\Resources\BranchResource\RelationManagers;
 use App\Models\Branch;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -28,7 +29,16 @@ class BranchResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('branch_name')
+                TextInput::make('branch_name')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('branch_address')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('branch_phone')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('branch_email')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -39,6 +49,12 @@ class BranchResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('branch_name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('branch_address')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('branch_phone')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('branch_email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

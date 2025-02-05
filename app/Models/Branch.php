@@ -10,7 +10,10 @@ class Branch extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'branch_name'
+        'branch_name',
+        'branch_address',
+        'branch_phone',
+        'branch_email',
     ];
     public function branchStock(): HasMany
     {

@@ -10,5 +10,10 @@ class Memo extends Model
     use HasFactory;
     protected $fillable = [
         "memo",
+        "branch_id",
     ];
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
 }

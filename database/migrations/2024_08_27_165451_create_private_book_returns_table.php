@@ -11,6 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if ( ! Schema::hasTable('private_book_returns'))
+    {
         Schema::create('private_book_returns', function (Blueprint $table) {
             $table->id();
             $table->foreignId('private_book_id')->references('id')
@@ -21,7 +23,7 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
+    }
     /**
      * Reverse the migrations.
      */

@@ -14,7 +14,6 @@ use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Get;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\VerticalAlignment;
-use Filament\Support\Exceptions\Halt;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
@@ -83,24 +82,45 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     $barcode = $get('barcode');
                     
                     // Fetch all branch stock records with the same barcode and belonging to the current branch
-                    $branchStocks = BranchStock::with('mainStock')
+                    $branchStocks = BranchStock::with('mainStock.item')
                         ->where('barcode', $barcode)
                         ->where('branch_id', auth()->user()->branch_id)
                         ->get();
-            
+                
                     if ($branchStocks->count() === 1) {
                         // If only one item matches the barcode
                         $branchStock = $branchStocks->first();
                         $set('branch_stock_id', $branchStock->id);
                         $set('item_id', $branchStock->mainStock->item->item_name); // Assuming item is linked via MainStock
+                
+                        // Set GST rate and calculate GST amount
+                        $gstRate = $branchStock->mainStock->item->gst_rate ?? 0;
+                        $set('gst_rate', $gstRate);
+                
+                        $price = $get('price');
+                        $quantity = $get('quantity') ?? 1; // Default to 1 if quantity is not set
+                        if ($price) {
+                            $totalPrice = $price * $quantity;
+                            $gstAmount = ($totalPrice * $gstRate) / 100;
+                            $set('gst_amount', $gstAmount);
+                        } else {
+                            $mrp = $branchStock->mrp ?? 0;
+                            $totalPrice = $mrp * $quantity;
+                            $gstAmount = ($totalPrice * $gstRate) / 100;
+                            $set('gst_amount', $gstAmount);
+                        }
                     } elseif ($branchStocks->count() > 1) {
                         // If multiple items have the same barcode, clear and allow item selection
                         $set('branch_stock_id', null);
                         $set('item_id', null);
+                        $set('gst_rate', null);
+                        $set('gst_amount', null);
                     } else {
                         // If no match is found, clear the selection
                         $set('branch_stock_id', null);
                         $set('item_id', null);
+                        $set('gst_rate', null);
+                        $set('gst_amount', null);
                     }
                 })
                 ->reactive()
@@ -253,6 +273,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         }),
                 TextInput::make('mrp')
                     ->label('Price')
+                    ->hidden()
                     ->live()
                     ->numeric()
                     ->afterStateUpdated(function ($state, callable $set, Get $get) {
@@ -336,12 +357,13 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             // ...
             ])
             ->headerActions([
-                \Filament\Tables\Actions\Action::make('print receipt')
+                \Filament\Tables\Actions\Action::make('print receipt/invoices')
                 ->form([
                     TextInput::make('name')
                         ->autofocus()
                         ->required(),
                     TextInput::make('address'),
+                    TextInput::make('phone'),
                     TextInput::make('gst_number')
                         ->label('GST Numbers')
                 ])
@@ -444,10 +466,20 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                 }
                 
                                 // Memo safe update
-                                $memo = Memo::lockForUpdate()->latest()->first();
-                                $newMemo = $memo->memo + 1;
-                                $memo->memo = $newMemo;
-                                $memo->update();
+                                // Fetch the last memo for the current branch
+                            $lastMemo = Memo::where('branch_id', auth()->user()->branch_id)
+                                ->lockForUpdate() // Lock the row to prevent concurrent updates
+                                ->orderBy('memo', 'desc')
+                                ->first();
+                            
+                            // Generate the next memo number for the current branch
+                            $newMemoNumber = $lastMemo ? $lastMemo->memo + 1 : 1000;
+                            
+                            // Update the existing memo or create a new one
+                            Memo::updateOrCreate(
+                                ['branch_id' => auth()->user()->branch_id, 'memo' => $lastMemo ? $lastMemo->memo : null],
+                                ['memo' => $newMemoNumber]
+                            );
                 
                                 $cartItems = SalesCartItem::where('branch_id', auth()->user()->branch_id)
                                     ->where('user_id', auth()->user()->id)
@@ -476,7 +508,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                         'total_amount_with_gst' => $item->total_amount_with_gst,
                                         'payment_mode' => $data['payment_mode'],
                                         'transaction_number' => $data['transaction_number'],
-                                        'memo' => $newMemo . auth()->user()->branch_id,
+                                        'memo' => $newMemoNumber . auth()->user()->branch_id,
                                     ]);
                 
                                     // Delete cart item

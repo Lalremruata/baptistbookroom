@@ -12,6 +12,7 @@ class Customer extends Model
         'customer_name',
         'phone',
         'sales_id',
+        'address'
     ];
 
     public function sales()
