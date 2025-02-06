@@ -1,7 +1,9 @@
 @php
 $totalAmount = $records->sum('total_amount');
 $totalDiscount = $records->sum('discount');
-$totalAmountWithGst = $records->sum('total_amount_with_gst');
+// $totalAmountWithGst = $records->sum('total_amount_with_gst');
+$totalGstAmount = $records->sum('gst_amount');
+$totalAmountWithGst = $totalAmount + $totalGstAmount;
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -119,7 +121,7 @@ $totalAmountWithGst = $records->sum('total_amount_with_gst');
             GSTIN: {{$data['gst_number'] ?? 'N/A' }}
         </div>
         <div class="shipped-to">
-            <strong>Invoice Date:</strong><br>
+            <strong>Invoice Date: {{ \Carbon\Carbon::parse($records[0]->created_at)->format('d/m/Y') }}</strong><br>
             <strong>Shipped To:</strong><br>
             Name: {{ $data['name'] ?? 'N/A' }}<br>
             Address: {{$data['address'] ?? 'N/A'}}<br>
@@ -144,6 +146,9 @@ $totalAmountWithGst = $records->sum('total_amount_with_gst');
             </thead>
             <tbody>
             @foreach($records as $index => $record)
+            @php
+            $totalWithGst = $record->total_amount + $record->gst_amount;
+            @endphp
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $record->item->item_name }}</td>
@@ -153,7 +158,7 @@ $totalAmountWithGst = $records->sum('total_amount_with_gst');
                 <td>{{$record->total_amount}}</td>
                 <td>{{$record->gst_rate}}</td>
                 <td>{{$record->gst_amount}}</td>
-                <td>{{$record->total_amount_with_gst}}</td>
+                <td>{{$totalWithGst}}</td>
             </tr>
             @endforeach
             <tr>

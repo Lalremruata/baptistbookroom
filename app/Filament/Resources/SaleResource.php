@@ -161,6 +161,7 @@ class SaleResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('memo')
                     ->size(TextColumn\TextColumnSize::Medium)
+                    ->searchable()
                     ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('transaction_number')

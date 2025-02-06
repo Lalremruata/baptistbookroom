@@ -120,7 +120,7 @@
             GSTIN: {{$request['gst_number'] ?? 'N/A' }}
         </div>
         <div class="shipped-to">
-            <strong>Invoice Date:</strong><br>
+            <strong>Invoice Date: {{ date('d/m/Y') }}</strong><br>
             <strong>Shipped To:</strong><br>
             Name: {{ $request['name'] ?? 'N/A' }}<br>
             Address: {{$request['address'] ?? 'N/A'}}<br>

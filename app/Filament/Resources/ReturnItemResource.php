@@ -94,8 +94,12 @@ class ReturnItemResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('branchStock.mainStock.item.item_name')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('branchStock.item.item_name')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('branchStock.mainStock.barcode')
+                    ->label('Barcode')
+                    ->searchable(isIndividual: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('branch.branch_name')
                     ->numeric()
@@ -122,6 +126,7 @@ class ReturnItemResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])

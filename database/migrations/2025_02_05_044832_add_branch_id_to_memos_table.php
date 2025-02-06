@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if ( ! Schema::hasTable('memos'))
-        {
-            Schema::table('memos', function (Blueprint $table) {
-                $table->unsignedBigInteger('branch_id')->after('id');
-                $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
-            });
-        }
+        Schema::table('memos', function (Blueprint $table) {
+            $table->unsignedBigInteger('branch_id')->after('id');
+            $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
+        });
     }
 
     /**
