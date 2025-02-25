@@ -54,12 +54,12 @@ class UserResource extends Resource
                 ->required(fn(Page $livewire): bool => $livewire instanceof CreateRecord)
                 ->minLength(8)
                 ->dehydrated(false),
-                Toggle::make('user_type')
-                ->label("Is Admin")
-                ->onIcon('heroicon-m-check')
-                ->offIcon('heroicon-m-x-mark')
-                ->onColor('success')
-                ->offColor('danger'),
+                Select::make('user_type')
+                ->options([
+                    '1' => 'Admin',
+                    '2' => 'Manager',
+                    '3' => 'Staff',
+                ]),
                 Select::make('branch_id')
                 ->label('branch')
                 ->relationship('branch','branch_name')

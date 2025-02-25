@@ -33,7 +33,7 @@ class PrivateBookResource extends Resource
     protected static ?string $navigationGroup = 'Private Books';
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()->user_type=='1';
+        return in_array(auth()->user()->user_type, ['1', '2']);
     }
     public static function form(Form $form): Form
     {

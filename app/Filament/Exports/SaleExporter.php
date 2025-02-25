@@ -16,7 +16,14 @@ class SaleExporter extends Exporter
         return [
             // ExportColumn::make('id')
             //     ->label('ID'),
-            ExportColumn::make('item.item_name'),
+            ExportColumn::make('created_at')
+            ->label('Date'),
+            ExportColumn::make('memo')
+            ->label('INVOICE NO'),
+            ExportColumn::make('item.hsn_number')
+            ->label('HSN'),
+            ExportColumn::make('item.item_name')
+            ->label('Item Description'),
             ExportColumn::make('item.category.category_name'),
             ExportColumn::make('item.subCategory.subcategory_name'),
             ExportColumn::make('item.barcode')
@@ -24,15 +31,13 @@ class SaleExporter extends Exporter
             ExportColumn::make('branch.branch_name'),
             ExportColumn::make('quantity'),
             ExportColumn::make('discount'),
-            ExportColumn::make('total_amount'),
-            ExportColumn::make('payment_mode'),
-            ExportColumn::make('transaction_number'),
-            ExportColumn::make('memo'),
-            ExportColumn::make('gst_rate'),
+            ExportColumn::make('rate'),
             ExportColumn::make('gst_amount'),
-            ExportColumn::make('total_amount_with_gst'),
-            ExportColumn::make('created_at')
-                ->label('date'),
+            ExportColumn::make('total_amount'),
+            ExportColumn::make('rate')
+            ->label('Taxable Amount'),
+            ExportColumn::make('payment_mode'),
+            ExportColumn::make('gst_rate'),
             // ExportColumn::make('updated_at'),
         ];
     }

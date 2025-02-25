@@ -317,19 +317,13 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
         return $table
             ->query(SalesCartItem::query()->where('branch_id', auth()->user()->branch_id))
             ->columns([
-                TextColumn::make('branchStock.item.item_name')
+                TextColumn::make('item.item_name')
                     ->wrapHeader()
                     ->verticalAlignment(VerticalAlignment::Start),
                 TextColumn::make('quantity')
-                    ->verticallyAlignStart(),
-                TextColumn::make('selling_price')
-                ->suffix('/-')
-                 ->summarize(Summarizer::make()
-                 ->label('Total')
-                 ->using(function (Builder $query): string {
-                    return $query->sum('selling_price');
-                    //  return $query->sum(DB::raw('selling_price * quantity'));
-                 })),
+                    ->label('Qty.')
+                    ->wrapHeader()
+                    ->verticalAlignment(VerticalAlignment::Start),
                 TextColumn::make('discount')
                     ->suffix('%'),
                 TextColumn::make('gst_rate')
@@ -341,13 +335,22 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     ->using(function (Builder $query): string {
                         return $query->sum('gst_amount');
                     })),
-                TextColumn::make('total_amount_with_gst')
+                TextColumn::make('rate')
                     ->suffix('/-')
                     ->summarize(Summarizer::make()
                     ->label('Total')
                     ->using(function (Builder $query): string {
-                        return $query->sum('total_amount_with_gst');
+                        return $query->sum('rate');
                     })),
+                TextColumn::make('selling_price')
+                    ->label('Total Amount')
+                    ->suffix('/-')
+                     ->summarize(Summarizer::make()
+                     ->label('Total')
+                     ->using(function (Builder $query): string {
+                        return $query->sum('selling_price');
+                        //  return $query->sum(DB::raw('selling_price * quantity'));
+                     })),
 
             ])
             ->actions([
@@ -505,6 +508,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                         'total_amount' => $item->selling_price,
                                         'gst_rate' => $item->gst_rate,
                                         'gst_amount' => $item->gst_amount,
+                                        'rate' => $item->rate,
                                         'total_amount_with_gst' => $item->total_amount_with_gst,
                                         'payment_mode' => $data['payment_mode'],
                                         'transaction_number' => $data['transaction_number'],
@@ -582,12 +586,14 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 $totalCostPrice = $branchStock->cost_price * $data['quantity'];
                 $sellingPrice = $totalMrp - ($totalMrp * ($data['discount']/100));
                 $gstRate = $data['gst_rate'];
-                $gstAmount = ($sellingPrice * $gstRate) / 100;
-                $totalAmountWithGst = $sellingPrice + $data['gst_amount'];
+                $gstAmount = $data['gst_amount'];
+                $rate = $sellingPrice - $gstAmount;
+                $totalAmountWithGst = $sellingPrice;
                 $newData = [
                     'cost_price'=> $totalCostPrice,
                     'selling_price'=> $sellingPrice,
                     'gst_amount'=> $gstAmount,
+                    'rate' => $rate,
                     'total_amount_with_gst'=> $totalAmountWithGst
                 ];
                 $data += $newData;
@@ -603,7 +609,9 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 $cartItem->cost_price += $totalCostPrice;
                 $cartItem->selling_price += $sellingPrice;
                 $cartItem->gst_amount += $data['gst_amount'];
-                $totalAmountWithGst = $sellingPrice + $data['gst_amount'];
+                $rate = $sellingPrice - $data['gst_amount'];
+                $cartItem->rate += $rate;
+                $totalAmountWithGst = $sellingPrice;
                 $cartItem->total_amount_with_gst += $totalAmountWithGst;
                 $cartItem->update();
             }

@@ -20,6 +20,7 @@ class Sale extends Model
         "total_amount",
         'gst_rate',
         'gst_amount',
+        'rate',
         'total_amount_with_gst',
         'payment_mode',
         'transaction_number',

@@ -37,7 +37,7 @@ class BranchStockResource extends Resource
     }
     public static function getEloquentQuery(): Builder
     {
-        if(auth()->user()->user_type == '1') {
+        if(auth()->user()->user_type == '1' || auth()->user()->user_type == '2') {
             return parent::getEloquentQuery()->withoutGlobalScopes();
         }
         else {

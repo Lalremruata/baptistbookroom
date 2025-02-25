@@ -20,6 +20,7 @@ class SalesCartItem extends Model
         "discount",
         "gst_rate",
         "gst_amount",
+        "rate",
         "total_amount",
         "total_amount_with_gst",
     ];

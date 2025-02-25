@@ -33,6 +33,7 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Illuminate\Database\Eloquent\Collection;
+use Filament\Tables\Grouping\Group;
 
 class SaleResource extends Resource
 {
@@ -96,19 +97,13 @@ class SaleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultGroup('memo')
-            ->groupRecordsTriggerAction(
-                fn (Action $action) => $action
-                    ->button()
-                    ->label('Group records')
-                    ->action(function (array $records) {
-                        // Handle the grouped records action here
-                        // For example, you can loop through the records and perform some action
-                        foreach ($records as $record) {
-                            // Perform action on each record
-                        }
-                    })
-            )
+        ->selectable()
+        ->defaultGroup('memo')
+        ->groups([
+            Group::make('memo')
+                ->orderQueryUsing(fn (Builder $query, string $direction) => $query->orderBy('created_at', 'desc'))
+                ->label('Invoice Number'),
+        ])
             ->columns([
                 TextColumn::make('')
                     ->size(TextColumn\TextColumnSize::Medium)
@@ -117,8 +112,15 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('branch.branch_name')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('item.item_name')
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('mainStock.item.item_name')
+                Tables\Columns\TextColumn::make('item.hsn_number')
+                    ->label('HSN')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->searchable()
@@ -127,17 +129,21 @@ class SaleResource extends Resource
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('item.subCategory.subcategory_name')
                     ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('mainStock.item.barcode')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('item.barcode')
                     ->label('barcode')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('date')
+                    ->date()
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->sortable(),
@@ -148,18 +154,14 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('discount')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('total_amount')
-                    ->size(TextColumn\TextColumnSize::Medium)
-                    ->weight(FontWeight::Bold)
-                    ->numeric()
                     ->sortable()
-                    ->summarize(Sum::make()->label('Total')),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('payment_mode')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('memo')
+                    ->label('Invoice Number')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->searchable()
                     ->weight(FontWeight::Bold)
@@ -167,7 +169,8 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('transaction_number')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('gst_rate')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
@@ -177,21 +180,21 @@ class SaleResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->sortable()
                     ->summarize(Sum::make()->label('Total')),
-                Tables\Columns\TextColumn::make('total_amount_with_gst')
+                Tables\Columns\TextColumn::make('rate')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
                     ->sortable()
                     ->summarize(Sum::make()->label('Total')),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('date')
-                    ->dateTime()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('total_amount')
+                    ->size(TextColumn\TextColumnSize::Medium)
+                    ->weight(FontWeight::Bold)
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total')),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('created_at', 'desc')
             ->filters([
                 Filter::make('created_at')
                     ->form([
@@ -226,6 +229,20 @@ class SaleResource extends Resource
                             ->first();
                         $branchStock->quantity += $record->quantity;
                         $branchStock->update();
+                    }),
+                Action::make('recalculate')
+                    ->requiresConfirmation()
+                    ->iconButton()
+                    ->icon('heroicon-o-arrow-path')
+                    ->action(function (Sale $record) {
+                        $item = $record->item;
+                        if ($item) {
+                            $record->gst_rate = $item->gst_rate;
+                            $record->gst_amount = ($record->gst_rate / 100) * ($record->quantity * $record->total_amount);
+                            $record->rate = $record->total_amount - $record->gst_amount;
+                            $record->total_amount_with_gst = $record->total_amount;
+                            $record->save();
+                        }
                     })
             ])
     
@@ -265,7 +282,25 @@ class SaleResource extends Resource
                 ->action(function (Collection $records, array $data) {
                     $saleController = new SalesInvoicesController();
                     return $saleController->generatePdf($records, $data);
-                }),     
+                })
+                ->deselectRecordsAfterCompletion(),
+                BulkAction::make('recalculate')
+                    ->requiresConfirmation()
+                    ->color('success')
+                    ->icon('heroicon-o-arrow-path')
+                    ->action(function (Collection $records) {
+                        foreach ($records as $record) {
+                            $item = $record->item;
+                            if ($item) {
+                                $record->gst_rate = $item->gst_rate;
+                                $record->gst_amount = ($record->gst_rate / 100) * ($record->quantity * $record->total_amount);
+                                $record->rate = $record->total_amount - $record->gst_amount;
+                                $record->total_amount_with_gst = $record->total_amount;
+                                $record->save();
+                            }
+                        }
+                    })
+                    ->deselectRecordsAfterCompletion(),
         ])
             ->headerActions([
                 ExportAction::make()

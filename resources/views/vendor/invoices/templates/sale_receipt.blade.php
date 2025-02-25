@@ -3,7 +3,8 @@ $totalAmount = $records->sum('total_amount');
 $totalDiscount = $records->sum('discount');
 // $totalAmountWithGst = $records->sum('total_amount_with_gst');
 $totalGstAmount = $records->sum('gst_amount');
-$totalAmountWithGst = $totalAmount + $totalGstAmount;
+$totalRate = $records->sum('rate');
+// $totalAmountWithGst = $totalAmount + $totalGstAmount;
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -26,10 +27,10 @@ $totalAmountWithGst = $totalAmount + $totalGstAmount;
         .header {
             text-align: center;
             margin: 0;
+            font-size: 14px;
         }
         .header h2 {
             margin: 0;
-            font-size: 24px;
         }
         .header p {
             margin: 5px 0;
@@ -39,12 +40,13 @@ $totalAmountWithGst = $totalAmount + $totalGstAmount;
         }
         .invoice-title {
             text-align: center;
-            font-size: 20px;
+            font-size: 16px;
         }
         .billed-to, .shipped-to {
             display: inline-block;
             width: 48%;
             vertical-align: top;
+            font-size: 12px;
         }
         .shipped-to {
             text-align: right;
@@ -56,6 +58,7 @@ $totalAmountWithGst = $totalAmount + $totalGstAmount;
         }
         table, th, td {
             border: 1px solid #000;
+            font-size: 12px;
         }
         th, td {
             padding: 10px;
@@ -69,6 +72,7 @@ $totalAmountWithGst = $totalAmount + $totalGstAmount;
             width: 48%;
             vertical-align: top;
             margin-top: 20px;
+            font-size: 12px;
         }
         .invoice-summary {
             display: inline-block;
@@ -76,10 +80,12 @@ $totalAmountWithGst = $totalAmount + $totalGstAmount;
             text-align: right;
             line-height: 1.1;
             margin-top: 20px;
+            font-size: 12px;
         }
         .manager-signature {
             text-align: right;
             margin-top: 40px;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -92,6 +98,7 @@ $totalAmountWithGst = $totalAmount + $totalGstAmount;
             <p>PHONE NO / MOB NO: {{$branch->branch_phone}}</p>
             <p>EMAIL ID: {{$branch->branch_email}}</p>
             <p class="bold">GSTIN: 15AAATB3039Q2ZK</p>
+            <p class="bold">Branch: {{ $branch->branch_name }}</p>
         </div>
 
         <!-- Invoice Title -->
@@ -138,6 +145,7 @@ $totalAmountWithGst = $totalAmount + $totalGstAmount;
                 <th>HSN Code</th>
                 <th>Qty</th>
                 <th>Rate</th>
+                <th>Mrp</th>
                 <th>Taxable Amount</th>
                 <th>GST%</th>
                 <th>GST</th>
@@ -154,26 +162,27 @@ $totalAmountWithGst = $totalAmount + $totalGstAmount;
                 <td>{{ $record->item->item_name }}</td>
                 <td>{{$record->item->hsn_number}}</td>
                 <td>{{$record->quantity}}</td>
+                <td>{{$record->rate}}</td>
                 <td>{{$record->mainStock->mrp}}</td>
-                <td>{{$record->total_amount}}</td>
+                <td>{{$record->rate}}</td>
                 <td>{{$record->gst_rate}}</td>
                 <td>{{$record->gst_amount}}</td>
-                <td>{{$totalWithGst}}</td>
+                <td>{{$record->total_amount}}</td>
             </tr>
             @endforeach
             <tr>
-                <td colspan="5" class="bold">Total</td>
+                <td colspan="6" class="bold">Total</td>
+                <td>{{$totalRate}}</td>
+                <td></td>
+                <td>{{$totalGstAmount}}</td>
                 <td>{{$totalAmount}}</td>
-                <td></td>
-                <td></td>
-                <td>{{$totalAmountWithGst}}</td>
             </tr>
             </tbody>
         </table>
 
         <!-- Amount in Words -->
         <div class="amount-in-words">
-            <strong>Amount in Words:</strong> {{ ucwords(\NumberFormatter::create('en_IN', \NumberFormatter::SPELLOUT)->format($totalAmountWithGst)) }} Only
+            <strong>Amount in Words:</strong> {{ ucwords(\NumberFormatter::create('en_IN', \NumberFormatter::SPELLOUT)->format($totalAmount)) }} Only
         </div>
 
         <!-- Bank Details and Invoice Summary -->
@@ -187,16 +196,16 @@ $totalAmountWithGst = $totalAmount + $totalGstAmount;
             BRANCH: SERKAWN BRANCH
         </div>
         <div class="invoice-summary">
-            <strong>Taxable Amount: {{$totalAmount}}</strong><br>
+            <strong>Taxable Amount: {{$totalRate}}</strong><br>
             Discount: {{$totalDiscount}}<br>
             IGST %: {{$records[0]->gst_rate}}<br>
             SGST %: {{($records[0]->gst_rate)/2}}<br>
             CGST %: {{($records[0]->gst_rate)/2}}<br>
-            <strong>Invoice Amount: {{$totalAmountWithGst}}</strong><br>
+            <strong>Invoice Amount: {{$totalAmount}}</strong><br>
             Freight: ________<br>
             Insurance: ________<br>
             Packing or Carrying Charge: ________<br>
-            <strong>TOTAL AMOUNT: <u>{{ $totalAmountWithGst }}</u></strong>
+            <strong>TOTAL AMOUNT: <u>{{ $totalAmount }}</u></strong>
         </div>
 
         <!-- Manager Signature -->
