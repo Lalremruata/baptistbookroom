@@ -35,13 +35,13 @@ class EditMainStock extends EditRecord
         }
         return $data;
     }
-    protected function afterSave(): void
+    protected function beforeSave(): void
     {
         try {
-            PrivateBook::findOrFail($this->data['id'])
+            PrivateBook::where('main_stock_id', $this->data['id'])
                 ->update(['quantity' => $this->data['quantity']]);
-            BranchStock::findOrFail($this->data['id'])
-                ->update(['cost_price' => $this->data['cost_price']],['mrp' => $this->data['mrp']]);
+            BranchStock::where('main_stock_id', $this->data['id'])
+                ->update(['cost_price' => $this->data['cost_price'], 'mrp' => $this->data['mrp']]);
         } catch (ModelNotFoundException $e) {
             // Handle the case where the MainStock with the specified ID is not found
             // You can log an error, redirect the user, or take other appropriate actions.
