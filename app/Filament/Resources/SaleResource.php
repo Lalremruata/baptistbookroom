@@ -238,9 +238,13 @@ class SaleResource extends Resource
                         $item = $record->item;
                         if ($item) {
                             $record->gst_rate = $item->gst_rate;
-                            $record->gst_amount = ($record->gst_rate / 100) * ($record->quantity * $record->total_amount);
-                            $record->rate = $record->total_amount - $record->gst_amount;
-                            $record->total_amount_with_gst = $record->total_amount;
+
+                            // Calculate total taxable amount (assuming total_amount is inclusive of GST)
+                            $record->rate = $record->total_amount / (1 + ($record->gst_rate / 100));
+                    
+                            // GST Amount (Total GST for all items)
+                            $record->gst_amount = $record->total_amount - $record->rate;
+                    
                             $record->save();
                         }
                     })
@@ -293,9 +297,16 @@ class SaleResource extends Resource
                             $item = $record->item;
                             if ($item) {
                                 $record->gst_rate = $item->gst_rate;
-                                $record->gst_amount = ($record->gst_rate / 100) * ($record->quantity * $record->total_amount);
-                                $record->rate = $record->total_amount - $record->gst_amount;
+                    
+                                // Calculate total taxable amount (assuming total_amount is inclusive of GST)
+                                $record->rate = $record->total_amount / (1 + ($record->gst_rate / 100));
+                    
+                                // GST Amount (Total GST for all items)
+                                $record->gst_amount = $record->total_amount - $record->rate;
+                    
+                                // Total Amount with GST remains unchanged
                                 $record->total_amount_with_gst = $record->total_amount;
+                    
                                 $record->save();
                             }
                         }

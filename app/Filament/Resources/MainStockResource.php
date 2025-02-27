@@ -150,8 +150,8 @@ class MainStockResource extends Resource
                     ->rules(['required', 'numeric'])
                     ->sortable()
                     ->afterStateUpdated(function ($record, $state) {
-                        $branchStock = BranchStock::find($record['id']);
-                        if ($branchStock) {
+                        $branchStocks = BranchStock::where('main_stock_id',$record['id'])->get();
+                        foreach ($branchStocks as $branchStock) {
                             $branchStock->update(['cost_price' => $state]);
                         }
                     }),
@@ -160,8 +160,8 @@ class MainStockResource extends Resource
                     ->rules(['required', 'numeric'])
                     ->sortable()
                     ->afterStateUpdated(function ($record, $state) {
-                        $branchStock = BranchStock::find($record['id']);
-                        if ($branchStock) {
+                        $branchStocks = BranchStock::where('main_stock_id', $record['id'])->get();
+                        foreach ($branchStocks as $branchStock) {
                             $branchStock->update(['mrp' => $state]);
                         }
                     }),

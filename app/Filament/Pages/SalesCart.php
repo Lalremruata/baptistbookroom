@@ -99,16 +99,20 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 
                         $price = $get('price');
                         $quantity = $get('quantity') ?? 1; // Default to 1 if quantity is not set
-                        if ($price) {
-                            $totalPrice = $price * $quantity;
-                            $gstAmount = ($totalPrice * $gstRate) / 100;
-                            $set('gst_amount', $gstAmount);
-                        } else {
+
+
                             $mrp = $branchStock->mrp ?? 0;
                             $totalPrice = $mrp * $quantity;
-                            $gstAmount = ($totalPrice * $gstRate) / 100;
-                            $set('gst_amount', $gstAmount);
-                        }
+                        
+                        
+                        // If MRP or Price is inclusive of GST, extract taxable amount
+                        $taxableAmount = $totalPrice / (1 + ($gstRate / 100));
+                        $gstAmount = $totalPrice - $taxableAmount;
+                        
+                        // Set GST amount
+                        $set('gst_amount', number_format($gstAmount, 2, '.', ''));
+                        $set('mrp', $mrp);
+                        
                     } elseif ($branchStocks->count() > 1) {
                         // If multiple items have the same barcode, clear and allow item selection
                         $set('branch_stock_id', null);
@@ -124,7 +128,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     }
                 })
                 ->reactive()
-                ->live(),
+                ->live()
+                ->extraInputAttributes(['onkeydown' => 'if(event.key === "Enter") { event.preventDefault(); }']),
             
             Select::make('item_id')
                 ->reactive()
@@ -156,16 +161,17 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
 
                     $price = $get('price');
                     $quantity = $get('quantity') ?? 1; // Default to 1 if quantity is not set
-                    if ($price) {
-                        $totalPrice = $price * $quantity;
-                        $gstAmount = ($price * $gstRate) / 100;
-                        $set('gst_amount', $gstAmount);
-                    }
-                    else {
-                        $totalPrice = $mrp * $quantity;
-                        $gstAmount = ($totalPrice * $gstRate) / 100;
-                        $set('gst_amount', $gstAmount);
-                    }
+
+                            $mrp = $branchStock->mrp ?? 0;
+                            $totalPrice = $mrp * $quantity;
+                        
+                        
+                        // If MRP or Price is inclusive of GST, extract taxable amount
+                        $taxableAmount = $totalPrice / (1 + ($gstRate / 100));
+                        $gstAmount = $totalPrice - $taxableAmount;
+                        
+                        // Set GST amount
+                        $set('gst_amount', number_format($gstAmount, 2, '.', ''));
                     if ($branchStock) {
                         $set('barcode', $branchStock->barcode);
                         $set('branch_stock_id', $branchStock->id);
@@ -206,16 +212,26 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 })
                     ->hintColor('success'),
                 TextInput::make('quantity')
-                ->afterStateUpdated(function ($state, callable $set, Get $get) {
-                    $price = $get('mrp');
-                    $gstRate = $get('gst_rate');
-                    $quantity = $state ?? 1; // Default to 1 if quantity is not set
-                    if ($price && $gstRate) {
-                        $totalPrice = $price * $quantity;
-                        $gstAmount = ($totalPrice * $gstRate) / 100;
-                        $set('gst_amount', $gstAmount);
-                    }
-                })
+                    ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                        $price = $get('mrp');
+                        $gstRate = $get('gst_rate');
+                        $quantity = $state ?? 1; // Default to 1 if quantity is not set
+                
+                        if ($gstRate) {
+                            // Total price calculation
+                            $totalPrice = $price * $quantity;
+                
+                            // Extract taxable amount (assuming MRP is inclusive of GST)
+                            $taxableAmount = $totalPrice / (1 + ($gstRate / 100));
+                
+                            // GST Amount Calculation
+                            $gstAmount = $totalPrice - $taxableAmount;
+                
+                            // Set values
+                            $set('gst_amount', number_format($gstAmount, 2, '.', ''));
+                        }
+                    })
+                
                     ->reactive()
                     ->minValue(1)
                     ->maxValue(function (Get $get) {
@@ -293,7 +309,6 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     ->label('GST Amount')
                     ->required()
                     ->reactive()
-                    ->numeric()
                     ->disabled()
                     ->dehydrated(),
                 TextInput::make('gst_rate')
