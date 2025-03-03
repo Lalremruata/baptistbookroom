@@ -135,11 +135,11 @@ class SaleResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('item.barcode')
+                Tables\Columns\TextColumn::make('branchStock.mainStock.barcode')
                     ->label('barcode')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
-                    ->searchable()
+                    ->searchable(isIndividual: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('date')
@@ -150,7 +150,8 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('quantity')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total')),
                 Tables\Columns\TextColumn::make('discount')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
@@ -219,6 +220,13 @@ class SaleResource extends Resource
                     ->relationship('item.category', 'category_name'),
                 SelectFilter::make('subCategory')
                     ->relationship('item.subCategory', 'subcategory_name'),
+                SelectFilter::make('payment_mode')
+                    ->options([
+                        "cash" => "cash",
+                        "upi" => "upi",
+                        "bank transfer"=>"bank transfer",
+                        "cheque" => "cheque"
+                    ]),
             ], layout: FiltersLayout::AboveContent)->filtersFormColumns(4)
             ->actions([
                 DeleteAction::make()
@@ -241,15 +249,15 @@ class SaleResource extends Resource
 
                             // Calculate total taxable amount (assuming total_amount is inclusive of GST)
                             $record->rate = $record->total_amount / (1 + ($record->gst_rate / 100));
-                    
+
                             // GST Amount (Total GST for all items)
                             $record->gst_amount = $record->total_amount - $record->rate;
-                    
+
                             $record->save();
                         }
                     })
             ])
-    
+
             ->bulkActions([
                 BulkAction::make('print invoice')
                 ->button()
@@ -270,7 +278,7 @@ class SaleResource extends Resource
                     // Fetch customer data based on the first record's customer_id
                     $customerId = $records[0]->customer_id;
                     $customer = Customer::find($customerId);
-        
+
                     if (!$customer) {
                         return [];
                     }
@@ -297,16 +305,16 @@ class SaleResource extends Resource
                             $item = $record->item;
                             if ($item) {
                                 $record->gst_rate = $item->gst_rate;
-                    
+
                                 // Calculate total taxable amount (assuming total_amount is inclusive of GST)
                                 $record->rate = $record->total_amount / (1 + ($record->gst_rate / 100));
-                    
+
                                 // GST Amount (Total GST for all items)
                                 $record->gst_amount = $record->total_amount - $record->rate;
-                    
+
                                 // Total Amount with GST remains unchanged
                                 $record->total_amount_with_gst = $record->total_amount;
-                    
+
                                 $record->save();
                             }
                         }

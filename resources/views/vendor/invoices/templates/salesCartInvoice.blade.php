@@ -15,13 +15,13 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0px;
         }
         .invoice-container {
             max-width: 800px;
             margin: 0 auto;
             border: 1px solid #000;
-            padding: 10px;
+            padding: 0px;
         }
         .header {
             text-align: center;
@@ -53,7 +53,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         table, th, td {
             border: 1px solid #000;
@@ -148,6 +148,8 @@
                 <th>Taxable Amount</th>
                 <th>GST%</th>
                 <th>GST</th>
+                <th>SGST%</th>
+                <th>CGST%</th>
                 <th>Total Amount</th>
             </tr>
             </thead>
@@ -163,14 +165,18 @@
                 <td>{{$record->rate}}</td>
                 <td>{{$record->gst_rate}}</td>
                 <td>{{$record->gst_amount}}</td>
+                <td>{{($record->gst_rate)/2}}</td>
+                <td>{{($record->gst_rate)/2}}</td>
                 <td>{{$record->selling_price}}</td>
             </tr>
             @endforeach
-            <tr>
-                <td colspan="6" class="bold">Total</td>
+            <td>
+                <td colspan="5" class="bold">Total</td>
                 <td>{{$totalRate}}</td>
                 <td></td>
                 <td>{{$totalGstAmount}}</td>
+                <td></td>
+                <td></td>
                 <td>{{$totalAmount}}</td>
             </tr>
             </tbody>
@@ -188,15 +194,15 @@
             A/C NO: 97015814436<br>
             BANK NAME: MIZORAM RURAL BANK<br>
             A/C TYPE: CURRENT<br>
-            IFSC CODE: SBIN0RMIGB<br>
+            IFSC CODE: SBIN0RRMIGB<br>
             BRANCH: SERKAWN BRANCH
         </div>
         <div class="invoice-summary">
             <strong>Taxable Amount: {{$totalRate}}</strong><br>
             Discount: {{$totalDiscount}}<br>
-            IGST %: {{$records[0]->gst_rate}}<br>
-            SGST %: {{($records[0]->gst_rate)/2}}<br>
-            CGST %: {{($records[0]->gst_rate)/2}}<br>
+{{--            IGST %: {{$records[0]->gst_rate}}<br>--}}
+{{--            SGST %: {{($records[0]->gst_rate)/2}}<br>--}}
+{{--            CGST %: {{($records[0]->gst_rate)/2}}<br>--}}
             <strong>Invoice Amount: {{$totalAmount}}</strong><br>
             Freight:<br>
             Insurance: <br>

@@ -16,13 +16,13 @@ $totalRate = $records->sum('rate');
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0px;
         }
         .invoice-container {
             max-width: 800px;
             margin: 0 auto;
             border: 1px solid #000;
-            padding: 10px;
+            padding: 0px;
         }
         .header {
             text-align: center;
@@ -54,7 +54,7 @@ $totalRate = $records->sum('rate');
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         table, th, td {
             border: 1px solid #000;
@@ -149,14 +149,12 @@ $totalRate = $records->sum('rate');
                 <th>Taxable Amount</th>
                 <th>GST%</th>
                 <th>GST</th>
-                <th>Total Amount</th>
+                <th style="width: 5%;">SGST%</th>
+                <th style="width: 5%;">CGST%</th><th>Total Amount</th>
             </tr>
             </thead>
             <tbody>
             @foreach($records as $index => $record)
-            @php
-            $totalWithGst = $record->total_amount + $record->gst_amount;
-            @endphp
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $record->item->item_name }}</td>
@@ -167,6 +165,8 @@ $totalRate = $records->sum('rate');
                 <td>{{$record->rate}}</td>
                 <td>{{$record->gst_rate}}</td>
                 <td>{{$record->gst_amount}}</td>
+                <td>{{($record->gst_rate)/2}}</td>
+                <td>{{($record->gst_rate)/2}}</td>
                 <td>{{$record->total_amount}}</td>
             </tr>
             @endforeach
@@ -175,6 +175,8 @@ $totalRate = $records->sum('rate');
                 <td>{{$totalRate}}</td>
                 <td></td>
                 <td>{{$totalGstAmount}}</td>
+                <td></td>
+                <td></td>
                 <td>{{$totalAmount}}</td>
             </tr>
             </tbody>
@@ -192,15 +194,15 @@ $totalRate = $records->sum('rate');
             A/C NO: 97015814436<br>
             BANK NAME: MIZORAM RURAL BANK<br>
             A/C TYPE: CURRENT<br>
-            IFSC CODE: SBIN0RMIGB<br>
+            IFSC CODE: SBIN0RRMIGB<br>
             BRANCH: SERKAWN BRANCH
         </div>
         <div class="invoice-summary">
             <strong>Taxable Amount: {{$totalRate}}</strong><br>
             Discount: {{$totalDiscount}}<br>
-            IGST %: {{$records[0]->gst_rate}}<br>
-            SGST %: {{($records[0]->gst_rate)/2}}<br>
-            CGST %: {{($records[0]->gst_rate)/2}}<br>
+{{--            IGST %: {{$records[0]->gst_rate}}<br>--}}
+{{--            SGST %: {{($records[0]->gst_rate)/2}}<br>--}}
+{{--            CGST %: {{($records[0]->gst_rate)/2}}<br>--}}
             <strong>Invoice Amount: {{$totalAmount}}</strong><br>
             Freight: ________<br>
             Insurance: ________<br>
