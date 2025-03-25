@@ -5,95 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
     <style>
-        /* Add your invoice styling here */
         body {
-            font-family: 'Arial', sans-serif;
+            padding: 32px;
+            font-family: Arial, sans-serif;
         }
-        .invoice-box {
-            max-width: 800px;
-            margin: auto;
-            padding: 30px;
-            border: 1px solid #eee;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-            font-size: 16px;
-            line-height: 24px;
-            color: #555;
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
         }
-        table {
-            width: 100%;
-            line-height: inherit;
-            text-align: left;
-        }
-        table td {
-            padding: 5px;
-            vertical-align: top;
-        }
-        .logo {
-            width: 100px;
-            height: auto;
-        }
-        .total {
+        .invoice-header h1 {
+            font-size: 24px;
             font-weight: bold;
+        }
+        .invoice-header p {
+            text-align: right;
+            font-size: 14px;
+        }
+        .receiver-info {
+            margin-bottom: 20px;
+        }
+        .receiver-info p {
+            margin: 2px 0;
+        }
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid black;
+        }
+        .invoice-table th,
+        .invoice-table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        .signature-section {
+             margin-top: 60px;
+             display: flex;
+             gap: 40px;
+             align-items: center;
+             width: 100%;
+         }
+        .signature-section span {
+            text-align: center;
+            padding-right: 60px;
+        }
+        .receiver-signature {
+            text-align: right;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="invoice-box">
-        <table>
-            <tr>
-                <td>
-                    <!-- Adding the logo at the top left corner -->
-                    <img src="{{ asset('images/bcm-logo.svg') }}" alt="Logo" class="logo">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <h2>Baptist Literature Service : Bookroom</h2>
-                    <p>
-                        Address: Baptist House, MG Road, Khatla, Aizawl, Mizoram<br>
-                        Phone: 0389-2345676
-                    </p>
-                </td>
-                <td>
-                    <h3>Invoice #{{ $invoiceNumber }}</h3>
-                    <p>Date: {{ $date }}</p>
-                </td>
-            </tr>
-        </table>
 
-        <table>
-            <tr>
-                <td>
-                    <h3>Bill To:</h3>
-                    <p>
-                        {{ $receiverName }}<br>
-                        Address: {{ $receiverAddress }}<br>
-                        Phone: {{ $receiverPhone }}
-                    </p>
-                </td>
-            </tr>
-        </table>
+<!-- Invoice Header -->
+<div class="invoice-header">
+    <h1>BILL</h1>
+    <p>Date: {{ $date }}</p>
+</div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Description</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Return Amount</td>
-                    <td>{{ $returnAmount }}</td>
-                </tr>
-                <tr>
-                    <td>Return Date</td>
-                    <td>{{ $returnDate }}</td>
-                </tr>
-            </tbody>
-        </table>
+<!-- Receiver Information -->
+<div class="receiver-info">
+    <p><strong>To,</strong></p>
+    <p>The Manager</p>
+    <p>Baptist Literature Service, Aizawl</p>
+</div>
 
-        <hr>
-    </div>
+<!-- Table -->
+<table class="invoice-table">
+    <thead>
+    <tr>
+        <th>Sl.No</th>
+        <th>Particulars</th>
+        <th>No</th>
+        <th>Qty</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>1</td>
+        <td>{{ $itemDescription }}</td>
+        <td>{{ $itemNo }}</td>
+        <td>{{ $returnAmount }}</td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- Signature Section (Now using CSS Grid) -->
+<div class="signature-section">
+    <span>Sales Promoter</span>
+    <span>System Operator</span>
+    <span>Manager</span>
+</div>
+<!-- Receiver Signature -->
+<div class="receiver-signature">
+    <p>Signature: __________________</p>
+    <p>FROM: {{ $receiverName }}</p>
+</div>
+
 </body>
 </html>

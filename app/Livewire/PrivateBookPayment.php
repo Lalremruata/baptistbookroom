@@ -79,9 +79,9 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                 ->after(function (){
                     $this->dispatch('paymentUpdated');
                 }),
-                \Filament\Tables\Actions\Action::make('download receipt')
+                \Filament\Tables\Actions\Action::make('print receipt')
                 ->button()
-                ->icon('heroicon-o-arrow-down-tray')
+                ->icon('heroicon-o-printer')
                 ->color('success')
                 ->url(function(PrivateBookAccount $privateBookAccount)
                 {

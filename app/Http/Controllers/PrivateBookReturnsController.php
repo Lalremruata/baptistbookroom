@@ -13,6 +13,8 @@ class PrivateBookReturnsController extends Controller
     {
         $data = [
             'invoiceNumber'  => $privateBookReturn->id . '/' . Carbon::now()->format('y'),
+            'itemDescription' => $privateBookReturn->privateBook->item->item_name,
+            'itemNo'         => $privateBookReturn->privateBook->file_no,
             'date'           => Carbon::now()->format('d/m/Y'),
             'receiverName'   => $privateBookReturn->receiver_name,
             'receiverAddress'=> $privateBookReturn->address,
@@ -24,7 +26,10 @@ class PrivateBookReturnsController extends Controller
         // Generate PDF from the Blade view
         $pdf = PDF::loadView('vendor.invoices.templates.privateBookReturnInvoice', $data);
 
-        // Download the generated PDF
-        return $pdf->download('invoice.pdf');
+        // Set the PDF file name
+        $fileName = 'receipt_' . $privateBookReturn->id . '.pdf';
+
+        // Download the PDF
+        return $pdf->download($fileName);
     }
 }

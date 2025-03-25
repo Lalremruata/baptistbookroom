@@ -15,6 +15,8 @@ class PrivateBook extends Model
         "main_stock_id",
         "receive_from",
         "author",
+        "address",
+        "phone_number",
         "file_no",
         "quantity",
     ];

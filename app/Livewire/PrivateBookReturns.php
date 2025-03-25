@@ -64,7 +64,7 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                     ->first();
                     $privateBook->quantity += $record->return_amount;
                     $privateBook->update();
-                    //Deduct MainStock Quantity
+                    //Incriment MainStock Quantity
                     $mainStock = MainStock::where('id',  $privateBook->main_stock_id)
                     ->first();
                     $mainStock->quantity += $record->return_amount;
@@ -121,9 +121,9 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                 ->after(function (){
                     $this->dispatch('returnUpdated');
                 }),
-                \Filament\Tables\Actions\Action::make('download receipt')
+                \Filament\Tables\Actions\Action::make('print receipt')
                 ->button()
-                ->icon('heroicon-o-arrow-down-tray')
+                ->icon('heroicon-o-printer')
                 ->color('success')
                 ->url(function(PrivateBookReturn $privateBookReturn)
                 {
@@ -159,8 +159,8 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                         //Deduct PrivateBook Stock Quantity
                         $privateBook = PrivateBook::where('id',  $this->privateBookId)
                         ->first();
-                        $privateBook->quantity -= $data['return_amount'];
-                        $privateBook->update();
+//                        $privateBook->quantity -= $data['return_amount'];
+//                        $privateBook->update();
                         //Deduct MainStock Quantity
                         $mainStock = MainStock::where('id',  $privateBook->main_stock_id)
                         ->first();

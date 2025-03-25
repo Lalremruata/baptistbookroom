@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\PrivateBookResource\Pages;
 
 use App\Filament\Resources\PrivateBookResource;
+use App\Http\Controllers\PrivateBookAccountReceiptController;
 use App\Models\BranchStock;
 use App\Models\MainStock;
 use App\Models\PrivateBook;
 use App\Models\PrivateBookAccount;
 use App\Models\PrivateBookReturn;
 use App\Models\Sale;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Pages\Page;
 
@@ -16,12 +18,15 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Actions\Concerns\InteractsWithActions;;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Table;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Collection;
+
 class BookAccount extends Page implements HasForms,  HasActions
 {
     use InteractsWithForms;
@@ -32,8 +37,13 @@ class BookAccount extends Page implements HasForms,  HasActions
      public $totalQuantity;
      public $totalSale;
      public $initialQuantity;
+     public $totalBookValue;
+     public $balance;
     public $totalReturns;
-     public ?array $data = [];
+    public $costPrice;
+    public $mrp;
+
+    public ?array $data = [];
     protected static string $view = 'filament.resources.private-book-resource.pages.book-account';
     public function mount(): void
     {
@@ -44,7 +54,8 @@ class BookAccount extends Page implements HasForms,  HasActions
         $itemId = $this->record->item_id;
 
         // Fetch main stock, branch stock, and total sales in a single query
-        $mainStock = MainStock::where('id', $this->record->main_stock_id)->first(['quantity']);
+        $mainStock = MainStock::where('id', $this->record->main_stock_id)->first(['quantity','cost_price', 'mrp']);
+
         $branchStockQuantity = BranchStock::where('main_stock_id', $this->record->main_stock_id)->sum('quantity');
 
         // Total sale quantity based on item_id
@@ -63,6 +74,11 @@ class BookAccount extends Page implements HasForms,  HasActions
             + $this->totalReturns;
         $this->totalQuantity = ($mainStock->quantity ?? 0)
             + $branchStockQuantity;
+
+        $this->totalBookValue = $this->totalQuantity * $mainStock->cost_price;
+        $this->balance = $this->totalQuantity * $mainStock->cost_price;
+        $this->costPrice = $mainStock->cost_price;
+        $this->mrp = $mainStock->mrp;
 
 
     }
@@ -90,6 +106,22 @@ class BookAccount extends Page implements HasForms,  HasActions
 
     public function getMaxContentWidth(): MaxWidth
     {
-        return MaxWidth::FiveExtraLarge;
+        return MaxWidth::Full;
+    }
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('Print Receipt')
+                ->icon('heroicon-o-printer')
+                ->slideOver()
+                ->modalCancelAction(fn (StaticAction $action) => $action->label('Close'))
+                ->modalSubmitAction(false)
+                ->modalWidth(MaxWidth::Medium)
+                ->modalAlignment(Alignment::Center)
+                ->url(function () {
+                    // Use $this->record to access the current PrivateBook
+                    return route('private-book.receipt.download', ['privateBook' => $this->record->id]);
+                }),
+        ];
     }
 }

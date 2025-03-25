@@ -67,12 +67,6 @@ class PrivateBookResource extends Resource
                 ])->columns(3),
                 Section::make('')
                 ->schema([
-                    Forms\Components\TextInput::make('receive_from')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('author')
-                    ->required()
-                    ->maxLength(255),
                 Forms\Components\TextInput::make('file_no')
                     ->required()
                     ->maxLength(255),
@@ -95,6 +89,22 @@ class PrivateBookResource extends Resource
                     ->required()
                     ->numeric(),
                 ])->columns(2),
+                Section::make('')
+                    ->columns(2)
+                ->schema([
+                    Forms\Components\TextInput::make('receive_from')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('author')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('address')
+                    ->required()
+                    ->maxLength(255),
+                    Forms\Components\TextInput::make('phone_number')
+                    ->required()
+                    ->maxLength(255),
+                ])
 
             ]);
     }
