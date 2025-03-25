@@ -4,6 +4,7 @@ use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\PrivateBookPaymentsController;
 use App\Http\Controllers\PrivateBookReturnsController;
 use App\Http\Controllers\SalesCartInvoicesController;
+use App\Http\Controllers\PrivateBookAccountReceiptController;
 use App\Http\Controllers\SalesInvoicesController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,3 +35,6 @@ Route::get('{privateBookAccount}/private-book-payment/receipt/download',[Private
 // Receipt/Invoice download routes for private book return
 Route::get('{privateBookReturn}/private-book-return/receipt/download',[PrivateBookReturnsController::class, 'downloadInvoice'])
 ->name('private-book-return.receipt.download');
+
+Route::get('{privateBook}/private-book/receipt/download', [PrivateBookAccountReceiptController::class, 'downloadReceipt'])
+    ->name('private-book.receipt.download');
