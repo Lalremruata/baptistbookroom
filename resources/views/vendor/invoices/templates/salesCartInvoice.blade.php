@@ -3,6 +3,7 @@
     $totalDiscount = $records->sum('discount');
     $totalGstAmount = $records->sum('gst_amount');
     $totalRate = $records->sum('rate');
+    $totalQuantity = $records->sum('quantity');
     // $totalAmountWithGst = $records->sum('total_amount_with_gst');
 @endphp
 <!DOCTYPE html>
@@ -21,7 +22,7 @@
             max-width: 800px;
             margin: 0 auto;
             border: 1px solid #000;
-            padding: 0px;
+            padding: 10px;
         }
         .header {
             text-align: center;
@@ -139,18 +140,20 @@
         <table>
             <thead>
             <tr>
-                <th>Sl.No</th>
-                <th>Description of Goods</th>
-                <th>HSN Code</th>
-                <th>Qty</th>
-                <th>Rate</th>
-                <th>Mrp</th>
-                <th>Taxable Amount</th>
-                <th>GST%</th>
-                <th>GST</th>
-                <th>SGST%</th>
-                <th>CGST%</th>
-                <th>Total Amount</th>
+                <th rowspan="2">Sl.No</th>
+                <th rowspan="2">Description of Goods</th>
+                <th rowspan="2">HSN Code</th>
+                <th rowspan="2">Qty</th>
+                <th rowspan="2">Rate</th>
+                <th rowspan="2">Mrp</th>
+                <th rowspan="2">Taxable Amount</th>
+                <th colspan="2">GST</th> <!-- GST Column Spanning 2 Sub-columns -->
+                <th rowspan="2">Total Amount</th>
+            </tr>
+            <!-- Second Row of Header -->
+            <tr>
+                <th>%</th>
+                <th>Amt.</th>
             </tr>
             </thead>
             <tbody>
@@ -165,18 +168,17 @@
                 <td>{{$record->rate}}</td>
                 <td>{{$record->gst_rate}}</td>
                 <td>{{$record->gst_amount}}</td>
-                <td>{{($record->gst_rate)/2}}</td>
-                <td>{{($record->gst_rate)/2}}</td>
                 <td>{{$record->selling_price}}</td>
             </tr>
             @endforeach
-            <td>
-                <td colspan="5" class="bold">Total</td>
+            <tr>
+                <td colspan="3" class="bold">Total</td>
+                <td>{{$totalQuantity}}</td>
+                <td></td>
+                <td></td>
                 <td>{{$totalRate}}</td>
                 <td></td>
                 <td>{{$totalGstAmount}}</td>
-                <td></td>
-                <td></td>
                 <td>{{$totalAmount}}</td>
             </tr>
             </tbody>
@@ -201,8 +203,8 @@
             <strong>Taxable Amount: {{$totalRate}}</strong><br>
             Discount: {{$totalDiscount}}<br>
 {{--            IGST %: {{$records[0]->gst_rate}}<br>--}}
-{{--            SGST %: {{($records[0]->gst_rate)/2}}<br>--}}
-{{--            CGST %: {{($records[0]->gst_rate)/2}}<br>--}}
+            SGST: {{($totalGstAmount)/2}}<br>
+            CGST: {{($totalGstAmount)/2}}<br>
             <strong>Invoice Amount: {{$totalAmount}}</strong><br>
             Freight:<br>
             Insurance: <br>
