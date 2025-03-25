@@ -37,6 +37,7 @@ class SaleExporter extends Exporter
             ExportColumn::make('rate')
             ->label('Taxable Amount'),
             ExportColumn::make('payment_mode'),
+            ExportColumn::make('transaction_number'),
             ExportColumn::make('gst_rate'),
             // ExportColumn::make('updated_at'),
         ];
