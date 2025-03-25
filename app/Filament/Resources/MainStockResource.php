@@ -57,7 +57,7 @@ class MainStockResource extends Resource
                     ->autofocus()
                     ->live()
                     ->dehydrated(),
-                
+
                 Forms\Components\Select::make('sub_category_id')
                     ->label('Sub Category')
                     ->options(SubCategory::query()->pluck('subcategory_name', 'id'))
@@ -77,7 +77,7 @@ class MainStockResource extends Resource
                         } elseif ($subCategory) {
                             return $subCategory->items->pluck('item_name', 'id');
                         }
-                        
+
                         return Item::query()->pluck('item_name', 'id');
                     })
                     ->afterStateUpdated(function(callable $set, Get $get) {
@@ -137,14 +137,14 @@ class MainStockResource extends Resource
                 TextInputColumn::make('quantity')
                     ->summarize(Sum::make()->label('Total'))
                     ->rules(['required', 'numeric'])
-                    ->sortable()
-                    ->afterStateUpdated(function ($record, $state) {
-                        $privateBook = PrivateBook::where('main_stock_id', $record['id'])->first();
-                        if ($privateBook) {
-                            // Update the quantity column
-                            $privateBook->update(['quantity' => $state]);
-                        }
-                    }),
+                    ->sortable(),
+//                    ->afterStateUpdated(function ($record, $state) {
+//                        $privateBook = PrivateBook::where('main_stock_id', $record['id'])->first();
+//                        if ($privateBook) {
+//                            // Update the quantity column
+//                            $privateBook->update(['quantity' => $state]);
+//                        }
+//                    }),
                 TextInputColumn::make('cost_price')
                     ->summarize(Sum::make()->label('Total'))
                     ->rules(['required', 'numeric'])
