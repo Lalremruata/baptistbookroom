@@ -40,7 +40,8 @@
                     Sale Values
                 </x-slot>
                 <h5 class="text-xl">Lehkhabu hralh zat: {{ $this->totalSale }}</h5>
-                <h5 class="text-xl">Lehkhabu hralh man : {{ $totalAmount }}/-</h5>
+                <h5 class="text-xl">Lehkhabu hralh man(Mrp): {{ $totalAmount }}/-</h5>
+                <h5 class="text-xl">Lehkhabu hralh man(CP): {{ $this->totalSale * $this->costPrice }}/-</h5>
             </x-filament::fieldset>
 
             <!-- Return Details -->

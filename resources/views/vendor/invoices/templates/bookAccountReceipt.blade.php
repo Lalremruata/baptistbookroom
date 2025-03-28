@@ -61,8 +61,8 @@
     <div class="header">
         <img src="{{ asset('images/bcm-logo.svg') }}" alt="Logo">
         <div class="header-text">
-            <p>BAPTIST LITERATURE SERVICE : AIZAWL</p>
-            <p>Chanmari, Aizawl - 796001, Mizoram. Ph. 0389 - 2345676</p>
+            <p>BAPTIST LITERATURE SERVICE : {{ auth()->user()->branch->branch_name }}</p>
+            <p>{{ auth()->user()->branch->branch_address }}. Ph. {{ auth()->user()->branch->branch_phone }}</p>
             <p><span class="underline">LEHKHABU LAKNA / DAWNNA</span></p>
         </div>
     </div>
