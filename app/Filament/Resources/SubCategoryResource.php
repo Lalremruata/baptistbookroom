@@ -28,7 +28,7 @@ class SubCategoryResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()->user_type=='1';
+        return auth()->user()->roles->contains('title', 'Admin');
     }
 
     public static function form(Form $form): Form

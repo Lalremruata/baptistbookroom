@@ -18,6 +18,8 @@ use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Exports\Enums\ExportFormat;
+use Filament\Tables\Columns\Summarizers\Summarizer;
+use Illuminate\Database\Query\Builder As QueryBuilder;
 
 class StockDistributeResource extends Resource
 {
@@ -74,12 +76,18 @@ class StockDistributeResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->numeric()
                     ->money('inr')
-                    ->summarize(Sum::make()->label('Total')),
+                    ->summarize(Summarizer::make()
+                        ->label('Total')
+                        ->using(fn(QueryBuilder $query): float => $query->get()->sum(fn($row) => $row->cost_price * $row->quantity))
+                    ),
                 TextColumn::make('mrp')
                     ->weight(FontWeight::Bold)
                     ->numeric()
                     ->money('inr')
-                    ->summarize(Sum::make()->label('Total')),
+                    ->summarize(Summarizer::make()
+                    ->label('Total')
+                    ->using(fn(QueryBuilder $query): float => $query->get()->sum(fn($row) => $row->mrp * $row->quantity))
+                ),
                 TextColumn::make('batch')
                     ->weight(FontWeight::Bold),
                 TextColumn::make('mainStock.barcode')

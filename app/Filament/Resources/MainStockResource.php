@@ -28,6 +28,7 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Query\Builder;
 
 class MainStockResource extends Resource
 {
@@ -116,7 +117,7 @@ class MainStockResource extends Resource
 
     public static function table(Table $table): Table
     {
-        if(auth()->user()->user_type=='1'){
+        if(auth()->user()->roles->first()->title=='Admin'){
             return $table
             ->columns([
                 TextColumn::make('*')
@@ -146,7 +147,10 @@ class MainStockResource extends Resource
 //                        }
 //                    }),
                 TextInputColumn::make('cost_price')
-                    ->summarize(Sum::make()->label('Total'))
+                    ->summarize(Tables\Columns\Summarizers\Summarizer::make()
+                        ->label('Total')
+                        ->using(fn(Builder $query): float => $query->get()->sum(fn($row) => $row->cost_price * $row->quantity))
+                    )
                     ->rules(['required', 'numeric'])
                     ->sortable()
                     ->afterStateUpdated(function ($record, $state) {
@@ -156,7 +160,10 @@ class MainStockResource extends Resource
                         }
                     }),
                 TextInputColumn::make('mrp')
-                    ->summarize(Sum::make()->label('Total'))
+                    ->summarize(Tables\Columns\Summarizers\Summarizer::make()
+                        ->label('Total')
+                        ->using(fn(Builder $query): float => $query->get()->sum(fn($row) => $row->mrp * $row->quantity))
+                    )
                     ->rules(['required', 'numeric'])
                     ->sortable()
                     ->afterStateUpdated(function ($record, $state) {

@@ -16,6 +16,10 @@ class PrivateBookAccount extends Model
         "receiver_name",
         "address",
         "phone_number",
+        "payment_mode",
+        "transaction_number",
+        "account_number",
+        "ifsc_code",
     ];
     public function privateBook(): BelongsTo
     {

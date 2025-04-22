@@ -49,7 +49,9 @@ class SaleResource extends Resource
     }
     public static function getEloquentQuery(): Builder
     {
-        if(auth()->user()->user_type == '1') {
+        $allowedRoles = ['Admin', 'Manager'];
+        // return in_array(auth()->user()->roles->first()->title, $allowedRoles);
+        if(in_array(auth()->user()->roles->first()->title, $allowedRoles)) {
             return parent::getEloquentQuery()->withoutGlobalScopes();
         }
         else {

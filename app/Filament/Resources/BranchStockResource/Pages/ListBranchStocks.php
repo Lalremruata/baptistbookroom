@@ -38,7 +38,8 @@ class ListBranchStocks extends ListRecords
     }
     public function getTabs(): array
     {
-        if(auth()->user()->user_type=='1') {
+        $allowedRoles = ['Admin', 'Manager'];
+        if(in_array(auth()->user()->roles->first()->title, $allowedRoles)) {
             $branches = Branch::all();
             $tabs=[null => ListRecords\Tab::make('All'),];
             foreach ($branches as $branch) {

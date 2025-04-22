@@ -31,9 +31,10 @@ class PrivateBookResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
     protected static ?string $navigationGroup = 'Private Books';
+
     public static function shouldRegisterNavigation(): bool
     {
-        return in_array(auth()->user()->user_type, ['1', '2']);
+        return auth()->user()->roles->contains('title', 'Admin');
     }
     public static function form(Form $form): Form
     {

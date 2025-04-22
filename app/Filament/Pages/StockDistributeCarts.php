@@ -57,7 +57,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     protected static string $view = 'filament.pages.stock-distribute-cart';
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()->user_type;
+        return auth()->user()->roles->contains('title', 'Admin');
     }
     public static function getEloquentQuery(): Builder
     {

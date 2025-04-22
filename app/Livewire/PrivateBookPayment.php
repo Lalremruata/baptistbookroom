@@ -52,6 +52,10 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
             TextColumn::make('receiver_name'),
             TextColumn::make('address'),
             TextColumn::make('phone_number'),
+            TextColumn::make('payment_mode'),
+            TextColumn::make('transaction_number'),
+            TextColumn::make('account_number'),
+            TextColumn::make('ifsc_code'),
         ])
         ->actions([
                 DeleteAction::make()
@@ -62,19 +66,40 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                 EditAction::make()
                 ->iconButton()
                 ->form([
-                    TextInput::make('return_amount')
-                        ->required()
-                        ->maxLength(255),
-                    TextInput::make('receiver_name')
-                        ->required()
-                        ->maxLength(255),
-                    TextInput::make('address')
-                        ->required()
-                        ->maxLength(255),
-                    TextInput::make('phone_number')
-                        ->required()
-                        ->maxLength(255),
-                    DatePicker::make('return_date')
+                    Section::make([
+                        TextInput::make('return_amount')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('receiver_name')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('address')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('phone_number')
+                            ->required()
+                            ->maxLength(255),
+                    ])->columns(2),
+                    Section::make([
+                        Select::make('payment_mode')
+                            ->options([
+                                "cash" => "cash",
+                                "upi" => "upi",
+                                "bank transfer" => "bank transfer",
+                                "cheque" => "cheque"
+                            ])
+                            ->reactive()
+                            ->required(),
+                        TextInput::make('transaction_number')
+                            ->visible(fn($get) => $get('payment_mode') === 'upi')
+                            ->reactive(),
+                        TextInput::make('account_number')
+                            ->visible(fn($get) => $get('payment_mode') === 'bank transfer' || $get('payment_mode') === 'cheque')
+                            ->reactive(),
+                        TextInput::make('ifsc_code')
+                            ->visible(fn($get) => $get('payment_mode') === 'bank transfer' || $get('payment_mode') === 'cheque')
+                            ->reactive(),
+                    ]),
                 ])
                 ->after(function (){
                     $this->dispatch('paymentUpdated');
@@ -105,7 +130,27 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                             DatePicker::make('return_date')
                             ->label('Payment date')
                             ->default(now())
-                        ])->columns(2)
+                        ])->columns(2),
+                        Section::make([
+                            Select::make('payment_mode')
+                                ->options([
+                                    "cash" => "cash",
+                                    "upi" => "upi",
+                                    "bank transfer" => "bank transfer",
+                                    "cheque" => "cheque"
+                                ])
+                                ->reactive()
+                                ->required(),
+                            TextInput::make('transaction_number')
+                                ->visible(fn($get) => $get('payment_mode') === 'upi')
+                                ->reactive(),
+                            TextInput::make('account_number')
+                                ->visible(fn($get) => $get('payment_mode') === 'bank transfer' || $get('payment_mode') === 'cheque')
+                                ->reactive(),
+                            TextInput::make('ifsc_code')
+                                ->visible(fn($get) => $get('payment_mode') === 'bank transfer' || $get('payment_mode') === 'cheque')
+                                ->reactive(),
+                        ])
                         ])
 
                     ->label('Add Payment to Author/Submitter')

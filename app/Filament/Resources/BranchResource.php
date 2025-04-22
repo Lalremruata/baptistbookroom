@@ -23,7 +23,8 @@ class BranchResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()->user_type=='1';
+        $allowedRoles = ['Admin'];
+        return in_array(auth()->user()->roles->first()->title, $allowedRoles);
     }
     public static function form(Form $form): Form
     {

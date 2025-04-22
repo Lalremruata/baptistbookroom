@@ -21,6 +21,8 @@ use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\HeaderActionsPosition;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Exports\Enums\ExportFormat;
+use Filament\Tables\Columns\Summarizers\Summarizer;
+use Illuminate\Database\Query\Builder As QueryBuilder;
 
 class BranchStockResource extends Resource
 {
@@ -35,9 +37,12 @@ class BranchStockResource extends Resource
     {
         return 0;
     }
+
     public static function getEloquentQuery(): Builder
     {
-        if(auth()->user()->user_type == '1' || auth()->user()->user_type == '2') {
+        $allowedRoles = ['Admin', 'Manager'];
+        // return in_array(auth()->user()->roles->first()->title, $allowedRoles);
+        if(in_array(auth()->user()->roles->first()->title, $allowedRoles)) {
             return parent::getEloquentQuery()->withoutGlobalScopes();
         }
         else {
@@ -94,12 +99,18 @@ class BranchStockResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->sortable(),
                 TextColumn::make('cost_price')
-                    ->summarize(Sum::make()->label('Total'))
+                    ->summarize(Summarizer::make()
+                    ->label('Total')
+                    ->using(fn(QueryBuilder $query): float => $query->get()->sum(fn($row) => $row->cost_price * $row->quantity))
+                    )
                     ->weight(FontWeight::Bold)
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('mrp')
-                    ->summarize(Sum::make()->label('Total'))
+                    ->summarize(Summarizer::make()
+                    ->label('Total')
+                    ->using(fn(QueryBuilder $query): float => $query->get()->sum(fn($row) => $row->mrp * $row->quantity))
+                    )
                     ->weight(FontWeight::Bold)
                     ->numeric()
                     ->sortable(),

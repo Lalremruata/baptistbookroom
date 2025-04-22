@@ -23,11 +23,15 @@ class PrivateBookPaymentsController extends Controller
             'receiverAddress'=> $privateBookAccount->address,
             'receiverPhone'  => $privateBookAccount->phone_number,
             'returnAmount'   => $privateBookAccount->return_amount,
+            'payment_mode'  => $privateBookAccount->payment_mode,
+            'transaction_number'    =>  $privateBookAccount->transaction_number,
+            'account_number'    =>  $privateBookAccount->account_number,
+            'ifsc_code'     => $privateBookAccount->ifsc_code,
             'returnDate'     => Carbon::parse($privateBookAccount->return_date)->format('d/m/Y'),
         ];
 
         // Generate PDF from the Blade view
-        $pdf = PDF::loadView('vendor.invoices.templates.privateBookPaymentInvoice', $data);
+        $pdf = PDF::loadView('vendor.invoices.templates.privateBookPaymentInvoice', $data)->setPaper('a5', 'landscape');
 
         $fileName = 'receipt_' . $privateBookAccount->id . '.pdf';
 
