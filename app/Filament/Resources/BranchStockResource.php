@@ -100,6 +100,7 @@ class BranchStockResource extends Resource
                     ->sortable(),
                 TextColumn::make('cost_price')
                     ->summarize(Summarizer::make()
+                        ->numeric()
                     ->label('Total')
                     ->using(fn(QueryBuilder $query): float => $query->get()->sum(fn($row) => $row->cost_price * $row->quantity))
                     )
@@ -108,6 +109,7 @@ class BranchStockResource extends Resource
                     ->sortable(),
                 TextColumn::make('mrp')
                     ->summarize(Summarizer::make()
+                        ->numeric()
                     ->label('Total')
                     ->using(fn(QueryBuilder $query): float => $query->get()->sum(fn($row) => $row->mrp * $row->quantity))
                     )
