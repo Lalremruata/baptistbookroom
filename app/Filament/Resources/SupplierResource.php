@@ -30,6 +30,12 @@ class SupplierResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
     protected ?string $title = 'Custom Page Heading';
+
+//     public static function shouldRegisterNavigation(): bool
+//     {
+//         return auth()->user()->roles->contains('title', 'Admin');
+//     }
+
     public static function form(Form $form): Form
     {
         return $form

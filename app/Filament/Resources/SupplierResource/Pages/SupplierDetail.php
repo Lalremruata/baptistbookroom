@@ -52,6 +52,11 @@ class SupplierDetail extends Page implements HasForms,  HasActions
     public $balance;
 
     protected static string $view = 'filament.pages.supplier-detail';
+
+    public static function canCreate(): bool
+    {
+        return 0;
+    }
     public function mount(): void
     {
         $this->form->fill();
@@ -62,6 +67,7 @@ class SupplierDetail extends Page implements HasForms,  HasActions
     {
         return [
             Action::make('AddRecord')
+                ->visible(fn (): bool => auth()->user()->can('create', static::$resource::getModel()))
             ->form([
                 Section::make([
                     TextInput::make('voucher_no')
