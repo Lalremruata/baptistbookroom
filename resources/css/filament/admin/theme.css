@@ -23,3 +23,178 @@
 .fi-simple-main-ctn .fi-simple-main{
     @apply bg-opacity-80;
 }
+
+/* POS Terminal Styles */
+.pos-form {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.pos-search-section {
+    background: white;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    margin-bottom: 1rem;
+}
+
+.pos-barcode-input input {
+    font-size: 1.1rem;
+    padding: 1rem;
+    border: 2px solid #cbd5e0;
+    border-radius: 8px;
+}
+
+.pos-barcode-input input:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.pos-item-select select {
+    font-size: 1rem;
+    padding: 1rem;
+}
+
+.pos-details-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.pos-product-info, .pos-price-info, .pos-stock-info {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.pos-qty-btn button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.pos-qty-input input {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    height: 50px;
+    border-radius: 8px;
+}
+
+.pos-actions-section {
+    background: white;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+}
+
+.pos-line-total {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #059669;
+    text-align: center;
+    background: #ecfdf5;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.pos-cart-table table {
+    font-size: 1rem;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.pos-cart-table tbody tr {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pos-cart-table tbody tr:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+.pos-item-name {
+    font-weight: 600;
+    color: #1a202c;
+}
+
+.pos-qty-col, .pos-amount-col {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.pos-cart-summary button {
+    background: #1a202c;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+}
+
+.pos-checkout-btn button {
+    background: #059669;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    min-width: 200px;
+}
+
+.pos-add-btn button {
+    background: #d97706;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    min-width: 150px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .pos-form {
+        padding: 1rem;
+    }
+
+    .pos-qty-btn button {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .pos-qty-input input {
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* Touch-friendly buttons */
+button, .pos-qty-btn button, .pos-checkout-btn button {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Success animations */
+@keyframes addToCart {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.cart-item-added {
+    animation: addToCart 0.3s ease-in-out;
+}

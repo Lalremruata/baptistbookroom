@@ -80,39 +80,39 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->autofocus()
                 ->afterStateUpdated(function(callable $set, Get $get) {
                     $barcode = $get('barcode');
-                    
+
                     // Fetch all branch stock records with the same barcode and belonging to the current branch
                     $branchStocks = BranchStock::with('mainStock.item')
                         ->where('barcode', $barcode)
                         ->where('branch_id', auth()->user()->branch_id)
                         ->get();
-                
+
                     if ($branchStocks->count() === 1) {
                         // If only one item matches the barcode
                         $branchStock = $branchStocks->first();
                         $set('branch_stock_id', $branchStock->id);
                         $set('item_id', $branchStock->mainStock->item->item_name); // Assuming item is linked via MainStock
-                
+
                         // Set GST rate and calculate GST amount
                         $gstRate = $branchStock->mainStock->item->gst_rate ?? 0;
                         $set('gst_rate', $gstRate);
-                
+
                         $price = $get('price');
                         $quantity = $get('quantity') ?? 1; // Default to 1 if quantity is not set
 
 
                             $mrp = $branchStock->mrp ?? 0;
                             $totalPrice = $mrp * $quantity;
-                        
-                        
+
+
                         // If MRP or Price is inclusive of GST, extract taxable amount
                         $taxableAmount = $totalPrice / (1 + ($gstRate / 100));
                         $gstAmount = $totalPrice - $taxableAmount;
-                        
+
                         // Set GST amount
                         $set('gst_amount', number_format($gstAmount, 2, '.', ''));
                         $set('mrp', $mrp);
-                        
+
                     } elseif ($branchStocks->count() > 1) {
                         // If multiple items have the same barcode, clear and allow item selection
                         $set('branch_stock_id', null);
@@ -130,7 +130,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->reactive()
                 ->live()
                 ->extraInputAttributes(['onkeydown' => 'if(event.key === "Enter") { event.preventDefault(); }']),
-            
+
             Select::make('item_id')
                 ->reactive()
                 ->label('Item Search')
@@ -143,14 +143,14 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                             return $query->where('barcode', $barcode);
                         })
                         ->get();
-            
+
                     // Display items with item_info or other details
                     return $branchStocks->pluck('mainStock.item_info', 'id')->toArray();
                 })
                 ->afterStateUpdated(function (callable $set, Get $get) {
                     $branchStockId = $get('item_id');
                     $branchStock = BranchStock::with('mainStock')->find($branchStockId);
-            
+
                      // Set GST rate and calculate GST amount
                      // If GST rate is not set, default to 0
                     $gstRate = $branchStock->mainStock->item->gst_rate ?? 0;
@@ -164,12 +164,12 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
 
                             $mrp = $branchStock->mrp ?? 0;
                             $totalPrice = $mrp * $quantity;
-                        
-                        
+
+
                         // If MRP or Price is inclusive of GST, extract taxable amount
                         $taxableAmount = $totalPrice / (1 + ($gstRate / 100));
                         $gstAmount = $totalPrice - $taxableAmount;
-                        
+
                         // Set GST amount
                         $set('gst_amount', number_format($gstAmount, 2, '.', ''));
                     if ($branchStock) {
@@ -216,22 +216,22 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         $price = $get('mrp');
                         $gstRate = $get('gst_rate');
                         $quantity = $state ?? 1; // Default to 1 if quantity is not set
-                
+
                         if ($gstRate) {
                             // Total price calculation
                             $totalPrice = $price * $quantity;
-                
+
                             // Extract taxable amount (assuming MRP is inclusive of GST)
                             $taxableAmount = $totalPrice / (1 + ($gstRate / 100));
-                
+
                             // GST Amount Calculation
                             $gstAmount = $totalPrice - $taxableAmount;
-                
+
                             // Set values
                             $set('gst_amount', number_format($gstAmount, 2, '.', ''));
                         }
                     })
-                
+
                     ->reactive()
                     ->minValue(1)
                     ->maxValue(function (Get $get) {
@@ -454,14 +454,14 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     $maxRetries = 5;
                     $retryCount = 0;
                     $delay = 100; // Initial delay for retries
-                
+
                     while ($retryCount < $maxRetries) {
                         try {
                             DB::transaction(function () use ($data) {
                                 $totalAmount = SalesCartItem::where('branch_id', auth()->user()->branch_id)
                                     ->where('user_id', auth()->user()->id)
                                     ->sum('selling_price');
-                
+
                                 if ($data['customer_name'] && $data['received_amount'] < $totalAmount) {
                                     // Handle customer creation within the transaction
                                     $customer = Customer::create([
@@ -473,7 +473,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                 } else {
                                     $customer_id = null;
                                 }
-                
+
                                 if ($data['received_amount'] < $totalAmount) {
                                     CreditTransaction::create([
                                         'customer_id' => $customer_id,
@@ -482,27 +482,27 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                         'recovered_amount' => 0,
                                     ]);
                                 }
-                
+
                                 // Memo safe update
                                 // Fetch the last memo for the current branch
                             $lastMemo = Memo::where('branch_id', auth()->user()->branch_id)
                                 ->lockForUpdate() // Lock the row to prevent concurrent updates
                                 ->orderBy('memo', 'desc')
                                 ->first();
-                            
+
                             // Generate the next memo number for the current branch
                             $newMemoNumber = $lastMemo ? $lastMemo->memo + 1 : 1000;
-                            
+
                             // Update the existing memo or create a new one
                             Memo::updateOrCreate(
                                 ['branch_id' => auth()->user()->branch_id, 'memo' => $lastMemo ? $lastMemo->memo : null],
                                 ['memo' => $newMemoNumber]
                             );
-                
+
                                 $cartItems = SalesCartItem::where('branch_id', auth()->user()->branch_id)
                                     ->where('user_id', auth()->user()->id)
                                     ->get();
-                
+
                                 foreach ($cartItems as $item) {
                                     // Lock stock row to prevent concurrent updates
                                     $branchStock = BranchStock::where('branch_id', $item->branch_id)
@@ -511,7 +511,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                         ->first();
                                     $branchStock->quantity -= $item->quantity;
                                     $branchStock->update();
-                
+
                                     // Create sale entry
                                     Sale::create([
                                         'branch_stock_id' => $item->branch_stock_id,
@@ -529,19 +529,19 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                         'transaction_number' => $data['transaction_number'],
                                         'memo' => $newMemoNumber . auth()->user()->branch_id,
                                     ]);
-                
+
                                     // Delete cart item
                                     $item->delete();
                                 }
                             });
-                
+
                             // Success Notification
                             Notification::make()
                                 ->success()
                                 ->title('Items sold successfully!')
                                 ->color('success')
                                 ->send();
-                
+
                             break; // Break out of the retry loop if transaction is successful
                         } catch (\Illuminate\Database\QueryException $e) {
                             if ($e->getCode() === '40001') {
@@ -558,7 +558,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         } catch (\Exception $e) {
                             // Log the error for debugging
                             Log::error('Sales checkout failed: ' . $e->getMessage());
-                
+
                             // Failure Notification
                             Notification::make()
                                 ->danger()
@@ -569,7 +569,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         }
                     }
                 })
-                
+
                 ->slideOver()
                 ->modalIcon('heroicon-o-check-circle')
                 ->modalIconColor('danger')
@@ -633,7 +633,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             $this->form->fill();
             // auth()->cartitem->save($data);
                     // Dispatch the browser event to focus the input
-           
+
             // Success notification
             Notification::make()
                 ->success()
@@ -641,7 +641,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->body('The item has been added to cart successfully.')
                 ->color('success')
                 ->send();
-    
+
             // Clear the form after submission
             $this->form->fill();
         });

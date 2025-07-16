@@ -131,5 +131,6 @@ class SupplierDetail extends Page implements HasForms,  HasActions
             $record = $this->record;
 
             return $record->supplier_name;
+
         }
 }
