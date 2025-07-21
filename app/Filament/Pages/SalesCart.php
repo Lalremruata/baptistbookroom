@@ -28,6 +28,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
 use Filament\Actions\StaticAction;
@@ -368,6 +369,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                      })),
 
             ])
+            ->defaultSort('created_at', 'desc')
             ->actions([
                 DeleteAction::make()
             ])
