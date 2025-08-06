@@ -3,8 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReturnItemResource\Pages;
-use App\Filament\Resources\ReturnItemResource\RelationManagers;
 use App\Models\BranchStock;
+use App\Models\Item;
 use App\Models\MainStock;
 use App\Models\ReturnItem;
 use Filament\Forms;
@@ -15,43 +15,59 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ReturnItemResource extends Resource
 {
     protected static ?string $model = ReturnItem::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    // protected static ?string $navigationParentItem = 'Distribute Report';
     protected static ?string $navigationGroup = 'Stocks';
     protected static ?string $navigationLabel = 'Branch Return Item';
     protected static ?int $navigationSort = 5;
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Select::make('branch_stock_id')
-                ->reactive()
-                ->label('Item')
-                ->options(function(){
-                     return BranchStock::with(['mainStock' => function ($query) {
-                        $query->select('item_id', 'id');
-                    }])
-                    ->whereHas('mainStock', function ($query) {
-                    $query->where('branch_id', auth()->user()->branch_id);
+                TextInput::make('barcode')
+                    ->afterStateUpdated(function(callable $set, Get $get){
+                        $barcode = $get('barcode');
+                        $items = Item::where('barcode', $barcode)->get();
+                        if($items->count() === 1) {
+                            $set('branch_stock_id', $items->first()->id);
+                        } elseif ($items->count() > 1) {
+                            $set('branch_stock_id', null);
+                        }
                     })
-                    ->get()
-                    ->pluck('mainStock.item.item_name', 'id')
-                    ->toArray();
-                })
-                ->searchable()
-                ->dehydrated()
-                ->required(),
+                    ->autofocus()
+                    ->live()
+                    ->dehydrated(),
+                Select::make('branch_stock_id')
+                    ->reactive()
+                    ->label('Item')
+                    ->options(function(){
+                         return BranchStock::with(['mainStock' => function ($query) {
+                            $query->select('item_id', 'id');
+                        }])
+                        ->whereHas('mainStock', function ($query) {
+                        $query->where('branch_id', auth()->user()->branch_id);
+                        })
+                        ->get()
+                        ->pluck('mainStock.item.item_name', 'id')
+                        ->toArray();
+                    })
+                    ->searchable()
+                    ->dehydrated()
+                    ->required(),
                 TextInput::make('quantity_returned')
                     ->reactive()
                     ->minValue(1)
@@ -62,7 +78,6 @@ class ReturnItemResource extends Resource
                             ->where('branch_id',auth()->user()->branch_id)
                             ->pluck('quantity','id')->first();
                                 return $result;
-
                         }
                     })
                     ->required()
@@ -130,22 +145,213 @@ class ReturnItemResource extends Resource
             ->filters([
                 //
             ])
+            // Make rows clickable to trigger the approval action
+            ->recordAction('approveReturn')
+            ->recordUrl(null) // Disable default record URL
             ->actions([
-                Tables\Actions\EditAction::make()
-                ->form([
-                    Toggle::make('is_approved'),
-                ])
-                ->iconButton()
-                ->after(function (Model $record, array $data) {
-                    $branchStock = BranchStock::where('id', $record['branch_stock_id'])->first();
-                    // dd($branchStock->mainStock->barcode);
-                    $branchStock->quantity -= $record['quantity_returned'];
-                    $branchStock->update();
-                    $mainStock = MainStock::where('id', $branchStock->mainStock->id)->first();
-                    $mainStock->quantity += $record['quantity_returned'];
-                    $mainStock->update();
-                }),
-                // Tables\Actions\DeleteAction::make(),
+                // Fixed: Capital 'A' in Action
+                Tables\Actions\Action::make('approveReturn')
+                    ->label('Approve Return') 
+                    ->form([
+                       Section::make('Return Details')
+                           ->schema([
+                               Placeholder::make('item_info')
+                                   ->label('Item Information')
+                                   ->content(function (Model $record): string {
+                                       $item = $record->branchStock->item ?? null;
+                                       $barcode = $record->branchStock->mainStock->barcode ?? 'N/A';
+
+                                       if (!$item) {
+                                           return "Barcode: {$barcode}";
+                                       }
+
+                                       return "{$item->item_name} (Barcode: {$barcode})";
+                                   }),
+
+                               Placeholder::make('return_info')
+                                   ->label('Return Information')
+                                   ->content(function (Model $record): string {
+                                       $returnDate = 'Not set';
+                                       
+                                       if ($record->return_date) {
+                                           if ($record->return_date instanceof \Carbon\Carbon) {
+                                               $returnDate = $record->return_date->format('M d, Y');
+                                           } else {
+                                               try {
+                                                   $returnDate = \Carbon\Carbon::parse($record->return_date)->format('M d, Y');
+                                               } catch (\Exception $e) {
+                                                   $returnDate = $record->return_date;
+                                               }
+                                           }
+                                       }
+
+                                       return "Quantity: {$record->quantity_returned} | Date: {$returnDate} | Note: " . ($record->return_note ?: 'None');
+                                   }),
+
+                               TextInput::make('barcode')
+                                   ->label('Barcode')
+                                   ->default(function (Model $record) {
+                                       return $record->branchStock->mainStock->barcode ?? 'N/A';
+                                   })
+                                   ->disabled()
+                                   ->dehydrated(false),
+                           ]),
+
+                        Section::make('Approval')
+                            ->schema([
+                                Toggle::make('is_approved')
+                                    ->label('Approve Return')
+                                    ->helperText('This will update stock quantities')
+                                    // Fixed: Set the current state as default
+                                    ->default(function (Model $record): bool {
+                                        return (bool) $record->is_approved;
+                                    })
+                                    ->inline(false),
+                            ]),
+                    ])
+                    ->modalWidth('md')
+                    // Fixed: Use action() instead of after() for better control
+                    ->action(function (Model $record, array $data) {
+                        Log::info('Approve action triggered', [
+                            'record_id' => $record->id,
+                            'old_approved' => $record->is_approved,
+                            'new_approved' => $data['is_approved'],
+                            'quantity_returned' => $record->quantity_returned
+                        ]);
+
+                        try {
+                            $oldApprovalStatus = (bool) $record->is_approved;
+                            $newApprovalStatus = (bool) $data['is_approved'];
+
+                            // Update the record first
+                            $record->update(['is_approved' => $newApprovalStatus]);
+
+                            // Process approval change
+                            if ($newApprovalStatus && !$oldApprovalStatus) {
+                                // Being approved for the first time
+                                $branchStock = BranchStock::find($record->branch_stock_id);
+
+                                if (!$branchStock) {
+                                    throw new \Exception('Branch stock not found');
+                                }
+
+                                // Check if there's enough stock to return
+                                if ($branchStock->quantity < $record->quantity_returned) {
+                                    throw new \Exception("Insufficient stock for return. Available: {$branchStock->quantity}, Required: {$record->quantity_returned}");
+                                }
+
+                                // Perform atomic operations
+                                DB::transaction(function () use ($branchStock, $record) {
+                                    Log::info('Processing approval - decrementing branch stock', [
+                                        'branch_stock_id' => $branchStock->id,
+                                        'current_quantity' => $branchStock->quantity,
+                                        'decrement_by' => $record->quantity_returned
+                                    ]);
+
+                                    // Decrement branch stock
+                                    $branchStock->decrement('quantity', $record->quantity_returned);
+
+                                    Log::info('Processing approval - incrementing main stock', [
+                                        'main_stock_id' => $branchStock->mainStock->id,
+                                        'current_quantity' => $branchStock->mainStock->quantity,
+                                        'increment_by' => $record->quantity_returned
+                                    ]);
+
+                                    // Increment main stock
+                                    $branchStock->mainStock->increment('quantity', $record->quantity_returned);
+                                });
+
+                                Notification::make()
+                                    ->title('Return Approved Successfully')
+                                    ->body("Stock quantities updated: Branch stock decreased by {$record->quantity_returned}, Main stock increased by {$record->quantity_returned}")
+                                    ->success()
+                                    ->send();
+
+                            } elseif (!$newApprovalStatus && $oldApprovalStatus) {
+                                // Being unapproved - reverse the operation
+                                $branchStock = BranchStock::find($record->branch_stock_id);
+
+                                if ($branchStock) {
+                                    DB::transaction(function () use ($branchStock, $record) {
+                                        Log::info('Processing unapproval - reversing stock changes');
+
+                                        // Reverse the operations
+                                        $branchStock->increment('quantity', $record->quantity_returned);
+                                        $branchStock->mainStock->decrement('quantity', $record->quantity_returned);
+                                    });
+
+                                    Notification::make()
+                                        ->title('Return Unapproved')
+                                        ->body("Stock quantities reversed: Branch stock increased by {$record->quantity_returned}, Main stock decreased by {$record->quantity_returned}")
+                                        ->warning()
+                                        ->send();
+                                }
+                            } else {
+                                // No approval status change
+                                Notification::make()
+                                    ->title('Return Updated')
+                                    ->body('Return record updated successfully')
+                                    ->success()
+                                    ->send();
+                            }
+
+                        } catch (\Exception $e) {
+                            Log::error('Error processing return approval: ' . $e->getMessage(), [
+                                'record_id' => $record->id,
+                                'trace' => $e->getTraceAsString()
+                            ]);
+
+                            // Revert the record update if stock update failed
+                            $record->update(['is_approved' => $record->getOriginal('is_approved')]);
+
+                            Notification::make()
+                                ->title('Error Processing Return')
+                                ->body('Failed to update stock quantities: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+
+                            throw $e; // Re-throw to prevent action completion
+                        }
+                    })
+                    ->icon('heroicon-o-check-circle')
+                    ->color(function (Model $record): string {
+                        return $record->is_approved ? 'success' : 'warning';
+                    })
+                    ->iconButton(),
+                    
+                // Optional: Add a separate view action for read-only details
+                Tables\Actions\Action::make('viewDetails')
+                    ->label('View Details')
+                    ->icon('heroicon-o-eye')
+                    ->color('gray')
+                    ->modalWidth('md')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->form([
+                        Section::make('Return Details')
+                            ->schema([
+                                Placeholder::make('item_info')
+                                    ->label('Item Information')
+                                    ->content(function (Model $record): string {
+                                        $item = $record->branchStock->item ?? null;
+                                        $barcode = $record->branchStock->mainStock->barcode ?? 'N/A';
+                                        return $item ? "{$item->item_name} (Barcode: {$barcode})" : "Barcode: {$barcode}";
+                                    }),
+
+                                Placeholder::make('return_details')
+                                    ->label('Return Information')
+                                    ->content(function (Model $record): string {
+                                        $returnDate = $record->return_date ? 
+                                            (\Carbon\Carbon::parse($record->return_date)->format('M d, Y')) : 'Not set';
+                                        $approved = $record->is_approved ? 'Yes' : 'No';
+                                        $branch = $record->branch->branch_name ?? 'Unknown';
+                                        $user = $record->user->name ?? 'Unknown';
+                                        
+                                        return "Quantity: {$record->quantity_returned}\nDate: {$returnDate}\nApproved: {$approved}\nBranch: {$branch}\nUser: {$user}\nNote: " . ($record->return_note ?: 'None');
+                                    }),
+                            ])
+                    ])
+                    ->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

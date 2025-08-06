@@ -19,6 +19,10 @@ class MainStock extends Model
         'quantity',
         'barcode',
     ];
+
+    protected $casts = [
+        'quantity' => 'integer',
+    ];
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);

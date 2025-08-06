@@ -21,6 +21,9 @@ class BranchStock extends Model
         'branch_id',
         'main_stock_id',
     ];
+    protected $casts = [
+        'quantity' => 'integer',
+    ];
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);

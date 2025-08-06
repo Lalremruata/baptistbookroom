@@ -70,15 +70,20 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                         TextInput::make('return_amount')
                             ->required()
                             ->maxLength(255),
+                        TextInput::make('quantity')
+                            ->numeric(),
                         TextInput::make('receiver_name')
                             ->required()
                             ->maxLength(255),
                         TextInput::make('address')
                             ->required()
                             ->maxLength(255),
+                        TextInput::make('pin_code')
+                            ->required()
+                            ->maxLength(6),
                         TextInput::make('phone_number')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(10),
                     ])->columns(2),
                     Section::make([
                         Select::make('payment_mode')
@@ -94,6 +99,12 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                             ->visible(fn($get) => $get('payment_mode') === 'upi')
                             ->reactive(),
                         TextInput::make('account_number')
+                            ->visible(fn($get) => $get('payment_mode') === 'bank transfer' || $get('payment_mode') === 'cheque')
+                            ->reactive(),
+                        TextInput::make('account_holder')
+                            ->visible(fn($get) => $get('payment_mode') === 'bank transfer' || $get('payment_mode') === 'cheque')
+                            ->reactive(),
+                        TextInput::make('branch_name')
                             ->visible(fn($get) => $get('payment_mode') === 'bank transfer' || $get('payment_mode') === 'cheque')
                             ->reactive(),
                         TextInput::make('ifsc_code')
@@ -120,13 +131,19 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                             TextInput::make('return_amount')
                             ->label('Payment amount')
                             ->required(),
+                            TextInput::make('quantity')
+                            ->numeric(),
                             TextInput::make('receiver_name')
                             ->required(),
                             TextInput::make('address')
                             ->required(),
+                            TextInput::make('pin_code')
+                            ->required()
+                            ->maxLength(6),
                             TextInput::make('phone_number')
                             ->numeric()
-                            ->required(),
+                            ->required()
+                            ->maxLength(10),
                             DatePicker::make('return_date')
                             ->label('Payment date')
                             ->default(now())
@@ -145,6 +162,12 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                                 ->visible(fn($get) => $get('payment_mode') === 'upi')
                                 ->reactive(),
                             TextInput::make('account_number')
+                                ->visible(fn($get) => $get('payment_mode') === 'bank transfer' || $get('payment_mode') === 'cheque')
+                                ->reactive(),
+                            TextInput::make('account_holder')
+                                ->visible(fn($get) => $get('payment_mode') === 'bank transfer' || $get('payment_mode') === 'cheque')
+                                ->reactive(),
+                            TextInput::make('branch_name')
                                 ->visible(fn($get) => $get('payment_mode') === 'bank transfer' || $get('payment_mode') === 'cheque')
                                 ->reactive(),
                             TextInput::make('ifsc_code')
@@ -182,6 +205,10 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
         $privateBookAccount->payment_mode = $data['payment_mode'];
         $privateBookAccount->transaction_number = $data['transaction_number'] ?? '';
         $privateBookAccount->account_number = $data['account_number'] ?? '';
+        $privateBookAccount->account_holder = $data['account_holder'] ?? '';
+        $privateBookAccount->branch_name = $data['branch_name'] ?? '';
+        $privateBookAccount->pin_code = $data['pin_code'] ?? '';
+        $privateBookAccount->quantity = $data['quantity'] ?? 0; // Set default quantity
         $privateBookAccount->ifsc_code = $data['ifsc_code'] ?? '';
         $privateBookAccount->save();
 

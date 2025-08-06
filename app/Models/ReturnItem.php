@@ -18,6 +18,12 @@ class ReturnItem extends Model
         "is_approved",
         "return_note",
     ];
+    protected $casts = [
+        'return_date' => 'date', // or 'datetime' if you need time as well
+        'is_approved' => 'boolean',
+        'quantity_returned' => 'integer',
+        // ... other casts
+    ];
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);
     }

@@ -23,31 +23,104 @@ class BranchSalesChart extends ChartWidget
     protected function getData(): array
     {
         $branches = Branch::all();
-
         $datasets = [];
-        $monthlyCounts = collect(); // Initialize an empty collection for monthly counts
+        $allLabels = collect(); // To store all possible labels across branches
 
         foreach ($branches as $branch) {
             $salesData = $this->getFilteredSalesData($branch);
 
-            $monthlyCounts[$branch->branch_name] = $salesData
-                ->groupBy(function ($date) {
-                    return Carbon::parse($date->created_at)->format('m');
-                })
-                ->map(function ($month) {
-                    return count($month);
-                });
+            // Group data based on the selected filter
+            $groupedData = $this->groupDataByFilter($salesData);
+
+            // Collect all labels to ensure consistency across branches
+            $allLabels = $allLabels->merge($groupedData->keys())->unique()->sort();
 
             $datasets[] = [
-                'label' => "{$branch->branch_name}",
-                'data' => $monthlyCounts[$branch->branch_name]->values(),
+                'label' => $branch->branch_name,
+                'data' => $groupedData,
             ];
         }
 
+        // Ensure all datasets have the same labels
+        $normalizedDatasets = $this->normalizeDatasets($datasets, $allLabels);
+
         return [
-            'datasets' => $datasets,
-            'labels' => $monthlyCounts->first() ? $monthlyCounts->first()->keys()->toArray() : [],
+            'datasets' => $normalizedDatasets,
+            'labels' => $allLabels->values()->toArray(),
         ];
+    }
+
+    /**
+     * Group sales data based on the current filter selection
+     * This method demonstrates how different time periods require different grouping strategies
+     */
+    protected function groupDataByFilter(Collection $salesData): Collection
+    {
+        switch ($this->filter) {
+            case 'today':
+                // For today, group by hour to show hourly sales pattern
+                return $salesData
+                    ->groupBy(function ($sale) {
+                        return Carbon::parse($sale->created_at)->format('H:00'); // Group by hour
+                    })
+                    ->map(function ($hourSales) {
+                        return $hourSales->sum('total_amount'); // Sum the sales amount, not just count
+                    });
+
+            case 'week':
+                // For week, group by day name
+                return $salesData
+                    ->groupBy(function ($sale) {
+                        return Carbon::parse($sale->created_at)->format('l'); // Day name (Monday, Tuesday, etc.)
+                    })
+                    ->map(function ($daySales) {
+                        return $daySales->sum('total_amount');
+                    });
+
+            case 'month':
+                // For month, group by day of month
+                return $salesData
+                    ->groupBy(function ($sale) {
+                        return Carbon::parse($sale->created_at)->format('j'); // Day of month (1, 2, 3...)
+                    })
+                    ->map(function ($daySales) {
+                        return $daySales->sum('total_amount');
+                    });
+
+            case 'year':
+                // For year, group by month name
+                return $salesData
+                    ->groupBy(function ($sale) {
+                        return Carbon::parse($sale->created_at)->format('M'); // Month abbreviation (Jan, Feb, etc.)
+                    })
+                    ->map(function ($monthSales) {
+                        return $monthSales->sum('total_amount');
+                    });
+
+            default:
+                return collect();
+        }
+    }
+
+    /**
+     * Normalize datasets to ensure all branches have data for all labels
+     * This prevents chart rendering issues when different branches have different data points
+     */
+    protected function normalizeDatasets(array $datasets, Collection $allLabels): array
+    {
+        return array_map(function ($dataset) use ($allLabels) {
+            $normalizedData = [];
+
+            foreach ($allLabels as $label) {
+                // If this branch has data for this label, use it; otherwise, use 0
+                $normalizedData[] = $dataset['data'][$label] ?? 0;
+            }
+
+            return [
+                'label' => $dataset['label'],
+                'data' => $normalizedData,
+            ];
+        }, $datasets);
     }
 
     protected function getFilters(): ?array

@@ -188,4 +188,5 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    'allow_custom_datetime' => filter_var(env('ALLOW_CUSTOM_DATETIME', false), FILTER_VALIDATE_BOOLEAN),
 ];

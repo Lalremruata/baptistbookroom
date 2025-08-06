@@ -127,8 +127,12 @@ class PrivateBookResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->searchable(),
                 TextColumn::make('file_no')
+                    ->weight(FontWeight::Bold),
+                    // ->searchable(),
+                TextColumn::make('mainStock.barcode')
+                    ->label('barcode')
                     ->weight(FontWeight::Bold)
-                    ->searchable(),
+                    ->searchable(isIndividual: true),
                 // TextColumn::make('quantity')
                 //     ->weight(FontWeight::Bold)
                 //     ->sortable(),

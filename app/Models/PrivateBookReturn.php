@@ -16,6 +16,7 @@ class PrivateBookReturn extends Model
         "receiver_name",
         "address",
         "phone_number",
+        "return_note", // Added return_note field
     ];
     public function privateBook(): BelongsTo
     {

@@ -12,13 +12,17 @@ class PrivateBookAccount extends Model
     protected $fillable = [
         "private_book_id",
         "return_amount",
+        "quantity",
         "return_date",
         "receiver_name",
         "address",
+        "pin_code",
         "phone_number",
         "payment_mode",
         "transaction_number",
         "account_number",
+        "account_holder",
+        "branch_name",
         "ifsc_code",
     ];
     public function privateBook(): BelongsTo

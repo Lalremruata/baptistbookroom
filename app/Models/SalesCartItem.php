@@ -23,6 +23,16 @@ class SalesCartItem extends Model
         "rate",
         "total_amount",
         "total_amount_with_gst",
+        'created_at',
+    ];
+
+    public $timestamps = true;
+
+    // Cast the custom field as datetime
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        // ... other casts
     ];
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);

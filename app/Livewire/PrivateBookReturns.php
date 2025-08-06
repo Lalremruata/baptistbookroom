@@ -55,6 +55,7 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
             TextColumn::make('receiver_name'),
             TextColumn::make('address'),
             TextColumn::make('phone_number'),
+            TextColumn::make('return_note')
         ])
         ->actions([
                 DeleteAction::make()
@@ -87,6 +88,9 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                         ->required()
                         ->maxLength(255),
                     TextInput::make('phone_number')
+                        ->required()
+                        ->maxLength(255),
+                    Textarea::make('return_note')
                         ->required()
                         ->maxLength(255),
                     DatePicker::make('return_date')
@@ -146,7 +150,10 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                             ->required(),
                             DatePicker::make('return_date')
                             ->label('Return date')
-                            ->default(now())
+                            ->default(now()),
+                            Textarea::make('return_note')
+                            ->required()
+                            ->maxLength(255),
                         ])->columns(2)
                         ])
 
@@ -175,6 +182,7 @@ class PrivateBookReturns extends Component implements HasForms, HasTable, HasAct
                         $privateBookAccount->receiver_name = $data['receiver_name'];
                         $privateBookAccount->address = $data['address'];
                         $privateBookAccount->phone_number = $data['phone_number'];
+                        $privateBookAccount->return_note = $data['return_note'];
                         $privateBookAccount->save();
                     })
                     ->after(function (){

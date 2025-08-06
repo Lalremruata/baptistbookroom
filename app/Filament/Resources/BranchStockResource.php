@@ -23,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Tables\Columns\Summarizers\Summarizer;
 use Illuminate\Database\Query\Builder As QueryBuilder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 class BranchStockResource extends Resource
 {
@@ -147,13 +148,91 @@ class BranchStockResource extends Resource
                                 fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
                         }),
-                    SelectFilter::make('branch')
-                        ->relationship('branch','branch_name')
-                        ->hidden(! auth()->user()->user_type=='1'),
-                    SelectFilter::make('category')
-                        ->relationship('item.category','category_name'),
-                    SelectFilter::make('subCategory')
-                        ->relationship('item.subCategory','subcategory_name'),
+                    // SelectFilter::make('branch')
+                    //     ->relationship('branch','branch_name')
+                    //     ->hidden(! auth()->user()->user_type=='1'),
+                        SelectFilter::make('category_subcategory')
+                        ->label('Category & Subcategory')
+                        // Build the custom filter form
+                        ->form([
+                            // Build the Category dropdown
+                            Forms\Components\Select::make('category_id')
+                                ->label('Category')
+                                // Select all Categories
+                                ->options(
+                                    fn() => \App\Models\Category::all()->pluck('category_name', 'id')->toArray()
+                                )
+                                // When category changes, check if currently selected subcategory belongs to the selected category
+                                ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                    $category = \App\Models\Category::find($state);
+
+                                    if ($category) {
+                                        $subcategoryId = (int) $get('subcategory_id');
+
+                                        if ($subcategoryId && $subcategory = \App\Models\SubCategory::find($subcategoryId)) {
+                                            if ($subcategory->category_id !== $category->id) {
+                                                // Subcategory doesn't belong to category, so unselect it
+                                                $set('subcategory_id', null);
+                                            }
+                                        }
+                                    }
+                                })
+                                // Make the category dropdown reactive so we can rebuild the subcategory dropdown when state changes
+                                ->reactive()
+                                ->searchable()
+                                ->placeholder('Select Category'),
+
+                            // Build the SubCategory dropdown
+                            Forms\Components\Select::make('subcategory_id')
+                                ->label('Subcategory')
+                                // Build the options based on selected category
+                                ->options(function (callable $get) {
+                                    $category = \App\Models\Category::find($get('category_id'));
+
+                                    // If a category is selected, fetch subcategories for this category
+                                    if ($category) {
+                                        return $category->subCategories->pluck('subcategory_name', 'id');
+                                    }
+
+                                    // No category selected, so get all subcategories
+                                    return \App\Models\SubCategory::all()->pluck('subcategory_name', 'id');
+                                })
+                                ->searchable()
+                                ->placeholder(function (callable $get): string {
+                                    return $get('category_id') ? 'Select Subcategory' : 'Select category';
+                                })
+//                                ->hint(function (callable $get): ?string {
+//                                    $categoryId = $get('category_id');
+//                                    if (!$categoryId) {
+//                                        return null;
+//                                    }
+//
+//                                    $count = \App\Models\SubCategory::where('category_id', $categoryId)->count();
+//                                    return $count > 0 ? "{$count} subcategories available" : "No subcategories in this category";
+//                                }),
+                        ])
+                        ->columns(2)
+                        // Handle the query - this is where you define how this filter affects your main table
+                        ->query(function (EloquentBuilder $query, array $data) {
+                            // Get the category and subcategory IDs from the form's $data array
+                            $categoryId = (int) $data['category_id'];
+                            $subcategoryId = (int) $data['subcategory_id'];
+
+                            // If a subcategory is selected, filter by subcategory (this implicitly includes the category)
+                            if (!empty($subcategoryId)) {
+                                $query->whereHas(
+                                    'item',
+                                    fn(EloquentBuilder $query) => $query->where('sub_category_id', '=', $subcategoryId)
+                                );
+                            }
+                            // If only category is selected (no subcategory), filter by category
+                            elseif (!empty($categoryId)) {
+                                $query->whereHas(
+                                    'item',
+                                    fn(EloquentBuilder $query) => $query->where('category_id', '=', $categoryId)
+                                );
+                            }
+                        }),
                 ], layout: FiltersLayout::AboveContent)->filtersFormColumns(4)
             ->headerActions([
                 ExportAction::make()

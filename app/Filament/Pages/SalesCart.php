@@ -10,6 +10,7 @@ use App\Models\Sale;
 use Filament\Actions\Action;
 use App\Models\SalesCartItem;
 use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Get;
 use Filament\Support\Enums\MaxWidth;
@@ -75,7 +76,19 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
         return $form
         ->schema([
             Section::make()
-            ->schema([
+            ->schema(array_filter([
+                config('app.allow_custom_datetime') ?
+                DateTimePicker::make('custom_created_at')
+                    ->label('Transaction Date & Time')
+                    ->default(now())
+                    ->required(config('app.allow_custom_datetime'))
+                    ->native(false)
+                    ->displayFormat('d/m/Y H:i')
+                    ->seconds(false)
+                    ->columnSpan(1)
+                    ->helperText('⚠️ Temporary backdating feature - will be removed')
+                : null,
+
                 TextInput::make('barcode')
                 ->label('Barcode Search')
                 ->autofocus()
@@ -324,7 +337,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     ->default(auth()->user()->branch_id),
                 Hidden::make('user_id')
                     ->default(auth()->user()->id),
-                    ])->columns(2)
+                    ]))
+                    ->columns(config('app.allow_custom_datetime') ? 2 : 1)
 
         ])->statePath('data');
     }
@@ -367,6 +381,10 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                         return $query->sum('selling_price');
                         //  return $query->sum(DB::raw('selling_price * quantity'));
                      })),
+                TextColumn::make('created_at')
+                     ->label('Transaction Time')
+                     ->dateTime('d/m/Y H:i')
+                     ->sortable(),
 
             ])
             ->defaultSort('created_at', 'desc')
@@ -530,6 +548,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                         'payment_mode' => $data['payment_mode'],
                                         'transaction_number' => $data['transaction_number'],
                                         'memo' => $newMemoNumber . auth()->user()->branch_id,
+                                        'created_at' => $item->created_at,
+                                        'updated_at' => now(),
                                     ]);
 
                                     // Delete cart item
@@ -595,6 +615,11 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
         try {
             DB::transaction(function() {
             $data = $this->form->getState();
+            // Only use custom datetime if the feature is enabled
+
+            $createdAt = config('app.allow_custom_datetime') && isset($data['custom_created_at']) 
+            ? $data['custom_created_at'] 
+            : now();
             $cartItem = SalesCartItem::where('branch_stock_id', $data['branch_stock_id'])->first();
             if (!$cartItem) {
                 $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
@@ -611,9 +636,13 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     'selling_price'=> $sellingPrice,
                     'gst_amount'=> $gstAmount,
                     'rate' => $rate,
-                    'total_amount_with_gst'=> $totalAmountWithGst
+                    'total_amount_with_gst'=> $totalAmountWithGst,
+                    'created_at' => $createdAt,
+                    'updated_at' => now(),
                 ];
-                $data += $newData;
+                $data = array_merge($data, $newData);
+                
+                // Create the record with custom timestamps
                 SalesCartItem::create($data);
             }
             else {
@@ -630,6 +659,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 $cartItem->rate += $rate;
                 $totalAmountWithGst = $sellingPrice;
                 $cartItem->total_amount_with_gst += $totalAmountWithGst;
+                $cartItem->created_at = $data['custom_created_at'];
                 $cartItem->update();
             }
             $this->form->fill();

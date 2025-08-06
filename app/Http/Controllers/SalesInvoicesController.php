@@ -19,18 +19,6 @@ class SalesInvoicesController extends Controller
 {
     public function generatePdf(Collection $records, array $request)
     {
-        // dd($records[0]->customer->customer_name);
-        // Ensure all text fields are properly encoded
-        // $records->transform(function ($record) {
-        //     $data = $record->toArray(); // Convert record to array
-        //     foreach ($data as $key => $value) {
-        //         if (is_string($value)) {
-        //             $data[$key] = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
-        //         }
-        //     }
-        //     return (object) $data; // Return as object
-        // });
-
         // Generate PDF from Blade template
         $branch = Branch::find($records[0]->branch_id);
         $pdf = Pdf::loadView('vendor.invoices.templates.sale_receipt', ['records' => $records, 'data' => $request, 'branch' => $branch]);
