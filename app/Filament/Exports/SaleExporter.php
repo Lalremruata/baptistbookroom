@@ -19,7 +19,8 @@ class SaleExporter extends Exporter
             ExportColumn::make('created_at')
             ->label('Date'),
             ExportColumn::make('memo')
-            ->label('INVOICE NO'),
+            ->label('INVOICE NO')
+            ->state(fn (Sale $record) => $record->getFormattedInvoiceNumber()),
             ExportColumn::make('item.hsn_number')
             ->label('HSN'),
             ExportColumn::make('item.item_name')
@@ -53,4 +54,5 @@ class SaleExporter extends Exporter
 
         return $body;
     }
+
 }

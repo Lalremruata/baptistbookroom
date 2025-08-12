@@ -58,4 +58,21 @@ class Sale extends Model
     {
         return $this->belongsToThrough(MainStock::class,BranchStock::class);
     }
+    public function getFormattedInvoiceNumber()
+    {
+        $currentYear = date('y');
+        $nextYear = date('y', strtotime('+1 year'));
+        $financialYear = (date('m') > 3) ? $currentYear . '-' . $nextYear : ($currentYear - 1) . '-' . date('y');
+        
+        $userBranch = $this->branch->branch_name;
+        $branchWords = explode(' ', $userBranch);
+        
+        if (count($branchWords) > 1) {
+            $branchCode = substr($branchWords[0], 0, 3) . substr($branchWords[1], 0, 1);
+        } else {
+            $branchCode = substr($userBranch, 0, 3);
+        }
+        
+        return 'BLS/' . $financialYear . '/' . $branchCode . '/' . $this->memo;
+    }
 }

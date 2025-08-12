@@ -164,7 +164,8 @@ class SaleResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('memo')
-                    ->label('Invoice Number')
+                    ->label('INVOICE NO')
+                    ->state(fn (Sale $record) => $record->getFormattedInvoiceNumber())
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->searchable()
                     ->weight(FontWeight::Bold)
