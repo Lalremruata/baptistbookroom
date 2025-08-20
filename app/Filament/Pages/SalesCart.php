@@ -547,7 +547,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                         'total_amount_with_gst' => $item->total_amount_with_gst,
                                         'payment_mode' => $data['payment_mode'],
                                         'transaction_number' => $data['transaction_number'],
-                                        'memo' => $newMemoNumber . auth()->user()->branch_id,
+                                        'memo' => $newMemoNumber,
                                         'created_at' => $item->created_at,
                                         'updated_at' => now(),
                                     ]);
@@ -617,8 +617,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
             $data = $this->form->getState();
             // Only use custom datetime if the feature is enabled
 
-            $createdAt = config('app.allow_custom_datetime') && isset($data['custom_created_at']) 
-            ? $data['custom_created_at'] 
+            $createdAt = config('app.allow_custom_datetime') && isset($data['custom_created_at'])
+            ? $data['custom_created_at']
             : now();
             $cartItem = SalesCartItem::where('branch_stock_id', $data['branch_stock_id'])->first();
             if (!$cartItem) {
@@ -641,7 +641,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     'updated_at' => now(),
                 ];
                 $data = array_merge($data, $newData);
-                
+
                 // Create the record with custom timestamps
                 SalesCartItem::create($data);
             }
