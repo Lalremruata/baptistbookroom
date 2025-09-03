@@ -19,6 +19,7 @@ class PrivateBook extends Model
         "phone_number",
         "file_no",
         "quantity",
+        "notes"
     ];
     public function item(): BelongsTo
     {

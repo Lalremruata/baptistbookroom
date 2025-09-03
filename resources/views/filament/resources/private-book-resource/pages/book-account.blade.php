@@ -31,6 +31,7 @@
                 <h5 class="text-xl">Initial Quantity(A tir a lak zat): {{ $this->initialQuantity }}</h5>
                 <h5 class="text-xl">Cost Price: {{ $this->costPrice }}/-</h5>
                 <h5 class="text-xl">Mrp: {{ $this->mrp}}/-</h5>
+                <h5 class="text-xl">Notes: {{ $this->record->notes }}</h5>
 {{--                <h5 class="text-xl">Total Amount(Lehkhabu man C.P): {{ $this->totalBookValue }}</h5>--}}
             </x-filament::fieldset>
 

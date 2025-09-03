@@ -5,7 +5,7 @@
     $totalRate = $records->sum('rate');
     $totalQuantity = $records->sum('quantity');
     $totalTaxableValue = $totalRate - $totalDiscount;
-    
+
     // Financial year and invoice number formatting
     $currentYear = date('y');
     $nextYear = date('y', strtotime('+1 year'));
@@ -17,7 +17,7 @@
     } else {
         $branchCode = substr($userBranch, 0, 3);
     }
-    $invoiceNo = 'BLS/' . $financialYear . '/' . $branchCode . '/' . $memoNumber . auth()->user()->branch_id;
+    $invoiceNo = 'BLS/' . $financialYear . '/' . $branchCode . '/' . $memoNumber;
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -31,26 +31,26 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: Arial, sans-serif;
             font-size: 11px;
             padding: 10px;
         }
-        
+
         .invoice-container {
             max-width: 800px;
             margin: 0 auto;
             border: 2px solid #000;
         }
-        
+
         /* Header Section */
         .header-row {
             display: table;
             width: 100%;
             border-bottom: 1px solid #000;
         }
-        
+
         .invoice-no-section {
             display: table-cell;
             width: 30%;  /* Increased from 25% to accommodate the text */
@@ -84,13 +84,13 @@
             display: table-cell;
             width: 30%;  /* Adjusted from 25% */
         }
-        
+
         /* Details Section */
         .details-section {
             border-bottom: 1px solid #000;
             padding: 5px;
         }
-        
+
         .details-title {
             text-align: center;
             font-weight: bold;
@@ -98,13 +98,13 @@
             background-color: #f0f0f0;
             border-bottom: 1px solid #000;
         }
-        
+
         .detail-row {
             display: table;
             width: 100%;
             border-bottom: 1px solid #000;
         }
-        
+
         .detail-label {
             display: table-cell;
             width: 15%;
@@ -112,41 +112,41 @@
             border-right: 1px solid #000;
             font-weight: bold;
         }
-        
+
         .detail-value {
             display: table-cell;
             padding: 3px 5px;
         }
-        
+
         /* Billing and Shipping Section */
         .billing-shipping {
             display: table;
             width: 100%;
             border-bottom: 1px solid #000;
         }
-        
+
         .billed-to, .shipping-to {
             display: table-cell;
             width: 50%;
             padding: 5px;
             vertical-align: top;
         }
-        
+
         .shipping-to {
             border-left: 1px solid #000;
         }
-        
+
         .section-title {
             font-weight: bold;
             margin-bottom: 3px;
         }
-        
+
         /* Table Section */
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         th {
             border: 1px solid #000;
             padding: 5px;
@@ -154,45 +154,45 @@
             font-size: 10px;
             background-color: #f0f0f0;
         }
-        
+
         td {
             border: 1px solid #000;
             padding: 4px;
             text-align: center;
             font-size: 10px;
         }
-        
+
         .text-left {
             text-align: left !important;
         }
-        
+
         .text-right {
             text-align: right !important;
         }
-        
+
         /* Footer Section */
         .footer-section {
             display: table;
             width: 100%;
         }
-        
+
         .amount-words-bank {
             display: table-cell;
             width: 50%;
             padding: 5px;
             vertical-align: top;
         }
-        
+
         .amount-in-words {
             border-bottom: 1px solid #000;
             padding: 5px;
             min-height: 40px;
         }
-        
+
         .bank-details {
             padding: 5px;
         }
-        
+
         .bank-details-title {
             font-weight: bold;
             text-align: center;
@@ -201,14 +201,14 @@
             border: 1px solid #000;
             margin-bottom: 3px;
         }
-        
+
         .bank-detail-row {
             display: table;
             width: 100%;
             border: 1px solid #000;
             border-top: none;
         }
-        
+
         .bank-label {
             display: table-cell;
             width: 30%;
@@ -217,13 +217,13 @@
             font-weight: bold;
             font-size: 9px;
         }
-        
+
         .bank-value {
             display: table-cell;
             padding: 2px 5px;
             font-size: 9px;
         }
-        
+
         .summary-section {
             display: table-cell;
             width: 50%;
@@ -231,39 +231,39 @@
             vertical-align: top;
             border-left: 1px solid #000;
         }
-        
+
         .summary-row {
             display: table;
             width: 100%;
             border-bottom: 1px solid #000;
         }
-        
+
         .summary-label {
             display: table-cell;
             width: 70%;
             padding: 3px 5px;
             border-right: 1px solid #000;
         }
-        
+
         .summary-value {
             display: table-cell;
             width: 30%;
             padding: 3px 5px;
             text-align: right;
         }
-        
+
         .summary-row.highlight {
             background-color: #e6f3ff;
             font-weight: bold;
         }
-        
+
         /* Signature Section */
         .signature-section {
             text-align: center;
             padding: 20px 5px 10px;
             border-top: 1px solid #000;
         }
-        
+
         .signature-line {
             margin-top: 30px;
         }
@@ -284,7 +284,7 @@
                 <!-- This section can remain empty or be used for other information -->
             </div>
         </div>
-        
+
         <!-- Details Section -->
         <div class="details-section">
             <div class="details-title">DETAILS</div>
@@ -313,7 +313,7 @@
                 <div class="detail-value">15</div>
             </div>
         </div>
-        
+
         <!-- Billing and Shipping Section -->
         <div class="billing-shipping">
             <div class="billed-to">
@@ -333,7 +333,7 @@
                 <div>State Code: {{ $request['state_code'] ?? 'N/A' }}</div>
             </div>
         </div>
-        
+
         <!-- Items Table -->
         <table>
             <thead>
@@ -368,7 +368,7 @@
                     <td class="text-right">{{ number_format($record->selling_price, 2) }}</td>
                 </tr>
                 @endforeach
-                
+
                 <!-- Empty rows for space -->
                 @for($i = count($records); $i < 5; $i++)
                 <tr>
@@ -384,7 +384,7 @@
                     <td>&nbsp;</td>
                 </tr>
                 @endfor
-                
+
                 <!-- Total row -->
                 <tr style="font-weight: bold;">
                     <td colspan="3" class="text-right">Total</td>
@@ -398,7 +398,7 @@
                 </tr>
             </tbody>
         </table>
-        
+
         <!-- Footer Section -->
         <div class="footer-section">
             <!-- Left side: Amount in words and Bank details -->
@@ -407,7 +407,7 @@
                     <strong>Amount in words:</strong><br>
                     {{ ucwords(\NumberFormatter::create('en_IN', \NumberFormatter::SPELLOUT)->format($totalAmount)) }} Only
                 </div>
-                
+
                 <div class="bank-details">
                     <div class="bank-details-title">BANK DETAILS</div>
                     <div class="bank-detail-row">
@@ -436,7 +436,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Right side: Summary -->
             <div class="summary-section">
                 <div class="summary-row highlight">
@@ -489,7 +489,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Signature Section -->
         <div class="signature-section">
             <div class="signature-line">

@@ -39,63 +39,121 @@ class ReturnItemResource extends Resource
         return $form
             ->schema([
                 TextInput::make('barcode')
-                    ->afterStateUpdated(function(callable $set, Get $get){
+                    ->label('Barcode Search')
+                    ->autofocus()
+                    ->afterStateUpdated(function(callable $set, Get $get) {
                         $barcode = $get('barcode');
-                        $items = Item::where('barcode', $barcode)->get();
-                        if($items->count() === 1) {
-                            $set('branch_stock_id', $items->first()->id);
-                        } elseif ($items->count() > 1) {
+
+                        // Fetch all branch stock records with the same barcode and belonging to the current branch
+                        $branchStocks = BranchStock::with('mainStock.item')
+                            ->where('barcode', $barcode)
+                            ->where('branch_id', auth()->user()->branch_id)
+                            ->get();
+
+                        if ($branchStocks->count() === 1) {
+                            // If only one item matches the barcode
+                            $branchStock = $branchStocks->first();
+                            $set('branch_stock_id', $branchStock->id);
+                            $set('item_id', $branchStock->mainStock->item->item_name); // or use item_info if available
+                        } elseif ($branchStocks->count() > 1) {
+                            // If multiple items have the same barcode, clear and allow item selection
                             $set('branch_stock_id', null);
+                            $set('item_id', null);
+                        } else {
+                            // If no match is found, clear the selection
+                            $set('branch_stock_id', null);
+                            $set('item_id', null);
                         }
                     })
-                    ->autofocus()
-                    ->live()
-                    ->dehydrated(),
-                Select::make('branch_stock_id')
                     ->reactive()
-                    ->label('Item')
-                    ->options(function(){
-                         return BranchStock::with(['mainStock' => function ($query) {
-                            $query->select('item_id', 'id');
-                        }])
-                        ->whereHas('mainStock', function ($query) {
-                        $query->where('branch_id', auth()->user()->branch_id);
-                        })
-                        ->get()
-                        ->pluck('mainStock.item.item_name', 'id')
-                        ->toArray();
+                    ->live()
+                    ->extraInputAttributes(['onkeydown' => 'if(event.key === "Enter") { event.preventDefault(); }']),
+
+                Select::make('item_id')
+                    ->reactive()
+                    ->label('Item Search')
+                    ->options(function (callable $get) {
+                        $barcode = $get('barcode');
+                        // Fetch all branch stock records with the same barcode and belonging to the current branch
+                        $branchStocks = BranchStock::with('mainStock.item')
+                            ->where('branch_id', auth()->user()->branch_id)
+                            ->when($barcode, function($query) use ($barcode) {
+                                return $query->where('barcode', $barcode);
+                            })
+                            ->get();
+
+                        // Display items with item_info or item_name
+                        return $branchStocks->pluck('mainStock.item.item_name', 'id')->toArray(); // Change to item_info if available
                     })
+                    ->afterStateUpdated(function (callable $set, Get $get) {
+                        $branchStockId = $get('item_id');
+                        $branchStock = BranchStock::with('mainStock')->find($branchStockId);
+
+                        if ($branchStock) {
+                            $set('barcode', $branchStock->barcode);
+                            $set('branch_stock_id', $branchStock->id);
+                        } else {
+                            // Clear the barcode if no item is selected
+                            $set('barcode', null);
+                        }
+                    })
+                    ->noSearchResultsMessage('No items found.')
+                    ->searchingMessage('Searching items')
                     ->searchable()
-                    ->dehydrated()
-                    ->required(),
+                    ->dehydrated(false)
+                    ->required()
+                    ->live(),
+
                 TextInput::make('quantity_returned')
                     ->reactive()
                     ->minValue(1)
                     ->maxValue(function (Get $get) {
                         $branchStockId = $get('branch_stock_id');
                         if ($branchStockId) {
-                            $result=BranchStock::where('id',$branchStockId)
-                            ->where('branch_id',auth()->user()->branch_id)
-                            ->pluck('quantity','id')->first();
-                                return $result;
+                            $result = BranchStock::where('id', $branchStockId)
+                                ->where('branch_id', auth()->user()->branch_id)
+                                ->pluck('quantity', 'id')->first();
+                            return $result;
                         }
                     })
                     ->required()
                     ->integer()
                     ->hint(function(Get $get){
                         $branchStockId = $get('branch_stock_id');
+                        $barcode = $get('barcode');
                         if ($branchStockId) {
-                                $result=BranchStock::where('id',$branchStockId)
-                                ->where('branch_id',auth()->user()->branch_id)
-                                ->pluck('quantity','id')->first();
-                                 return 'quantity available: '.$result;
+                            $result = BranchStock::where('id', $branchStockId)
+                                ->where('branch_id', auth()->user()->branch_id)
+                                ->pluck('quantity', 'id')->first();
+                            if($result)
+                                return 'quantity available: '.$result;
+                            else
+                                return 'stock unavailable';
                         }
-                            return null;
+                        elseif ($barcode) {
+                            $result = BranchStock::where('barcode', $barcode)
+                                ->where('branch_id', auth()->user()->branch_id)
+                                ->pluck('quantity', 'id')->first();
+                            if($result)
+                                return 'quantity available: '.$result;
+                            else
+                                return 'stock unavailable';
+                        }
+                        return null;
                     })
-                        ->hintColor('danger')
-                        ->required(),
+                    ->hintColor('danger')
+                    ->required()
+                    ->hidden(function (Get $get): bool {
+                        if(BranchStock::where('barcode', $get('barcode'))->first() || $get('branch_stock_id'))
+                            return false;
+                        else
+                            return true;
+                    }),
+
                 Forms\Components\TextInput::make('return_note')
                     ->maxLength(255),
+
+                Hidden::make('branch_stock_id'),
                 Hidden::make('branch_id')
                     ->default(auth()->user()->branch_id),
                 Hidden::make('user_id')
@@ -151,7 +209,7 @@ class ReturnItemResource extends Resource
             ->actions([
                 // Fixed: Capital 'A' in Action
                 Tables\Actions\Action::make('approveReturn')
-                    ->label('Approve Return') 
+                    ->label('Approve Return')
                     ->form([
                        Section::make('Return Details')
                            ->schema([
@@ -172,7 +230,7 @@ class ReturnItemResource extends Resource
                                    ->label('Return Information')
                                    ->content(function (Model $record): string {
                                        $returnDate = 'Not set';
-                                       
+
                                        if ($record->return_date) {
                                            if ($record->return_date instanceof \Carbon\Carbon) {
                                                $returnDate = $record->return_date->format('M d, Y');
@@ -318,7 +376,7 @@ class ReturnItemResource extends Resource
                         return $record->is_approved ? 'success' : 'warning';
                     })
                     ->iconButton(),
-                    
+
                 // Optional: Add a separate view action for read-only details
                 Tables\Actions\Action::make('viewDetails')
                     ->label('View Details')
@@ -341,12 +399,12 @@ class ReturnItemResource extends Resource
                                 Placeholder::make('return_details')
                                     ->label('Return Information')
                                     ->content(function (Model $record): string {
-                                        $returnDate = $record->return_date ? 
+                                        $returnDate = $record->return_date ?
                                             (\Carbon\Carbon::parse($record->return_date)->format('M d, Y')) : 'Not set';
                                         $approved = $record->is_approved ? 'Yes' : 'No';
                                         $branch = $record->branch->branch_name ?? 'Unknown';
                                         $user = $record->user->name ?? 'Unknown';
-                                        
+
                                         return "Quantity: {$record->quantity_returned}\nDate: {$returnDate}\nApproved: {$approved}\nBranch: {$branch}\nUser: {$user}\nNote: " . ($record->return_note ?: 'None');
                                     }),
                             ])

@@ -24,6 +24,7 @@ class PrivateBookAccount extends Model
         "account_holder",
         "branch_name",
         "ifsc_code",
+        "notes",
     ];
     public function privateBook(): BelongsTo
     {

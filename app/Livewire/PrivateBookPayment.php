@@ -56,6 +56,7 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
             TextColumn::make('transaction_number'),
             TextColumn::make('account_number'),
             TextColumn::make('ifsc_code'),
+            TextColumn::make('notes'),
         ])
         ->actions([
                 DeleteAction::make()
@@ -84,6 +85,7 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                         TextInput::make('phone_number')
                             ->required()
                             ->maxLength(10),
+                        Textarea::make('notes'),
                     ])->columns(2),
                     Section::make([
                         Select::make('payment_mode')
@@ -146,7 +148,8 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
                             ->maxLength(10),
                             DatePicker::make('return_date')
                             ->label('Payment date')
-                            ->default(now())
+                            ->default(now()),
+                            Textarea::make('notes'),
                         ])->columns(2),
                         Section::make([
                             Select::make('payment_mode')
