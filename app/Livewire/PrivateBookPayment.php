@@ -213,6 +213,7 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
         $privateBookAccount->pin_code = $data['pin_code'] ?? '';
         $privateBookAccount->quantity = $data['quantity'] ?? 0; // Set default quantity
         $privateBookAccount->ifsc_code = $data['ifsc_code'] ?? '';
+        $privateBookAccount->notes = $data['notes'] ?? '';
         $privateBookAccount->save();
 
         // Emit an event after adding the payment
