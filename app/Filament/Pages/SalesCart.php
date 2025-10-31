@@ -316,9 +316,39 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                             $set('gst_amount', $gstAmount);
                         }
                     }),
-                    TextInput::make('discount')
+
+                TextInput::make('discount')
+                    ->label('Discount Amount') // Changed from 'Discount (%)' to 'Discount Amount'
                     ->numeric()
-                    ->default(0),
+                    ->step(0.01)
+                    ->helperText('Enter discount amount (not percentage)') // Added helper text
+                    ->suffix('₹') // Added currency suffix to make it clear it's a value
+                    ->afterStateUpdated(function (callable $set, Get $get) {
+                        $mrp = $get('mrp') ?? 0;
+                        $quantity = $get('quantity') ?? 1;
+                        $gstRate = $get('gst_rate') ?? 0;
+                        $discount = $get('discount') ?? 0; // This is now a value, not percentage
+
+                        // Calculate total MRP
+                        $totalMrp = $mrp * $quantity;
+
+                        // Validate discount doesn't exceed total MRP
+                        if ($discount > $totalMrp) {
+                            $set('discount', $totalMrp);
+                            $discount = $totalMrp;
+                        }
+
+                        // Apply value-based discount
+                        $discountedPrice = max(0, $totalMrp - $discount);
+
+                        // Calculate GST on the discounted price
+                        $taxableAmount = $discountedPrice / (1 + ($gstRate / 100));
+                        $gstAmount = $discountedPrice - $taxableAmount;
+
+                        $set('gst_amount', number_format($gstAmount, 2, '.', ''));
+                    })
+                    ->live(),
+
                 TextInput::make('gst_amount')
                     ->label('GST Amount')
                     ->required()
@@ -347,45 +377,47 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
         return $table
             ->query(SalesCartItem::query()->where('branch_id', auth()->user()->branch_id))
             ->columns([
-                TextColumn::make('item.item_name')
-                    ->wrapHeader()
-                    ->verticalAlignment(VerticalAlignment::Start),
-                TextColumn::make('quantity')
-                    ->label('Qty.')
-                    ->wrapHeader()
-                    ->verticalAlignment(VerticalAlignment::Start),
-                TextColumn::make('discount')
-                    ->suffix('%'),
-                TextColumn::make('gst_rate')
-                    ->suffix('%'),
-                TextColumn::make('gst_amount')
-                    ->suffix('/-')
-                    ->summarize(Summarizer::make()
-                    ->label('Total')
-                    ->using(function (Builder $query): string {
-                        return $query->sum('gst_amount');
-                    })),
-                TextColumn::make('rate')
-                    ->suffix('/-')
-                    ->summarize(Summarizer::make()
-                    ->label('Total')
-                    ->using(function (Builder $query): string {
-                        return $query->sum('rate');
-                    })),
-                TextColumn::make('selling_price')
-                    ->label('Total Amount')
-                    ->suffix('/-')
-                     ->summarize(Summarizer::make()
-                     ->label('Total')
-                     ->using(function (Builder $query): string {
-                        return $query->sum('selling_price');
-                        //  return $query->sum(DB::raw('selling_price * quantity'));
-                     })),
-                TextColumn::make('created_at')
-                     ->label('Transaction Time')
-                     ->dateTime('d/m/Y H:i')
-                     ->sortable(),
+                TextColumn::make('branchStock.mainStock.item_info')
+                    ->label('Item')
+                    ->searchable()
+                    ->sortable(),
 
+                TextColumn::make('quantity')
+                    ->sortable()
+                    ->alignCenter()
+                    ->summarize(Summarizer::make()
+                        ->using(fn(\Illuminate\Database\Query\Builder $query): string => $query->sum('quantity'))),
+
+                TextColumn::make('discount')
+                    ->label('Discount (₹)')
+                    ->formatStateUsing(fn (string $state): string => '₹' . number_format($state, 2))
+                    ->alignCenter(),
+
+                TextColumn::make('selling_price')
+                    ->label('Selling Price')
+                    ->formatStateUsing(fn (string $state): string => '₹' . number_format($state, 2))
+                    ->alignCenter()
+                    ->summarize(Summarizer::make()
+                        ->using(fn(\Illuminate\Database\Query\Builder $query): string => '₹' . number_format($query->sum('selling_price'), 2))),
+
+                TextColumn::make('gst_amount')
+                    ->label('GST')
+                    ->formatStateUsing(fn (string $state): string => '₹' . number_format($state, 2))
+                    ->alignCenter()
+                    ->summarize(Summarizer::make()
+                        ->using(fn(\Illuminate\Database\Query\Builder $query): string => '₹' . number_format($query->sum('gst_amount'), 2))),
+
+                TextColumn::make('total_amount_with_gst')
+                    ->label('Total Amount')
+                    ->formatStateUsing(fn (string $state): string => '₹' . number_format($state, 2))
+                    ->alignCenter()
+                    ->summarize(Summarizer::make()
+                        ->using(fn(\Illuminate\Database\Query\Builder $query): string => '₹' . number_format($query->sum('total_amount_with_gst'), 2))),
+
+                TextColumn::make('created_at')
+                    ->label('Added On')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
@@ -614,82 +646,91 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
     {
         try {
             DB::transaction(function() {
-            $data = $this->form->getState();
-            // Only use custom datetime if the feature is enabled
+                $data = $this->form->getState();
+                // Only use custom datetime if the feature is enabled
 
-            $createdAt = config('app.allow_custom_datetime') && isset($data['custom_created_at'])
-            ? $data['custom_created_at']
-            : now();
-            $cartItem = SalesCartItem::where('branch_stock_id', $data['branch_stock_id'])->first();
-            if (!$cartItem) {
-                $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
-                $mrp = $data['mrp'] ?? $branchStock->mrp;
-                $totalMrp= $mrp * $data['quantity'];
-                $totalCostPrice = $branchStock->cost_price * $data['quantity'];
-                $sellingPrice = $totalMrp - ($totalMrp * ($data['discount']/100));
-                $gstRate = $data['gst_rate'];
-                $gstAmount = $data['gst_amount'];
-                $rate = $sellingPrice - $gstAmount;
-                $totalAmountWithGst = $sellingPrice;
-                $newData = [
-                    'cost_price'=> $totalCostPrice,
-                    'selling_price'=> $sellingPrice,
-                    'gst_amount'=> $gstAmount,
-                    'rate' => $rate,
-                    'total_amount_with_gst'=> $totalAmountWithGst,
-                    'created_at' => $createdAt,
-                    'updated_at' => now(),
-                ];
-                $data = array_merge($data, $newData);
+                $createdAt = config('app.allow_custom_datetime') && isset($data['custom_created_at'])
+                    ? $data['custom_created_at']
+                    : now();
+                $cartItem = SalesCartItem::where('branch_stock_id', $data['branch_stock_id'])->first();
+                if (!$cartItem) {
+                    $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
+                    $mrp = $data['mrp'] ?? $branchStock->mrp;
+                    $totalMrp= $mrp * $data['quantity'];
 
-                // Create the record with custom timestamps
-                SalesCartItem::create($data);
-            }
-            else {
-                $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
-                $totalCostPrice = $branchStock->cost_price * $data['quantity'];
-                $mrp = $data['mrp'] ?? $branchStock->mrp;
-                $totalMrp= $mrp * $data['quantity'];
-                $sellingPrice = $totalMrp - ($totalMrp * ($data['discount']/100));
-                $cartItem->quantity += $data['quantity'];
-                $cartItem->cost_price += $totalCostPrice;
-                $cartItem->selling_price += $sellingPrice;
-                $cartItem->gst_amount += $data['gst_amount'];
-                $rate = $sellingPrice - $data['gst_amount'];
-                $cartItem->rate += $rate;
-                $totalAmountWithGst = $sellingPrice;
-                $cartItem->total_amount_with_gst += $totalAmountWithGst;
-                $cartItem->created_at = $data['custom_created_at'];
-                $cartItem->update();
-            }
-            $this->form->fill();
-            // auth()->cartitem->save($data);
-                    // Dispatch the browser event to focus the input
+                    // Changed from percentage to value-based discount
+                    $discountAmount = $data['discount'] ?? 0;
+                    $sellingPrice = max(0, $totalMrp - $discountAmount);
 
-            // Success notification
+                    $gstRate = $data['gst_rate'];
+                    $gstAmount = $data['gst_amount'];
+                    $rate = $sellingPrice - $gstAmount;
+                    $totalAmountWithGst = $sellingPrice;
+                    $totalCostPrice = $branchStock->cost_price * $data['quantity'];
+
+                    $newData = [
+                        'cost_price'=> $totalCostPrice,
+                        'selling_price'=> $sellingPrice,
+                        'gst_amount'=> $gstAmount,
+                        'rate' => $rate,
+                        'total_amount_with_gst'=> $totalAmountWithGst,
+                        'created_at' => $createdAt,
+                        'updated_at' => now(),
+                    ];
+                    $data = array_merge($data, $newData);
+
+                    // Create the record with custom timestamps
+                    SalesCartItem::create($data);
+                }
+                else {
+                    $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
+                    $totalCostPrice = $branchStock->cost_price * $data['quantity'];
+                    $mrp = $data['mrp'] ?? $branchStock->mrp;
+                    $totalMrp= $mrp * $data['quantity'];
+
+                    // Changed from percentage to value-based discount
+                    $discountAmount = $data['discount'] ?? 0;
+                    $sellingPrice = max(0, $totalMrp - $discountAmount);
+
+                    $cartItem->quantity += $data['quantity'];
+                    $cartItem->cost_price += $totalCostPrice;
+                    $cartItem->selling_price += $sellingPrice;
+                    $cartItem->gst_amount += $data['gst_amount'];
+                    $rate = $sellingPrice - $data['gst_amount'];
+                    $cartItem->rate += $rate;
+                    $totalAmountWithGst = $sellingPrice;
+                    $cartItem->total_amount_with_gst += $totalAmountWithGst;
+                    $cartItem->created_at = $data['custom_created_at'];
+                    $cartItem->update();
+                }
+                $this->form->fill();
+                // auth()->cartitem->save($data);
+                // Dispatch the browser event to focus the input
+
+                // Success notification
+                Notification::make()
+                    ->success()
+                    ->title('Item added')
+                    ->body('The item has been added to cart successfully.')
+                    ->color('success')
+                    ->send();
+
+                // Clear the form after submission
+                $this->form->fill();
+            });
+
+        }   catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Item added to cart failed: ' . $e->getMessage());
+
+            // Failure notification
             Notification::make()
-                ->success()
-                ->title('Item added')
-                ->body('The item has been added to cart successfully.')
-                ->color('success')
+                ->danger()
+                ->title('Failed to add items!')
+                ->body('An error occurred during the process.')
+                ->color('danger')
                 ->send();
-
-            // Clear the form after submission
-            $this->form->fill();
-        });
-
-    }   catch (\Exception $e) {
-        // Log the error for debugging
-        Log::error('Item added to cart failed: ' . $e->getMessage());
-
-        // Failure notification
-        Notification::make()
-            ->danger()
-            ->title('Failed to add items!')
-            ->body('An error occurred during the process.')
-            ->color('danger')
-            ->send();
-    }
+        }
     }
     protected function getHeaderActions(): array
     {

@@ -46,6 +46,7 @@ class PrivateBookPayment extends Component implements HasForms, HasTable, HasAct
             ->label('Payment Amount')
             ->width('5%')
             ->summarize(Sum::make()),
+            TextColumn::make('quantity'),
             TextColumn::make('return_date')
             ->label('Payment date')
             ->date(),

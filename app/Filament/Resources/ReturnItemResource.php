@@ -210,6 +210,10 @@ class ReturnItemResource extends Resource
                 // Fixed: Capital 'A' in Action
                 Tables\Actions\Action::make('approveReturn')
                     ->label('Approve Return')
+                    ->visible(function (): bool {
+                        $user = auth()->user();
+                        return $user && $user->roles()->where('title', 'admin')->exists();
+                    })
                     ->form([
                        Section::make('Return Details')
                            ->schema([
