@@ -595,6 +595,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                                         'user_id' => auth()->user()->id,
                                         'customer_id' => $customer_id,
                                         'quantity' => $item->quantity,
+                                        'mrp' => $branchStock->mrp,
                                         'discount' => $item->discount,
                                         'total_amount' => $item->selling_price,
                                         'gst_rate' => $item->gst_rate,
@@ -687,6 +688,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
 
                     // Validate and cap discount server-side
                     $discountAmount = $data['discount'] ?? 0;
+                    $data['discount'] = $discountAmount;
                     if ($discountAmount > $totalMrp) {
                         $discountAmount = $totalMrp;
                         $data['discount'] = $discountAmount;
@@ -723,8 +725,10 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
 
                     // Validate and cap discount server-side
                     $discountAmount = $data['discount'] ?? 0;
+                    $data['discount'] = $discountAmount;
                     if ($discountAmount > $totalMrp) {
                         $discountAmount = $totalMrp;
+                        $data['discount'] = $discountAmount;
                     }
                     $sellingPrice = max(0, $totalMrp - $discountAmount);
 
