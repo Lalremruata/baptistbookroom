@@ -19,14 +19,17 @@ class EditPrivateBook extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
-    protected function beforeSave(): void
-    {
-        try {
-            MainStock::findOrFail($this->data['main_stock_id'])
-                ->update(['quantity' => $this->data['quantity']]);
-        } catch (ModelNotFoundException $e) {
-            // Handle the case where the MainStock with the specified ID is not found
-            // You can log an error, redirect the user, or take other appropriate actions.
-        }
-    }
+
+    // Update the MainStock quantity before saving the PrivateBook record
+    // Disable the "beforeSave" linter rule for this method
+    // protected function beforeSave(): void
+    // {
+    //     try {
+    //         MainStock::findOrFail($this->data['main_stock_id'])
+    //             ->update(['quantity' => $this->data['quantity']]);
+    //     } catch (ModelNotFoundException $e) {
+    //         // Handle the case where the MainStock with the specified ID is not found
+    //         // You can log an error, redirect the user, or take other appropriate actions.
+    //     }
+    // }
 }

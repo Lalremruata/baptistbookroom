@@ -6,8 +6,6 @@ use App\Filament\Exports\PrivateBookExporter;
 use App\Filament\Resources\PrivateBookResource\Pages;
 use App\Models\Item;
 use App\Models\PrivateBook;
-use App\Tables\Columns\TotalBookAmount;
-use App\Tables\Columns\TotalBookSale;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -43,6 +41,7 @@ class PrivateBookResource extends Resource
                 Section::make()
                 ->schema([
                     TextInput::make('barcode')
+                        ->hiddenOn('edit')
                         ->label('search barcode')
                         ->autofocus()
                         ->afterStateUpdated(function(callable $set,Get $get){
@@ -59,6 +58,7 @@ class PrivateBookResource extends Resource
                         // ->dehydrated(false)
                         ->live(),
                     Select::make('item_id')
+                        ->disabledOn('edit')
                         ->label('search item')
                         ->reactive()
                         ->searchable()
@@ -72,6 +72,7 @@ class PrivateBookResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('quantity')
+                    ->hiddenOn('edit')
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('cost_price')
@@ -140,8 +141,13 @@ class PrivateBookResource extends Resource
                 TextColumn::make('mainStock.mrp')
                     ->label('mrp')
                     ->weight(FontWeight::Bold),
-                TotalBookSale::make('total_sale'),
-                TotalBookAmount::make('total_sale_amount'),
+                TextColumn::make('total_sale_quantity')
+                    ->label('Total Sale')
+                    ->weight(FontWeight::Bold),
+                TextColumn::make('total_sale_amount')
+                    ->label('Total Sale Amount')
+                    ->weight(FontWeight::Bold)
+                    ->numeric(decimalPlaces: 2),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

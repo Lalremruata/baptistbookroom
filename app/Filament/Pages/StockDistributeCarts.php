@@ -22,7 +22,6 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
-use Filament\Support\Exceptions\Halt;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
@@ -52,27 +51,29 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
     protected static ?string $navigationGroup = 'Stocks';
     protected static ?string $navigationLabel = 'Main Stock Distribute';
     protected static ?int $navigationSort = 2;
-    public $branches;
     public $selectedTab = 'all';
     protected static string $view = 'filament.pages.stock-distribute-cart';
+
+    // Cache for branch options to avoid repeated queries
+    protected ?array $branchOptionsCache = null;
+
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->user()->roles->contains('title', 'Admin');
     }
-    public static function getEloquentQuery(): Builder
-    {
-        if(auth()->user()->user_type == '1') {
-            return parent::getEloquentQuery()->withoutGlobalScopes();
-        }
-        else {
-            return parent::getEloquentQuery()->where('branch_id', auth()->user()->branch_id);
 
-        }
-    }
     public function mount(): void
     {
         $this->form->fill();
-        $this->branches = Branch::all();
+    }
+
+    // Helper to get cached branch options
+    protected function getBranchOptions(): array
+    {
+        if ($this->branchOptionsCache === null) {
+            $this->branchOptionsCache = Branch::pluck('branch_name', 'id')->toArray();
+        }
+        return $this->branchOptionsCache;
     }
 
     public function form(Form $form): Form
@@ -141,7 +142,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                         ->label('Branch')
                         ->searchable()
                         ->required()
-                        ->options(Branch::pluck('branch_name','id')->toArray()),
+                        ->options(fn () => $this->getBranchOptions()),
                     TextInput::make('quantity')
                     ->reactive()
                     ->required()
@@ -149,39 +150,28 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                     ->maxValue(function (Get $get) {
                         $main_stock_id = $get('main_stock_id');
                         if ($main_stock_id) {
-                            $mainStockQuantity=MainStock::where('id',$main_stock_id)
-                            ->pluck('quantity','id')->first();
-                            $stockDistributeQuantity=StockDistributeCart::where('main_stock_id',$main_stock_id)
-                            ->sum('quantity');
-                            $result = $mainStockQuantity-$stockDistributeQuantity;
-                             return $result;
+                            $mainStockQuantity = MainStock::where('id', $main_stock_id)->value('quantity') ?? 0;
+                            $stockDistributeQuantity = StockDistributeCart::where('main_stock_id', $main_stock_id)->sum('quantity');
+                            return $mainStockQuantity - $stockDistributeQuantity;
                         }
+                        return null;
                     })
-                    ->required()
                     ->integer()
                     ->hint(function(Get $get){
                         $main_stock_id = $get('main_stock_id');
                         if ($main_stock_id) {
-                            $mainStockQuantity=MainStock::where('id',$main_stock_id)
-                            ->pluck('quantity','id')->first();
-                            $stockDistributeQuantity=StockDistributeCart::where('main_stock_id',$main_stock_id)
-                            ->where('user_id',auth()->user()->id)
-                            ->sum('quantity');
-                            $result = $mainStockQuantity-$stockDistributeQuantity;
-                            if($result)
-                            return 'qty. available: '.$result;
-                        else
-                            return 'stock unavailable';
+                            $mainStockQuantity = MainStock::where('id', $main_stock_id)->value('quantity') ?? 0;
+                            $stockDistributeQuantity = StockDistributeCart::where('main_stock_id', $main_stock_id)
+                                ->where('user_id', auth()->user()->id)
+                                ->sum('quantity');
+                            $result = $mainStockQuantity - $stockDistributeQuantity;
+                            return $result > 0 ? 'qty. available: ' . $result : 'stock unavailable';
                         }
-                            return null;
+                        return null;
                     })
-                        ->hintColor('danger')
+                    ->hintColor('danger')
                     ->numeric()
-                    ->hidden(function (Get $get): bool {
-                        if(MainStock::where('barcode', $get('barcode'))->first() || $get('item_id'))
-                            return 0;
-                        else return 1;
-                    }),
+                    ->hidden(fn (Get $get): bool => !($get('main_stock_id') || $get('item_id'))),
                     Hidden::make('user_id')
                     ->default(auth()->user()->id),
                     Hidden::make('main_stock_id'),
@@ -271,7 +261,7 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 \Filament\Tables\Actions\Action::make('print receipt')
                 ->form([
                     Select::make('branch_id')
-                    ->options(Branch::query()->pluck('branch_name','id'))
+                    ->options(fn () => $this->getBranchOptions())
                         ->autofocus()
                         ->required(),
                 ])
@@ -476,20 +466,13 @@ class StockDistributeCarts extends Page implements HasForms, HasTable, HasAction
                 ->color('success')
                 ->send();
 
-             // Preserve the branch_id value
-            $branchId = $this->form->getState()['branch_id'];
-
-            // Clear the form
+            // Preserve branch_id and reset form in single call
+            $branchId = $this->data['branch_id'] ?? null;
             $this->form->fill([
                 'barcode' => null,
-                'item_id' =>null,
+                'item_id' => null,
                 'quantity' => null,
                 'main_stock_id' => null,
-                // Add other fields you want to reset to null, but exclude 'branch_id'
-            ]);
-
-            // Restore the branch_id value
-            $this->form->fill([
                 'branch_id' => $branchId,
             ]);
         } catch (\Exception $e) {
