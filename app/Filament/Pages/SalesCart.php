@@ -173,10 +173,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     $set('mrp', $mrp);
                     $set('gst_rate', $gstRate);
 
-                    $price = $get('price');
-                    $quantity = $get('quantity') ?? 1; // Default to 1 if quantity is not set
+                    $quantity = $get('quantity') ?? 1;
 
-                            $mrp = $branchStock->mrp ?? 0;
                             $totalPrice = $mrp * $quantity;
 
 
@@ -253,6 +251,8 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
 
                             // Set values
                             $set('gst_amount', number_format($gstAmount, 2, '.', ''));
+                        } else {
+                            $set('gst_amount', '0.00');
                         }
                     })
 
@@ -334,6 +334,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
 
                 TextInput::make('discount')
                     ->label('Discount Amount') // Changed from 'Discount (%)' to 'Discount Amount'
+                    ->default(0)
                     ->numeric()
                     ->step(0.01)
                     ->helperText('Enter discount amount (not percentage)') // Added helper text
@@ -366,7 +367,6 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
 
                 TextInput::make('gst_amount')
                     ->label('GST Amount')
-                    ->required()
                     ->reactive()
                     ->disabled()
                     ->dehydrated(),
@@ -390,7 +390,10 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
     public function table(Table $table): Table
     {
         return $table
-            ->query(SalesCartItem::query()->where('branch_id', auth()->user()->branch_id))
+            ->query(SalesCartItem::query()
+                ->where('branch_id', auth()->user()->branch_id)
+                ->where('user_id', auth()->user()->id)
+                ->with(['branchStock.mainStock.item']))
             ->columns([
                 TextColumn::make('branchStock.mainStock.item_info')
                     ->label('Item')
@@ -667,6 +670,22 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->icon('heroicon-o-shopping-cart'),
         ];
     }
+    private function calculateGst(float $mrp, int $quantity, float $discount, float $gstRate): array
+    {
+        $totalMrp = $mrp * $quantity;
+        $discountAmount = min($discount, $totalMrp);
+        $sellingPrice = max(0, $totalMrp - $discountAmount);
+        $taxableAmount = $gstRate > 0 ? $sellingPrice / (1 + ($gstRate / 100)) : $sellingPrice;
+
+        return [
+            'discount'               => $discountAmount,
+            'selling_price'          => $sellingPrice,
+            'gst_amount'             => $sellingPrice - $taxableAmount,
+            'rate'                   => $taxableAmount,
+            'total_amount_with_gst'  => $sellingPrice,
+        ];
+    }
+
     public function save(): void
     {
         try {
@@ -681,71 +700,32 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                     ->where('user_id', auth()->user()->id)
                     ->where('branch_id', auth()->user()->branch_id)
                     ->first();
+                $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
+                $mrp = $data['mrp'] ?? $branchStock->mrp;
+                $gstCalc = $this->calculateGst(
+                    (float) $mrp,
+                    (int) $data['quantity'],
+                    (float) ($data['discount'] ?? 0),
+                    (float) ($data['gst_rate'] ?? 0)
+                );
+                $totalCostPrice = $branchStock->cost_price * $data['quantity'];
+
                 if (!$cartItem) {
-                    $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
-                    $mrp = $data['mrp'] ?? $branchStock->mrp;
-                    $totalMrp = $mrp * $data['quantity'];
-
-                    // Validate and cap discount server-side
-                    $discountAmount = $data['discount'] ?? 0;
-                    $data['discount'] = $discountAmount;
-                    if ($discountAmount > $totalMrp) {
-                        $discountAmount = $totalMrp;
-                        $data['discount'] = $discountAmount;
-                    }
-                    $sellingPrice = max(0, $totalMrp - $discountAmount);
-
-                    // Recalculate GST server-side (MRP is inclusive of GST)
-                    $gstRate = $data['gst_rate'] ?? 0;
-                    $taxableAmount = $gstRate > 0 ? $sellingPrice / (1 + ($gstRate / 100)) : $sellingPrice;
-                    $gstAmount = $sellingPrice - $taxableAmount;
-                    $rate = $taxableAmount;
-                    $totalAmountWithGst = $sellingPrice;
-                    $totalCostPrice = $branchStock->cost_price * $data['quantity'];
-
-                    $newData = [
-                        'cost_price'=> $totalCostPrice,
-                        'selling_price'=> $sellingPrice,
-                        'gst_amount'=> $gstAmount,
-                        'rate' => $rate,
-                        'total_amount_with_gst'=> $totalAmountWithGst,
-                        'created_at' => $createdAt,
-                        'updated_at' => now(),
-                    ];
-                    $data = array_merge($data, $newData);
-
-                    // Create the record with custom timestamps
+                    $data = array_merge($data, $gstCalc, [
+                        'cost_price'  => $totalCostPrice,
+                        'created_at'  => $createdAt,
+                        'updated_at'  => now(),
+                    ]);
                     SalesCartItem::create($data);
-                }
-                else {
-                    $branchStock = BranchStock::where('id', $data['branch_stock_id'])->first();
-                    $totalCostPrice = $branchStock->cost_price * $data['quantity'];
-                    $mrp = $data['mrp'] ?? $branchStock->mrp;
-                    $totalMrp = $mrp * $data['quantity'];
-
-                    // Validate and cap discount server-side
-                    $discountAmount = $data['discount'] ?? 0;
-                    $data['discount'] = $discountAmount;
-                    if ($discountAmount > $totalMrp) {
-                        $discountAmount = $totalMrp;
-                        $data['discount'] = $discountAmount;
-                    }
-                    $sellingPrice = max(0, $totalMrp - $discountAmount);
-
-                    // Recalculate GST server-side (MRP is inclusive of GST)
-                    $gstRate = $data['gst_rate'] ?? 0;
-                    $taxableAmount = $gstRate > 0 ? $sellingPrice / (1 + ($gstRate / 100)) : $sellingPrice;
-                    $gstAmount = $sellingPrice - $taxableAmount;
-
-                    $cartItem->quantity += $data['quantity'];
-                    $cartItem->cost_price += $totalCostPrice;
-                    $cartItem->selling_price += $sellingPrice;
-                    $cartItem->gst_amount += $gstAmount;
-                    $rate = $taxableAmount;
-                    $cartItem->rate += $rate;
-                    $totalAmountWithGst = $sellingPrice;
-                    $cartItem->total_amount_with_gst += $totalAmountWithGst;
-                    $cartItem->created_at = $createdAt;
+                } else {
+                    $cartItem->quantity               += $data['quantity'];
+                    $cartItem->cost_price             += $totalCostPrice;
+                    $cartItem->selling_price          += $gstCalc['selling_price'];
+                    $cartItem->gst_amount             += $gstCalc['gst_amount'];
+                    $cartItem->rate                   += $gstCalc['rate'];
+                    $cartItem->total_amount_with_gst  += $gstCalc['total_amount_with_gst'];
+                    $cartItem->discount               += $gstCalc['discount'];
+                    $cartItem->created_at              = $createdAt;
                     $cartItem->update();
                 }
                 $this->form->fill();
