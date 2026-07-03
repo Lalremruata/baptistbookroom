@@ -2,13 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Exports\SaleExporter;
-use App\Filament\Resources\SaleResource\Pages;
+use App\Filament\Exports\EstimateExporter;
+use App\Filament\Resources\EstimateResource\Pages;
 use App\Http\Controllers\SalesInvoicesController;
-use App\Models\BranchStock;
-use App\Models\Category;
 use App\Models\Customer;
-use App\Models\Sale;
+use App\Models\EstimateSale;
 use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -31,17 +29,33 @@ use Illuminate\Database\Eloquent\Model;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\BulkActionGroup;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Tables\Grouping\Group;
 
-class SaleResource extends Resource
+class EstimateResource extends Resource
 {
-    protected static ?string $model = Sale::class;
+    protected static ?string $model = EstimateSale::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-    protected static ?string $navigationGroup = 'Sales';
-    protected static ?string $navigationLabel = 'Sales Report';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationGroup = 'Sale Correction';
+    protected static ?string $navigationLabel = 'Sale Correction Report';
+    protected static ?string $modelLabel = 'Sale Correction';
+    protected static ?string $pluralModelLabel = 'Sale Correction Report';
+
+    protected static function isAdmin(): bool
+    {
+        return in_array(auth()->user()->roles->first()->title, ['Admin']);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::isAdmin();
+    }
+
+    public static function canViewAny(): bool
+    {
+        return static::isAdmin();
+    }
 
     public static function canCreate(): bool
     {
@@ -50,31 +64,24 @@ class SaleResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        return in_array(auth()->user()->roles->first()->title, ['Admin']);
+        return static::isAdmin();
     }
 
     public static function canDelete(Model $record): bool
     {
-        return in_array(auth()->user()->roles->first()->title, ['Admin']);
+        return static::isAdmin();
     }
     public static function getEloquentQuery(): Builder
     {
-        $allowedRoles = ['Admin', 'Manager'];
-        // return in_array(auth()->user()->roles->first()->title, $allowedRoles);
-        if(in_array(auth()->user()->roles->first()->title, $allowedRoles)) {
-            return parent::getEloquentQuery()->withoutGlobalScopes();
-        }
-        else {
-            return parent::getEloquentQuery()->where('branch_id', auth()->user()->branch_id);
-
-        }
+        // Admin-only resource — always show all branches.
+        return parent::getEloquentQuery()->withoutGlobalScopes();
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make('Sale Details')
+                Section::make('Sale Correction Details')
                     ->schema([
                         Forms\Components\Select::make('branch_id')
                             ->relationship('branch', 'branch_name')
@@ -159,7 +166,7 @@ class SaleResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('branchStock.mainStock.barcode')
+                Tables\Columns\TextColumn::make('item.barcode')
                     ->label('barcode')
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->weight(FontWeight::Bold)
@@ -192,7 +199,7 @@ class SaleResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('memo')
                     ->label('INVOICE NO')
-                    ->state(fn (Sale $record) => $record->getFormattedInvoiceNumber())
+                    ->state(fn (EstimateSale $record) => $record->getFormattedInvoiceNumber())
                     ->size(TextColumn\TextColumnSize::Medium)
                     ->searchable()
                     ->weight(FontWeight::Bold)
@@ -259,57 +266,17 @@ class SaleResource extends Resource
                     ]),
             ], layout: FiltersLayout::AboveContent)->filtersFormColumns(4)
             ->actions([
-                Action::make('print')
-                    ->iconButton()
-                    ->icon('heroicon-o-printer')
-                    ->color('success')
-                    ->tooltip('Print invoice')
-                    ->form([
-                        TextInput::make('name')
-                            ->autofocus()
-                            ->required(),
-                        TextInput::make('address'),
-                        TextInput::make('phone'),
-                        TextInput::make('gst_number')
-                            ->label('GST Numbers'),
-                    ])
-                    ->fillForm(function (Sale $record) {
-                        $customer = Customer::find($record->customer_id);
-                        if (! $customer) {
-                            return [];
-                        }
-                        return [
-                            'name' => $customer->customer_name,
-                            'address' => $customer->address,
-                            'phone' => $customer->phone,
-                            'gst_number' => $customer->gst_number,
-                        ];
-                    })
-                    ->action(function (Sale $record, array $data) {
-                        // Print the whole invoice: every line sharing this memo + branch
-                        $records = Sale::where('memo', $record->memo)
-                            ->where('branch_id', $record->branch_id)
-                            ->get();
-                        return (new SalesInvoicesController())->generatePdf($records, $data);
-                    }),
                 Tables\Actions\EditAction::make()
                     ->iconButton()
                     ->visible(fn (): bool => in_array(auth()->user()->roles->first()->title, ['Admin'])),
                 DeleteAction::make()
                     ->iconButton()
-                    ->visible(fn (): bool => in_array(auth()->user()->roles->first()->title, ['Admin']))
-                    ->before(function (Model $record) {
-                        $branchStock = BranchStock::where('branch_id', $record->branch_id)
-                            ->where('id', $record->branch_stock_id)
-                            ->first();
-                        $branchStock->quantity += $record->quantity;
-                        $branchStock->update();
-                    }),
+                    ->visible(fn (): bool => in_array(auth()->user()->roles->first()->title, ['Admin'])),
                 Action::make('recalculate')
                     ->requiresConfirmation()
                     ->iconButton()
                     ->icon('heroicon-o-arrow-path')
-                    ->action(function (Sale $record) {
+                    ->action(function (EstimateSale $record) {
                         $item = $record->item;
                         if ($item) {
                             $record->gst_rate = $item->gst_rate;
@@ -330,8 +297,12 @@ class SaleResource extends Resource
                 ->button()
                 ->icon('heroicon-o-printer')
                 ->form([
+                    DatePicker::make('invoice_date')
+                        ->label('Invoice Date')
+                        ->native(false)
+                        ->displayFormat('d/m/Y')
+                        ->helperText('Backdate the invoice if needed'),
                     TextInput::make('name')
-                        ->autofocus()
                         ->required(),
                     TextInput::make('address'),
                     TextInput::make('phone'),
@@ -342,21 +313,25 @@ class SaleResource extends Resource
                     if ($records->isEmpty()) {
                         return [];
                     }
-                    // Fetch customer data based on the first record's customer_id
-                    $customerId = $records[0]->customer_id;
-                    $customer = Customer::find($customerId);
+                    // Default the invoice date to the record's date (editable, so
+                    // it can be backdated). Estimates carry no customer, so the
+                    // buyer fields stay blank to fill in.
+                    $defaults = [
+                        'invoice_date' => $records[0]->created_at,
+                    ];
 
-                    if (!$customer) {
-                        return [];
+                    $customer = Customer::find($records[0]->customer_id);
+
+                    if ($customer) {
+                        $defaults = array_merge($defaults, [
+                            'name' => $customer->customer_name,
+                            'address' => $customer->address,
+                            'phone' => $customer->phone,
+                            'gst_number' => $customer->gst_number,
+                        ]);
                     }
 
-                    // Return default values for the form fields
-                    return [
-                        'name' => $customer->customer_name,
-                        'address' => $customer->address,
-                        'phone' => $customer->phone,
-                        'gst_number' => $customer->gst_number,
-                    ];
+                    return $defaults;
                 })
                 ->action(function (Collection $records, array $data) {
                     $saleController = new SalesInvoicesController();
@@ -390,13 +365,13 @@ class SaleResource extends Resource
         ])
             ->headerActions([
                 ExportAction::make()
-                    ->exporter(SaleExporter::class)
+                    ->exporter(EstimateExporter::class)
                     ->formats([
                             ExportFormat::Xlsx,
                         ])
                         ->icon('heroicon-m-arrow-down-tray')
                         ->color('success')
-            ], position: HeaderActionsPosition::Bottom);;
+            ], position: HeaderActionsPosition::Bottom);
     }
 
     public static function getRelations(): array
@@ -409,8 +384,8 @@ class SaleResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSales::route('/'),
-            'edit' => Pages\EditSale::route('/{record}/edit'),
+            'index' => Pages\ListEstimates::route('/'),
+            'edit' => Pages\EditEstimate::route('/{record}/edit'),
         ];
     }
 }

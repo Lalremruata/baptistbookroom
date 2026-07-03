@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\CalculatesCartGst;
 use App\Models\BranchStock;
 use App\Models\CreditTransaction;
 use App\Models\Customer;
@@ -46,6 +47,7 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
     use InteractsWithTable;
     use InteractsWithForms;
     use InteractsWithActions;
+    use CalculatesCartGst;
     public ?array $data = [];
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
     protected static ?string $navigationLabel = 'Sales cart';
@@ -670,22 +672,6 @@ class SalesCart extends Page implements HasForms, HasTable, HasActions
                 ->icon('heroicon-o-shopping-cart'),
         ];
     }
-    private function calculateGst(float $mrp, int $quantity, float $discount, float $gstRate): array
-    {
-        $totalMrp = $mrp * $quantity;
-        $discountAmount = min($discount, $totalMrp);
-        $sellingPrice = max(0, $totalMrp - $discountAmount);
-        $taxableAmount = $gstRate > 0 ? $sellingPrice / (1 + ($gstRate / 100)) : $sellingPrice;
-
-        return [
-            'discount'               => $discountAmount,
-            'selling_price'          => $sellingPrice,
-            'gst_amount'             => $sellingPrice - $taxableAmount,
-            'rate'                   => $taxableAmount,
-            'total_amount_with_gst'  => $sellingPrice,
-        ];
-    }
-
     public function save(): void
     {
         try {

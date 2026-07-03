@@ -9,8 +9,8 @@ $totalTaxableValue = $totalRate - $totalDiscount;
 // Financial year and invoice number formatting
 $currentYear = date('y');
 $nextYear = date('y', strtotime('+1 year'));
-$financialYear = (date('m') > 3) ? $currentYear . '-' . $nextYear : ($currentYear - 1) . '-' . date('y');
-$userBranch = auth()->user()->branch->branch_name;
+$financialYear = '25-26'; // hardcoded per request (revisit each new FY)
+$userBranch = $branch->branch_name ?? ''; // invoice's own branch (passed from controller)
 $branchWords = explode(' ', $userBranch);
 if (count($branchWords) > 1) {
     $branchCode = substr($branchWords[0], 0, 3) . substr($branchWords[1], 0, 1);
@@ -275,7 +275,7 @@ $invoiceNo = 'BLS/' . $financialYear . '/' . $branchCode . '/' . $records[0]->me
         <div class="header-row">
             <div class="invoice-no-section">
                 <div><strong>Invoice No.</strong> {{ $invoiceNo }}</div>
-                <div><strong>Date:</strong> {{ \Carbon\Carbon::parse($records[0]->created_at)->format('d/m/Y') }}</div>
+                <div><strong>Date:</strong> {{ \Carbon\Carbon::parse($data['invoice_date'] ?? $records[0]->created_at)->format('d/m/Y') }}</div>
             </div>
             <div class="tax-invoice-title">
                 TAX INVOICE

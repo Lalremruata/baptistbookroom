@@ -9,7 +9,7 @@
     // Financial year and invoice number formatting
     $currentYear = date('y');
     $nextYear = date('y', strtotime('+1 year'));
-    $financialYear = (date('m') > 3) ? $currentYear . '-' . $nextYear : ($currentYear - 1) . '-' . date('y');
+    $financialYear = '25-26'; // hardcoded per request (revisit each new FY)
     $userBranch = auth()->user()->branch->branch_name;
     $branchWords = explode(' ', $userBranch);
     if (count($branchWords) > 1) {

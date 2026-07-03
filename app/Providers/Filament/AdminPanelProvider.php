@@ -86,6 +86,9 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                      ->label('Sales'),
                 NavigationGroup::make()
+                     ->label('Sale Correction')
+                     ->collapsed(),
+                NavigationGroup::make()
                      ->label('Stocks')
                      ->collapsible(false),
                 NavigationGroup::make()

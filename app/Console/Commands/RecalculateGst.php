@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Sale;
 use App\Models\SalesCartItem;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class RecalculateGst extends Command
 {
@@ -21,11 +22,46 @@ class RecalculateGst extends Command
             $this->newLine();
         }
 
+        $this->backfillMrp($execute);
+        $this->newLine();
         $this->fixSales($execute);
         $this->newLine();
         $this->fixSalesCartItems($execute);
 
         return Command::SUCCESS;
+    }
+
+    private function backfillMrp(bool $execute): void
+    {
+        $this->info('=== BACKFILL MRP ON SALES TABLE ===');
+
+        $count = Sale::whereNull('mrp')->count();
+
+        if ($count === 0) {
+            $this->info('All sales records already have MRP set. No backfill needed.');
+            return;
+        }
+
+        $this->info("Found {$count} sales record(s) with NULL mrp.");
+
+        if ($execute) {
+            // First try: backfill from branch_stocks where the record still exists
+            $fromBranchStock = DB::table('sales')
+                ->join('branch_stocks', 'sales.branch_stock_id', '=', 'branch_stocks.id')
+                ->whereNull('sales.mrp')
+                ->update(['sales.mrp' => DB::raw('branch_stocks.mrp')]);
+            $this->info("Backfilled {$fromBranchStock} record(s) from branch_stocks.");
+
+            // Fallback: derive MRP from total_amount for remaining NULL records
+            // Since total_amount = mrp * quantity - discount, then mrp = (total_amount + discount) / quantity
+            $fromCalculation = DB::table('sales')
+                ->whereNull('mrp')
+                ->where('quantity', '>', 0)
+                ->update(['mrp' => DB::raw('ROUND((total_amount + COALESCE(discount, 0)) / quantity, 2)')]);
+            $this->info("Backfilled {$fromCalculation} record(s) by calculating from total_amount.");
+        } else {
+            $this->warn("{$count} sales record(s) would have MRP backfilled.");
+        }
     }
 
     private function fixSales(bool $execute): void

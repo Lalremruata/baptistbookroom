@@ -6,12 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Sale extends Model
+class EstimateSale extends Model
 {
     use \Znck\Eloquent\Traits\BelongsToThrough;
     use HasFactory;
+
+    protected $table = 'estimate_sales';
+
     protected $fillable = [
         "branch_stock_id",
+        "item_id",
         "branch_id",
         "user_id",
         'customer_id',
@@ -51,13 +55,9 @@ class Sale extends Model
     {
         return $this->belongsTo(Customer::class);
     }
-    public function item()
+    public function item(): BelongsTo
     {
-        return $this->belongsToThrough(Item::class,[MainStock::class, BranchStock::class]);
-    }
-    public function mainStock()
-    {
-        return $this->belongsToThrough(MainStock::class,BranchStock::class);
+        return $this->belongsTo(Item::class);
     }
     public function getFormattedInvoiceNumber()
     {
@@ -73,6 +73,6 @@ class Sale extends Model
             $branchCode = substr($userBranch, 0, 3);
         }
 
-        return 'BLS/' . $financialYear . '/' . $branchCode . '/' . $this->memo;
+        return 'BLS/' . $financialYear . '/' . $branchCode . '/' . str_pad($this->memo, 4, '0', STR_PAD_LEFT);
     }
 }

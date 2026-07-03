@@ -2,25 +2,23 @@
 
 namespace App\Filament\Exports;
 
-use App\Models\Sale;
+use App\Models\EstimateSale;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 
-class SaleExporter extends Exporter
+class EstimateExporter extends Exporter
 {
-    protected static ?string $model = Sale::class;
+    protected static ?string $model = EstimateSale::class;
 
     public static function getColumns(): array
     {
         return [
-            // ExportColumn::make('id')
-            //     ->label('ID'),
             ExportColumn::make('created_at')
             ->label('Date'),
             ExportColumn::make('memo')
             ->label('INVOICE NO')
-            ->state(fn (Sale $record) => $record->getFormattedInvoiceNumber()),
+            ->state(fn (EstimateSale $record) => $record->getFormattedInvoiceNumber()),
             ExportColumn::make('item.hsn_number')
             ->label('HSN'),
             ExportColumn::make('item.item_name')
@@ -42,13 +40,12 @@ class SaleExporter extends Exporter
             ExportColumn::make('payment_mode'),
             ExportColumn::make('transaction_number'),
             ExportColumn::make('gst_rate'),
-            // ExportColumn::make('updated_at'),
         ];
     }
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = 'Your sale export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
+        $body = 'Your sale correction export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
             $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to export.';
